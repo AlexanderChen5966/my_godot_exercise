@@ -8,6 +8,17 @@
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_kipkx"]
 size = Vector2(32, 96)
 
+[sub_resource type="Gradient" id="Gradient_tpq6i"]
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_8ukss"]
+gradient = SubResource("Gradient_tpq6i")
+width = 512
+height = 512
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_8ukss"]
 size = Vector2(160, 192)
 
@@ -27,7 +38,6 @@ script = ExtResource("1_q84vj")
 scroll_scale = Vector2(0.3, 1)
 
 [node name="Backdrop" type="TextureRect" parent="FarLayer" unique_id=1626762249]
-modulate = Color(0.55, 0.55, 0.6, 1)
 offset_right = 2304.0
 offset_bottom = 768.0
 mouse_filter = 2
@@ -109,6 +119,11 @@ limit_bottom = 768
 position_smoothing_enabled = true
 position_smoothing_speed = 6.0
 
+[node name="Flashlight" type="PointLight2D" parent="Player" unique_id=333886183]
+position = Vector2(0, -60)
+color = Color(1, 0.93, 0.8, 1)
+texture = SubResource("GradientTexture2D_8ukss")
+
 [node name="Points" type="Node2D" parent="." unique_id=1353451513]
 
 [node name="Light" type="Area2D" parent="Points" unique_id=405087221]
@@ -180,6 +195,7 @@ color = Color(0.35, 0.08, 0.06, 0.75)
 scroll_scale = Vector2(1.3, 1)
 
 [node name="Pillar1" type="ColorRect" parent="FrontLayer" unique_id=1981379393]
+light_mask = 0
 offset_left = 360.0
 offset_right = 480.0
 offset_bottom = 768.0
@@ -187,6 +203,7 @@ mouse_filter = 2
 color = Color(0.005, 0.006, 0.008, 0.96)
 
 [node name="Pillar2" type="ColorRect" parent="FrontLayer" unique_id=960153495]
+light_mask = 0
 offset_left = 1190.0
 offset_right = 1310.0
 offset_bottom = 768.0
@@ -194,6 +211,7 @@ mouse_filter = 2
 color = Color(0.005, 0.006, 0.008, 0.96)
 
 [node name="Pillar3" type="ColorRect" parent="FrontLayer" unique_id=911530233]
+light_mask = 0
 offset_left = 2020.0
 offset_right = 2140.0
 offset_bottom = 768.0
@@ -201,8 +219,12 @@ mouse_filter = 2
 color = Color(0.005, 0.006, 0.008, 0.96)
 
 [node name="Pillar4" type="ColorRect" parent="FrontLayer" unique_id=1301448866]
+light_mask = 0
 offset_left = 2240.0
 offset_right = 2360.0
 offset_bottom = 768.0
 mouse_filter = 2
 color = Color(0.005, 0.006, 0.008, 0.96)
+
+[node name="Darkness" type="CanvasModulate" parent="." unique_id=413259386]
+color = Color(0.32, 0.32, 0.3456, 1)
