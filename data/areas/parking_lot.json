@@ -1,0 +1,14 @@
+{
+  "id": "parking_lot",
+  "scene": "res://scenes/areas/ParkingLot.tscn",
+  "replaces_scenes": [1, 2],
+  "exit_to": 3,
+  "bgm": "bgm_01.ogg",
+  "intro": { "from": { "scene": 1 } },
+  "points": {
+    "light":  { "type": "inspect",  "label": "閃爍的燈光", "from": { "scene": 1, "choice": 0 } },
+    "debris": { "type": "inspect",  "label": "地面殘骸",   "from": { "scene": 2, "choice": 1 } },
+    "woman":  { "type": "approach", "once": true,          "from": { "scene": 2 } },
+    "exit":   { "type": "exit",     "label": "離開停車場", "from": { "scene": 2, "choice": 0 } }
+  }
+}

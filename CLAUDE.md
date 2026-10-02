@@ -1,6 +1,20 @@
-# 失語者 — 階段 1（視覺小說式）Godot 專案
+# 失語者 — Godot 專案（階段 1 完成，進行中：Lv1）
 
 這份檔案是給 Claude Code 讀的專案說明。每次開新對話都會自動載入。
+
+## 目前進度（每次開始前先看）
+
+- **階段 1（視覺小說式）已完成**，下方「要做的功能」「完成標準」是階段 1 的內容，保留作為現有系統的說明。
+- 之後改走 **Lv1～5 新路線**（橫向捲軸 2.5D、可移動），練習 MCP 與 AI 輔助開發：
+  - 路線、原規劃與新路線的對照、已確定的決策：`docs/開發路線圖.md`
+  - 每一級的規格、步驟、驗證方式、完成標準：`docs/Lv製作流程.md`
+  - 作者貼給你的分步指令：`PROMPTS.md` 的「Lv1 分步指令」
+- **暫不支援手機**：Lv1 起可走動區域只做鍵盤操作，不要自行加觸控。按鍵衝突（`interact` 與 `ui_accept`）之後再處理。
+- **目前進行：Lv1（停車場可走動）**。開始實作前，先讀 `docs/Lv製作流程.md` 的「0. 每一級共通的流程」與「Lv1」兩節。
+- **一次只做一級**：沒有作者的指示，不要開始下一級，也不要提前做後面等級的功能。
+- MCP：目前只用 **godot-mcp-toolkit**。Pixelorama MCP 從 Lv3 才加入（安裝方式見 `docs/Lv製作流程.md` 的 Lv3）。
+- 劇本 **v1.5 暫停**，Lv3 完成後才會改寫成「區域 × 事件」格式；在那之前不要依 `docs/v1.5_劇本調整規劃.md` 實作任何東西。
+- 每一級完成時：在 `MCP實驗紀錄.md` 新增該級的一節，並更新 `docs/開發路線圖.md` 的「進度紀錄」。
 
 ## 目標
 
@@ -34,7 +48,14 @@ addons/godot_mcp_toolkit/  Godot MCP Toolkit 編輯器外掛（v1.0.2，MIT）
 scenes/Main.tscn       主場景
 scripts/story_data.gd  劇本讀取（class_name StoryData）
 scripts/main.gd        主畫面邏輯
+docs/開發路線圖.md       原規劃（階段 1～4）與新路線（Lv1～5）、決策、進度紀錄
+docs/Lv製作流程.md       Lv1～5 的規格、步驟、驗證與完成標準
+docs/v1.5_劇本調整規劃.md  劇本 1.5 原規劃（暫停中）
+data/areas/parking_lot.json  Lv1 停車場區域資料（文字以引用方式取自 story.json）
+MCP實驗紀錄.md           每一級的 MCP 實驗觀察
 ```
+
+Lv1 之後會新增（依 `docs/Lv製作流程.md`）：`scenes/areas/`、`scripts/area_data.gd`、`scripts/area.gd`、`scripts/player.gd`、`scripts/interact_point.gd`。
 
 ## 劇本格式（data/story.json）
 
@@ -44,19 +65,19 @@ scripts/main.gd        主畫面邏輯
   "start_id": 1,
   "title_screen": { "bg": "scene_16.webp", "bgm": "bgm_15.ogg" },
   "scenes": [
-    {
-      "id": 1,
-      "title": "停車場甦醒",
-      "text": "場景主文字（一段）",
-      "hint": "請選擇行動：",
-      "extra_hint": "可能是空字串",
-      "bg": "scene_01.webp",        // 位於 res://assets/bg/
-      "bgm": "bgm_01.ogg",          // 位於 res://assets/bgm/
-      "is_ending": false,
-      "choices": [
-        { "text": "按鈕文字", "response": "選了之後顯示的回應", "next_id": 2 }
-      ]
-    }
+	{
+	  "id": 1,
+	  "title": "停車場甦醒",
+	  "text": "場景主文字（一段）",
+	  "hint": "請選擇行動：",
+	  "extra_hint": "可能是空字串",
+	  "bg": "scene_01.webp",        // 位於 res://assets/bg/
+	  "bgm": "bgm_01.ogg",          // 位於 res://assets/bgm/
+	  "is_ending": false,
+	  "choices": [
+		{ "text": "按鈕文字", "response": "選了之後顯示的回應", "next_id": 2 }
+	  ]
+	}
   ]
 }
 ```
@@ -105,7 +126,9 @@ Main (Control, full rect)
 │           └── Continue (Label)  「▼ 點擊繼續」
 ├── BgmA (AudioStreamPlayer)
 ├── BgmB (AudioStreamPlayer)   ← 兩個播放器交替做 crossfade
-└── Sfx (AudioStreamPlayer)
+├── Sfx (AudioStreamPlayer)
+├── TypeSfx (AudioStreamPlayer)  ← 打字音效（max_polyphony 4）
+└── RotateHint (ColorRect)      ← 直式畫面時顯示「請將裝置橫向持握」（Lv1-0）
 ```
 
 - `project.godot` 的 `run/main_scene` 要設成 `res://scenes/Main.tscn`。
@@ -147,6 +170,7 @@ Main (Control, full rect)
 
 ### 網頁匯出注意
 
+- **遊戲需要的資料不能少**：Web 設定的 `include_filter` 是 `data/*.json, data/areas/*.json`。之後新增資料資料夾（例如 `data/xxx/`）時要一併加入，匯出後檢查 `.pck` 裡確實有這些檔案。
 - Godot 4.3+ 預設的腳本匯出模式（Binary tokens）**不會**排除外掛腳本，匯出前要在 Web 設定的 `exclude_filter` 加上 `addons/*`（外掛會自動移除 `.mcp.json` 與 runtime autoload）。
 
 ## 完成標準（Definition of Done）
@@ -163,7 +187,10 @@ Main (Control, full rect)
 
 ## 劇本之後可能再調整（附註）
 
-> 下一版 **1.5** 的劇本調整規劃（分歧、快速結局、隱藏數值）見 `docs/v1.5_劇本調整規劃.md`，目前**尚未開始實作**；實作前仍以本檔的規則為準。
+> 下一版 **1.5** 的劇本調整規劃（分歧、快速結局、隱藏數值）見 `docs/v1.5_劇本調整規劃.md`，目前**暫停**：
+> 等 Lv3 完成後，會改寫成可移動版的「區域 × 事件」格式再開始（見 `docs/Lv製作流程.md` 的「劇本 v1.5」一節）。實作前仍以本檔的規則為準。
+>
+> Lv1 起，區域資料（`data/areas/*.json`）以 `from` **引用** `story.json` 的文字，不複製。修改 `story.json` 時，若刪除或調換了被引用的場景或選項順序，區域文字也會跟著變，請一併檢查（劇本檢查工具會在 Lv1 擴充這項檢查）。
 
 劇本（`data/story.json`）之後會由作者修改，例如處理下面的重複劇情。程式是完全依資料運作的，調整劇本時請注意：
 
@@ -179,5 +206,5 @@ Main (Control, full rect)
 
 - 場景 1~16 大部分選項都通往同一個下一場景，真正的分歧只在場景 17。
 - 場景 5/11、7/12、8/13、10/14 劇情重複。
-- 主角名稱與「靜語者／噬語者」用詞前後不一致。
+- 用詞已統一（2026-10-02 作者決定）：主角名稱為「楊尚瑜」；保有意識的感染者稱為「**靜語者**」（不是噬語者），場景 15 已修正。
 - 原專案缺 `bgm_13`，已用原專案中的〈Escape Through the Chaos〉代替。

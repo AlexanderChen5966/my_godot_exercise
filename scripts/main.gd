@@ -27,6 +27,7 @@ const BGM_FADE_TIME := 0.8
 @onready var bgm_players: Array[AudioStreamPlayer] = [$BgmA, $BgmB]
 @onready var sfx: AudioStreamPlayer = $Sfx
 @onready var type_sfx: AudioStreamPlayer = $TypeSfx
+@onready var rotate_hint: ColorRect = $RotateHint
 
 var story := StoryData.new()
 var current_id: int = -1
@@ -52,6 +53,8 @@ var _start_blink: Tween
 func _ready() -> void:
 	_type_base_db = type_sfx.volume_db
 	_setup_style()
+	get_window().size_changed.connect(_on_window_resized)
+	_on_window_resized()
 	if not story.load_story():
 		return
 	show_title()
@@ -296,7 +299,19 @@ func _show_continue() -> void:
 	continue_label.visible = true
 
 
+## 直式畫面（高 > 寬，例如手機直拿）時顯示「請將裝置橫向持握」，並暫停點擊推進。
+func _on_window_resized() -> void:
+	update_rotate_hint(get_window().size)
+
+
+func update_rotate_hint(window_size: Vector2i) -> void:
+	rotate_hint.visible = window_size.y > window_size.x
+
+
 func _input(event: InputEvent) -> void:
+	if rotate_hint.visible:
+		get_viewport().set_input_as_handled()
+		return
 	if state != State.TITLE and state != State.TYPING and state != State.RESPONSE:
 		return
 	var mb := event as InputEventMouseButton
