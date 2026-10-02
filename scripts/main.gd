@@ -465,6 +465,11 @@ func _show_continue() -> void:
 	continue_label.visible = true
 
 
+## 除錯用：回傳目前 FPS（給 MCP 的 execute_code 讀取；execute_code 不能直接存取 Engine）。正式版回傳 -1。
+func debug_fps() -> float:
+	return Engine.get_frames_per_second() if OS.is_debug_build() else -1.0
+
+
 ## 直式畫面（高 > 寬，例如手機直拿）時顯示「請將裝置橫向持握」，並暫停點擊推進。
 func _on_window_resized() -> void:
 	update_rotate_hint(get_window().size)
