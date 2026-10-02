@@ -226,6 +226,45 @@ ParkingLot (Node2D)  script: scripts/area.gd（通用，所有區域共用）
 
 替代美術可以繼續用色塊與剪影，這一級的重點是**層次與光**，不是細節。
 
+### 已確定的決策（2026-10-02，開工前）
+
+| 議題 | 決定 |
+|---|---|
+| 手電筒形狀 | **圓形光暈**（主角周圍一圈柔光）。**備案：錐形光束**（朝面向照出光束、轉身時翻轉，參考 Inside）。圓形試玩後若氛圍不夠，再改用備案；實作時把光的貼圖與位置集中在 `Flashlight` 節點，方便替換 |
+| 標題畫面 | Claude 做 2～3 種版本並截圖，**作者挑選** |
+| 停車場 → 視覺小說的切換落差 | **Lv2 不處理**，等 v1.5／Lv4 增加可走動區域時再根本解決 |
+
+### 場景結構
+
+```
+ParkingLot (Node2D)
+├── FarLayer   (Parallax2D, scroll_scale.x ≈ 0.3)  ← 現有 Backdrop（scene_01）搬進來，水平重複
+├── MidLayer   (Parallax2D, scroll_scale.x ≈ 0.7)  ← 柱子剪影（暗色色塊）
+├── Ground / Player / Points                        ← 遊戲層（1.0），玩法不變
+├── RedLight   (PointLight2D)                      ← 出口附近的紅色警示燈，腳本閃爍
+├── FrontLayer (Parallax2D, scroll_scale.x ≈ 1.3)  ← 靠近鏡頭、最暗的柱子
+└── Darkness   (CanvasModulate)                    ← 世界調暗（約 0.15～0.25）
+Player
+└── Flashlight (PointLight2D + GradientTexture2D)  ← 圓形光暈
+```
+
+### 給作者調整的參數
+
+氛圍要靠人判斷，常調的數值做成 `area.gd` 的 `@export`，在編輯器的屬性面板直接調整，不用改程式：
+世界亮度、手電筒半徑與亮度、紅燈亮度與閃爍速度、三層的 `scroll_scale`。
+
+### 分步（指令見 `PROMPTS.md` 的「Lv2 分步指令」）
+
+| 步驟 | 內容 | Claude 的自我驗證 |
+|---|---|---|
+| Lv2-2 | 三層視差 | 起點、中段、出口截圖；讀各層位移，確認遠景約 0.3 倍、前景約 1.3 倍 |
+| Lv2-3 | 黑暗＋手電筒 | 截圖確認光暈跟著主角；**UI 沒有變暗** |
+| Lv2-4 | 紅色警示燈閃爍（陰影選做） | 連續讀 `energy`，確認有在變化 |
+| Lv2-5 | 標題畫面 2～3 種版本 | 各截一張給作者挑 |
+| Lv2-6 | 作者調整氛圍 → 匯出 Web → 紀錄 | 回報 FPS（debug 版讀取）；記錄調整了幾輪 |
+
+> FPS：`execute_code` 不能存取 `Engine`，所以在 `main.gd` 加一個只在 debug 版有效的讀取函式。網頁版的流暢度由作者在瀏覽器確認（自動化分頁在背景會被降速）。
+
 ### 要注意
 
 - `CanvasModulate` 只會影響同一個畫布。因為 Lv1 已把 UI 放進 `UILayer`，對話框不會被調暗；但如果發現 UI 變暗，就是 UI 還留在預設畫布上。

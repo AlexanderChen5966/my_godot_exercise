@@ -201,6 +201,60 @@ Claude 自己發現了哪些問題、哪些問題是我試玩才發現的。並�
 
 ---
 
+# Lv2 分步指令：景深分層與光影
+
+> 規格在 `docs/Lv製作流程.md` 的「Lv2」一節。玩法不變，只改視覺。
+> 開始前：Godot 編輯器開著，**Claude 測試時請不要操作遊戲視窗**。
+
+---
+
+### Lv2-2：三層視差
+
+```
+依 Lv2 的「場景結構」，用 MCP 在 ParkingLot 加 FarLayer、MidLayer、FrontLayer（Parallax2D），
+Backdrop 搬進 FarLayer，中景與前景用暗色柱子剪影。在起點、中段、出口截圖並讀各層位移，確認視差有作用。
+```
+
+✅ 預期結果：走動時遠景慢、前景快，看得出前後景深。
+
+---
+
+### Lv2-3：黑暗與手電筒
+
+```
+加上 Darkness（CanvasModulate）與主角的 Flashlight（PointLight2D，圓形光暈）。
+把亮度與光暈參數做成 area.gd 的 @export。截圖確認光暈跟著主角，且對話框、提示文字沒有變暗。
+```
+
+---
+
+### Lv2-4：紅色警示燈
+
+```
+在出口附近加 RedLight（PointLight2D），寫閃爍腳本，參數做成 @export。讀 energy 確認有在閃爍。
+```
+
+---
+
+### Lv2-5：標題畫面
+
+```
+處理「失語者」壓在牆上 HERE 的問題：做 2～3 種版本，各截一張圖給我挑。
+```
+
+---
+
+### Lv2-6：調整、匯出、紀錄
+
+先由你在 Godot 裡試玩並調整（太暗、光暈太小等），把感想告訴 Claude。滿意之後：
+
+```
+回報 debug 版的 FPS，匯出 Web 版（排除 addons/*）。在 MCP實驗紀錄.md 新增「Lv2」一節：
+調整了幾輪、哪些描述方式對 AI 最有效、哪些只能靠人判斷。並更新 docs/開發路線圖.md 的進度紀錄。
+```
+
+---
+
 ## 實驗時可以觀察的重點
 
 - 哪些步驟 Claude **真的用了 MCP 工具**（scene_create_node、node_set_property、theme_edit、game_start、runtime_screenshot、input_simulate、debugger_get_log），哪些是直接改檔案？
