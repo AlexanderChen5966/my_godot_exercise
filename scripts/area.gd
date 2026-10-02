@@ -21,6 +21,10 @@ signal point_exited(point_id: String)    # 玩家離開互動點範圍
 ## 手電筒光暈的大小倍率與亮度。
 @export_range(0.1, 4.0, 0.05) var flashlight_scale := 1.5
 @export_range(0.0, 4.0, 0.05) var flashlight_energy := 1.6
+## 出口附近紅色警示燈的亮度與呼吸速度（RedLight）。
+## 2D 燈光是「燈色 × 表面顏色」：停車場是暗青色，紅色成分少，所以紅燈的亮度要比手電筒高很多才看得見。
+@export_range(0.0, 10.0, 0.1) var red_light_energy := 5.0
+@export_range(0.1, 6.0, 0.1) var red_light_speed := 1.6
 
 @onready var player: CharacterBody2D = $Player
 @onready var camera: Camera2D = $Player/Camera2D
@@ -56,6 +60,9 @@ func _apply_lighting() -> void:
 	if has_node("Player/Flashlight"):
 		$Player/Flashlight.texture_scale = flashlight_scale
 		$Player/Flashlight.energy = flashlight_energy
+	if has_node("RedLight"):
+		$RedLight.base_energy = red_light_energy
+		$RedLight.pulse_speed = red_light_speed
 
 
 func set_can_move(value: bool) -> void:

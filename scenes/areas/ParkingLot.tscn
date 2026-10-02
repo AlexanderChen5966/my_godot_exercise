@@ -4,6 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://d4m68tgy57mwv" path="res://assets/bg/scene_01.webp" id="2_tpq6i"]
 [ext_resource type="Script" uid="uid://dkcse5tmlbfke" path="res://scripts/player.gd" id="3_8ukss"]
 [ext_resource type="Script" uid="uid://u5x8mgenl5y4" path="res://scripts/interact_point.gd" id="4_tpq6i"]
+[ext_resource type="Script" uid="uid://cpx5m37cmu4jq" path="res://scripts/flicker_light.gd" id="5_8ukss"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_kipkx"]
 size = Vector2(32, 96)
@@ -30,6 +31,17 @@ size = Vector2(80, 192)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_x3vua"]
 size = Vector2(200, 192)
+
+[sub_resource type="Gradient" id="Gradient_kipkx"]
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_2mgj5"]
+gradient = SubResource("Gradient_kipkx")
+width = 512
+height = 512
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
 
 [node name="ParkingLot" type="Node2D" unique_id=1154784663]
 script = ExtResource("1_q84vj")
@@ -228,3 +240,10 @@ color = Color(0.005, 0.006, 0.008, 0.96)
 
 [node name="Darkness" type="CanvasModulate" parent="." unique_id=413259386]
 color = Color(0.32, 0.32, 0.3456, 1)
+
+[node name="RedLight" type="PointLight2D" parent="." unique_id=105667896]
+position = Vector2(2150, 360)
+color = Color(1, 0.12, 0.08, 1)
+texture = SubResource("GradientTexture2D_2mgj5")
+texture_scale = 2.0
+script = ExtResource("5_8ukss")
