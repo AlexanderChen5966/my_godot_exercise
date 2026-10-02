@@ -1,0 +1,53 @@
+[gd_scene format=3 uid="uid://c2g345p8r8dm1"]
+
+[ext_resource type="Script" uid="uid://r853iujge1v" path="res://scripts/area.gd" id="1_q84vj"]
+[ext_resource type="Texture2D" uid="uid://d4m68tgy57mwv" path="res://assets/bg/scene_01.webp" id="2_tpq6i"]
+[ext_resource type="Script" uid="uid://dkcse5tmlbfke" path="res://scripts/player.gd" id="3_8ukss"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_kipkx"]
+size = Vector2(32, 96)
+
+[node name="ParkingLot" type="Node2D" unique_id=1154784663]
+script = ExtResource("1_q84vj")
+
+[node name="Backdrop" type="TextureRect" parent="." unique_id=1626762249]
+modulate = Color(0.55, 0.55, 0.6, 1)
+offset_right = 2304.0
+offset_bottom = 768.0
+mouse_filter = 2
+texture = ExtResource("2_tpq6i")
+expand_mode = 1
+stretch_mode = 1
+
+[node name="Ground" type="ColorRect" parent="." unique_id=350550260]
+offset_top = 640.0
+offset_right = 2304.0
+offset_bottom = 768.0
+mouse_filter = 2
+color = Color(0.07, 0.08, 0.09, 0.92)
+
+[node name="Player" type="CharacterBody2D" parent="." unique_id=1633340741]
+position = Vector2(160, 640)
+motion_mode = 1
+script = ExtResource("3_8ukss")
+
+[node name="Body" type="ColorRect" parent="Player" unique_id=1576433445]
+offset_left = -16.0
+offset_top = -96.0
+offset_right = 16.0
+mouse_filter = 2
+color = Color(0.55, 0.62, 0.5, 1)
+
+[node name="Shape" type="CollisionShape2D" parent="Player" unique_id=858924400]
+position = Vector2(0, -48)
+shape = SubResource("RectangleShape2D_kipkx")
+
+[node name="Camera2D" type="Camera2D" parent="Player" unique_id=1629336938]
+limit_left = 0
+limit_top = 0
+limit_right = 2304
+limit_bottom = 768
+position_smoothing_enabled = true
+position_smoothing_speed = 6.0
+
+[node name="Points" type="Node2D" parent="." unique_id=1353451513]

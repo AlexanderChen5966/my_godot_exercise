@@ -147,6 +147,9 @@ Main (Control, full rect)
 - MCP 做不到的，再直接編輯 `.tscn` 或在腳本 `_ready()` 中設定，並說明原因。
 - 透過 MCP 修改場景後要 `editor_save_scene`。若直接改了 `.tscn` 檔案，要提醒使用者在編輯器重新載入，避免編輯器存檔時覆蓋。
 - 執行時動態產生的節點（例如選項按鈕）寫在腳本裡。
+- **Control 的位置與大小用 `offset_left/top/right/bottom` 設定**，不要在同一次 `scene_create_node` 裡同時給 `position` 和 `size`：屬性套用順序不固定，`position` 會被 `size` 蓋掉（Lv1-4 的地面與主角色塊曾因此跑位）。設定後檢查 `.tscn`。
+- 模擬移動用 `input_simulate` 的 `action` 類型（會呼叫 `Input.action_press`）。`key` 類型若要觸發動作，必須帶 `physical_keycode`（本專案的按鍵是用實體按鍵綁定）。
+- 測試期間如果使用者也在操作遊戲視窗，座標與狀態會被干擾；量測前先確認狀態，結果異常時先懷疑外部輸入。
 
 ### 腳本
 

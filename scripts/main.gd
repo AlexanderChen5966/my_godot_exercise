@@ -32,6 +32,8 @@ const BGM_FADE_TIME := 0.8
 @onready var rotate_hint: ColorRect = %RotateHint
 
 var story := StoryData.new()
+var areas := AreaData.new()
+var _area: Node2D = null  # 目前在 World 底下的區域場景
 var current_id: int = -1
 var state: State = State.TITLE
 var _pending_next_id: int = -1
@@ -59,6 +61,7 @@ func _ready() -> void:
 	_on_window_resized()
 	if not story.load_story():
 		return
+	areas.load_areas()
 	show_title()
 
 
@@ -142,6 +145,21 @@ func _start_game() -> void:
 		continue_label.visible = false
 		show_scene(story.start_id, false)
 	)
+
+
+## 把區域場景實例化到 World 底下（同時只會有一個區域）。
+func _instantiate_area(area_id: String) -> Node2D:
+	_free_area()
+	var area := areas.get_area(area_id)
+	_area = (load(area["scene"]) as PackedScene).instantiate()
+	world.add_child(_area)
+	return _area
+
+
+func _free_area() -> void:
+	if _area:
+		_area.queue_free()
+		_area = null
 
 
 ## 換曲：與目前曲目相同時不重播；不同時舊曲淡出、新曲淡入。
