@@ -31,3 +31,9 @@ func _ready() -> void:
 
 func set_can_move(value: bool) -> void:
 	player.can_move = value
+
+
+func consume_point(point_id: String) -> void:
+	for point in $Points.get_children():
+		if point.get("point_id") == point_id and point.has_method("consume"):
+			point.consume()

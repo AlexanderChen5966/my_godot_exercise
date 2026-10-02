@@ -147,7 +147,7 @@ Main (Control, full rect)
 - MCP 做不到的，再直接編輯 `.tscn` 或在腳本 `_ready()` 中設定，並說明原因。
 - 透過 MCP 修改場景後要 `editor_save_scene`。若直接改了 `.tscn` 檔案，要提醒使用者在編輯器重新載入，避免編輯器存檔時覆蓋。
 - 執行時動態產生的節點（例如選項按鈕）寫在腳本裡。
-- **Control 的位置與大小用 `offset_left/top/right/bottom` 設定**，不要在同一次 `scene_create_node` 裡同時給 `position` 和 `size`：屬性套用順序不固定，`position` 會被 `size` 蓋掉（Lv1-4 的地面與主角色塊曾因此跑位）。設定後檢查 `.tscn`。
+- **Control 的版面屬性不要在 `scene_create_node` 時一起設定**：建立時帶入的 `position`／`size`，甚至 `offset_*`，位置都可能被重設成 (0, 0)（Lv1-4、Lv1-5 各發生一次）。做法：先建立節點，**再用 `node_set_property` 設定 `offset_left/top/right/bottom`**，存檔後檢查 `.tscn`。
 - 模擬移動用 `input_simulate` 的 `action` 類型（會呼叫 `Input.action_press`）。`key` 類型若要觸發動作，必須帶 `physical_keycode`（本專案的按鍵是用實體按鍵綁定）。
 - 測試期間如果使用者也在操作遊戲視窗，座標與狀態會被干擾；量測前先確認狀態，結果異常時先懷疑外部輸入。
 
@@ -159,7 +159,7 @@ Main (Control, full rect)
 
 ### 每完成一個步驟
 
-1. `game_start`（`scene_path: "main"`）執行遊戲。若回傳 `runtime_ready: false`，或之後的 runtime 工具回報 `GAME_NOT_RUNNING`（但 log 顯示遊戲有在跑），先呼叫 `game_start`（`if_running: "return"`, `runtime_poll: true`）再重試；有時要**輪詢兩次**（間隔幾秒）才會連上。
+1. `game_start`（`scene_path: "main"`）執行遊戲。若回傳 `runtime_ready: false`，或之後的 runtime 工具回報 `GAME_NOT_RUNNING`（但 log 顯示遊戲有在跑），先呼叫 `game_start`（`if_running: "return"`, `runtime_poll: true`）再重試；有時要**輪詢兩次**才會連上。實測：`game_start` 之後**等約 3～5 秒**（登錄檔更新後）再呼叫 runtime 工具最穩定。
 2. `runtime_screenshot` 截圖確認畫面（**一律用 `image_response_mode: "disk"`** 再讀取存下的 PNG；inline 模式圖片超過約 1MB 會失敗，且曾回傳舊畫面）；需要互動時用 `input_simulate`（`click` 給座標，或 `click_node` 給節點路徑），再截圖確認結果。座標以 1152×768 為準。
 3. `debugger_get_log` 讀錯誤與警告（遊戲剛啟動時 log 可能還沒印完，必要時再讀一次）。
 4. 修好之後 `game_stop`。

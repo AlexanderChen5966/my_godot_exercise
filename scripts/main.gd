@@ -2,7 +2,7 @@
 ## 主文字與 response 以打字機效果顯示，換場時背景淡出淡入，BGM 以兩個播放器交替淡入淡出。
 extends Control
 
-enum State { TITLE, TRANSITION, TYPING, CHOOSING, RESPONSE }
+enum State { TITLE, TRANSITION, TYPING, CHOOSING, RESPONSE, EXPLORE, AREA_TEXT }
 
 const EXTRA_HINT_COLOR := "#a8a8a8"
 const CHOSEN_MODULATE := Color(1, 1, 1, 0.45)
@@ -30,10 +30,15 @@ const BGM_FADE_TIME := 0.8
 @onready var sfx: AudioStreamPlayer = %Sfx
 @onready var type_sfx: AudioStreamPlayer = %TypeSfx
 @onready var rotate_hint: ColorRect = %RotateHint
+@onready var prompt_label: Label = %PromptLabel
 
 var story := StoryData.new()
 var areas := AreaData.new()
 var _area: Node2D = null  # 目前在 World 底下的區域場景
+var _area_id := ""
+var _nearby_point := ""      # 玩家目前所在範圍內、可按互動鍵的互動點
+var _closing_point := ""     # 目前顯示的區域文字屬於哪個互動點（開場文字為空字串）
+var _consumed: Dictionary = {}  # 本次進入區域已觸發過的 once 互動點
 var current_id: int = -1
 var state: State = State.TITLE
 var _pending_next_id: int = -1
@@ -152,7 +157,12 @@ func _instantiate_area(area_id: String) -> Node2D:
 	_free_area()
 	var area := areas.get_area(area_id)
 	_area = (load(area["scene"]) as PackedScene).instantiate()
+	_area_id = area_id
+	_nearby_point = ""
+	_consumed.clear()
 	world.add_child(_area)
+	_area.point_entered.connect(_on_point_entered)
+	_area.point_exited.connect(_on_point_exited)
 	return _area
 
 
@@ -160,6 +170,99 @@ func _free_area() -> void:
 	if _area:
 		_area.queue_free()
 		_area = null
+	_area_id = ""
+	_nearby_point = ""
+	prompt_label.visible = false
+
+
+## 立即顯示區域與開場文字（不含淡入淡出與換曲；Lv1-6 的 enter_area() 會包住它）。
+func _show_area_now(area_id: String) -> void:
+	_instantiate_area(area_id)
+	title_layer.visible = false
+	background.visible = false
+	story_layer.visible = true
+	var area := areas.get_area(area_id)
+	if area.has("intro"):
+		_show_area_text(area["intro"])
+	else:
+		_begin_explore()
+
+
+func _area_point(point_id: String) -> Dictionary:
+	return areas.get_area(_area_id).get("points", {}).get(point_id, {})
+
+
+## 可操作狀態：隱藏對話框，讓主角可以移動。
+func _begin_explore() -> void:
+	state = State.EXPLORE
+	dialog_panel.visible = false
+	continue_label.visible = false
+	_area.set_can_move(true)
+	_update_prompt()
+
+
+func _update_prompt() -> void:
+	if state != State.EXPLORE or _nearby_point.is_empty():
+		prompt_label.visible = false
+		return
+	prompt_label.text = "E　%s" % _area_point(_nearby_point).get("label", "調查")
+	prompt_label.visible = true
+
+
+func _on_point_entered(point_id: String) -> void:
+	var point := _area_point(point_id)
+	if point.get("type") == "approach":
+		# 接近類：走進範圍自動觸發；once 的只觸發一次
+		if state != State.EXPLORE or (point.get("once", false) and _consumed.has(point_id)):
+			return
+		_consumed[point_id] = true
+		_show_area_text(point, point_id)
+		return
+	_nearby_point = point_id
+	_update_prompt()
+
+
+func _on_point_exited(point_id: String) -> void:
+	if _nearby_point == point_id:
+		_nearby_point = ""
+		_update_prompt()
+
+
+## 區域文字：沿用對話框與打字機；不顯示選項與提示。
+func _show_area_text(holder: Dictionary, point_id := "") -> void:
+	var resolved := AreaData.resolve(story, holder.get("from", {}))
+	_closing_point = point_id
+	_area.set_can_move(false)
+	prompt_label.visible = false
+	dialog_panel.visible = true
+	ending_tag.visible = false
+	hint.visible = false
+	continue_label.visible = false
+	_clear_choices()
+	scene_title.text = resolved.get("title", "")
+	_type_text(resolved.get("text", ""), _show_area_continue)
+
+
+func _show_area_continue() -> void:
+	state = State.AREA_TEXT
+	continue_label.visible = true
+
+
+func _close_area_text() -> void:
+	var point_id := _closing_point
+	_closing_point = ""
+	var point := _area_point(point_id)
+	if point.get("type") == "approach":
+		_area.consume_point(point_id)  # 例如婦人逃走後消失
+	if point.get("type") == "exit":
+		_on_area_exit()
+		return
+	_begin_explore()
+
+
+## 出口文字關閉後。Lv1-6 會改成 leave_area(exit_to)；目前先回到可操作狀態。
+func _on_area_exit() -> void:
+	_begin_explore()
 
 
 ## 換曲：與目前曲目相同時不重播；不同時舊曲淡出、新曲淡入。
@@ -190,6 +293,7 @@ func show_scene(id: int, fade_out := true) -> void:
 	_clear_choices()
 	hint.visible = false
 	continue_label.visible = false
+	dialog_panel.visible = true
 
 	if id == current_id:
 		# 留在原場景：已讀過的主文字直接完整顯示，重新給選項。
@@ -332,14 +436,23 @@ func _input(event: InputEvent) -> void:
 	if rotate_hint.visible:
 		get_viewport().set_input_as_handled()
 		return
-	if state != State.TITLE and state != State.TYPING and state != State.RESPONSE:
+	if state == State.EXPLORE:
+		# 同一個輸入事件只處理一次：開啟文字後立即標記為已處理，不會同時被當成「關閉」。
+		if event.is_action_pressed("interact") and not _nearby_point.is_empty():
+			get_viewport().set_input_as_handled()
+			_show_area_text(_area_point(_nearby_point), _nearby_point)
+		return
+	if state != State.TITLE and state != State.TYPING and state != State.RESPONSE \
+			and state != State.AREA_TEXT:
 		return
 	var mb := event as InputEventMouseButton
 	var clicked := mb != null and mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT
-	if not (clicked or event.is_action_pressed("ui_accept")):
+	if not (clicked or event.is_action_pressed("ui_accept") or event.is_action_pressed("interact")):
 		return
 	get_viewport().set_input_as_handled()
-	if state == State.TITLE:
+	if state == State.AREA_TEXT:
+		_close_area_text()
+	elif state == State.TITLE:
 		_start_game()
 	elif state == State.TYPING:
 		_finish_typing()  # 打字中點擊：直接顯示全部
