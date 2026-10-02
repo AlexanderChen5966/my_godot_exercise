@@ -202,8 +202,8 @@ ParkingLot (Node2D)  script: scripts/area.gd（通用，所有區域共用）
 - [x] 鏡頭跟隨主角，UI 固定不動
 - [x] 出口接到場景 3，之後可以一路玩到結局，再回到標題、開始第二輪
 - [x] `tools/validate_story.gd` 擴充：檢查區域 JSON 的引用都存在、`exit_to` 存在
-- [ ] 沒有錯誤；Web 版可玩
-- [ ] `MCP實驗紀錄.md` 新增「Lv1」一節
+- [x] 沒有錯誤；Web 版可玩
+- [x] `MCP實驗紀錄.md` 新增「Lv1」一節
 
 ---
 
