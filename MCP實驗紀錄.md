@@ -273,3 +273,50 @@
 2. **MCP 很適合「量化驗證」**：視差倍率用讀座標驗證，與設定完全吻合；燈光閃爍用取樣 energy 驗證。
 3. **「執行中改數值 → 截圖」是調整主觀效果最快的方法**，並讓作者從多個候選中選擇。
 4. **主觀判斷仍然要靠人**：「背景太黑」是作者發現的。
+
+---
+---
+
+# Lv3 準備：安裝 Pixelorama MCP（第二個 MCP）
+
+- 日期：2026-10-02
+- 結果：**安裝完成**，`/mcp` 看得到 pixelorama，擴充功能在 `127.0.0.1:7373` 回應正常（93 個工具）。
+- 安裝細節見 `docs/Lv製作流程.md` 的 Lv3「實際安裝紀錄」。
+
+## 1. 安裝前的安全檢查（Claude）
+
+| 檢查 | 結果 |
+|---|---|
+| npm 安裝時腳本（`postinstall` 等） | 沒有；正式相依套件只有官方 MCP SDK 與 zod |
+| MCP 伺服器 | 只連 `127.0.0.1:7373`，不執行系統指令；寫檔只發生在匯出工具 |
+| Pixelorama 外掛（約 5000 行 GDScript） | 只監聽 `127.0.0.1`，不執行系統指令；**沒有驗證機制**（本機任何程式都能下指令），不用時要關掉 Pixelorama |
+| 附帶的 `PixMcpBridge.pck`（二進位） | 比對後 5 個原始檔一字不差包含在內，沒有多餘程式 |
+| 根目錄的 `Pixelorama.pck` | 用途不明，不使用 |
+
+## 2. 遇到的問題與解法
+
+| # | 問題（症狀） | 原因 | 解法 | 誰發現 |
+|---|---|---|---|---|
+| 1 | `npm install` 失敗（ERESOLVE） | 作者 `package.json` 的 eslint 版本衝突（只影響開發工具），連帶裝不到 TypeScript | 用專案附的 lock 檔：`npm ci --legacy-peer-deps` | Claude |
+| 2 | `npm audit` 有 3 個漏洞 | MCP SDK 內建 HTTP 功能的相依套件（本 MCP 走 stdio，用不到） | `npm audit fix --omit=dev --legacy-peer-deps` → 0 個漏洞 | Claude |
+| 3 | Pixelorama 無法開啟 | App 只有 ad-hoc 簽章，Gatekeeper 阻擋 | 作者自行在「系統設定 → 隱私權與安全性」允許（安全設定由作者決定，Claude 不繞過） | — |
+| 4 | **Preferences → Extensions 看不到 pix-MCP Bridge** | 紀錄檔：`Pack version unsupported: 4`。附帶的 `.pck` 是 **Godot 4.7** 打包（格式第 4 版），Pixelorama 1.1.10 內建 **Godot 4.6.2**，只讀得懂第 3 版。作者附的檔案與他文件指定的版本不相容 | 查 Pixelorama 原始碼，確認它也讀 `.zip` → 用已驗證的 5 個原始檔打包成 `PixMcpBridge.zip`（zip 沒有版本問題） | Claude（讀紀錄檔＋.pck 檔頭） |
+| 5 | 換成 zip 後仍看不到／伺服器沒啟動 | 擴充功能資料夾被加入了 8MB 的 `Pixelorama.pck`（Pixelorama **自己的程式資料**），被當成擴充功能載入而跳出錯誤視窗，干擾畫面 | 刪除那份 `Pixelorama.pck`、清空 `Monitoring.ini` 的可疑紀錄 | Claude |
+| 6 | 擴充功能載入了卻沒動作 | Pixelorama 的擴充功能**預設是停用的** | 在 Preferences → Extensions 勾選啟用（等同 `config.ini` 的 `[extensions] PixMcpBridge=true`）；紀錄檔出現 `HTTP server listening on 127.0.0.1:7373` 即成功 | Claude（讀 Pixelorama 原始碼） |
+| 7 | `claude mcp list` 有 pixelorama，但 `/mcp` 看不到 | 用 **local 範圍**註冊，只在 Claude Code 判定的專案路徑相符時載入；啟動方式對不上就不會出現（godot-mcp-toolkit 寫在 `.mcp.json`，所以不受影響） | 改成 **user 範圍**：`claude mcp add -s user pixelorama -- node ~/Tools/pixelorama-mcp/mcp-server/dist/index.js`。不放 `.mcp.json`：那個檔案由 Godot 外掛管理、會進 git，且這是本機路徑 | 作者回報，Claude 查設定檔 |
+
+## 3. Claude 判斷錯誤、事後更正的地方
+
+| 一開始的判斷 | 實際情況 | 怎麼發現的 |
+|---|---|---|
+| 擴充功能資料夾裡的 `Pixelorama.pck` 是「作者修改過、來源不明的版本」 | 與 `/Applications/Pixelorama.app/Contents/Resources/Pixelorama.pck` **完全相同**，就是 Pixelorama 自己的程式資料 | `cmp` 比對 |
+| 「Pixelorama 每次啟動都會把自己裝成擴充功能」（Pixelorama 的 bug） | 重新啟動後**沒有重現**；比較可能是透過 Preferences 的 Add Extension 選到了 App 內的同名檔案 | 再啟動一次觀察 |
+
+教訓：**推論出原因後，要先重現或比對確認，再下結論**。這兩次都是先說了結論，後來才用比對／重現推翻。
+
+## 4. 觀察
+
+1. **第二個 MCP 的安裝難度比第一個高很多**：Godot MCP Toolkit 從 Asset Store 下載後啟用即可；Pixelorama MCP 是個人專案，遇到 7 個問題，其中 4 個是作者的檔案或文件本身的問題（版本不相容、依賴衝突、未說明預設停用）。
+2. **「讀紀錄檔＋讀原始碼」是排除問題最有效的方式**：版本不相容、預設停用都是從 Pixelorama 的紀錄檔和原始碼找到的，而不是靠猜。
+3. **自己從原始碼打包，比使用附帶的二進位檔更安全**：裝進去的就是檢查過的程式碼。
+4. **需要作者的地方**：允許未認證的 App 開啟（安全設定）、在 App 介面中操作、確認 `/mcp` 的顯示。

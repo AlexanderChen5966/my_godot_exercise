@@ -295,15 +295,31 @@ Player
 
 1. 安裝 **Pixelorama v1.1.10**（Pixelorama-MCP 文件指定的版本），暫時不要升級。
 2. 下載 <https://github.com/abidoo22/pixelorama-mcp>，在 `mcp-server/` 執行 `npm install && npm run build`。
-3. 在 Pixelorama：Preferences → Extensions → Add Extension，**只選 `PixMcpBridge.pck`**。根目錄的 `Pixelorama.pck` 不要用。
+3. 在 Pixelorama 安裝擴充功能。⚠️ 附帶的 `PixMcpBridge.pck` 在 v1.1.10 讀不了，要改用自己打包的 `PixMcpBridge.zip`（見下方「實際安裝紀錄」）。安裝後要在 Preferences → Extensions **勾選啟用**。根目錄的 `Pixelorama.pck` 不要用。
 4. 確認擴充功能運作：`curl -s http://127.0.0.1:7373/health`。
 5. 在專案資料夾加入 MCP：
 
    ```bash
-   claude mcp add pixelorama -- node /絕對路徑/pixelorama-mcp/mcp-server/dist/index.js
+   claude mcp add -s user pixelorama -- node /絕對路徑/pixelorama-mcp/mcp-server/dist/index.js
    ```
 
 6. 使用時要**同時開著 Godot 編輯器和 Pixelorama**。
+
+#### 實際安裝紀錄（2026-10-02，Claude 執行）
+
+| 項目 | 結果 |
+|---|---|
+| 原始碼位置 | `~/Tools/pixelorama-mcp`（commit `7549161`，不放進遊戲專案） |
+| 安全檢查 | npm 無安裝時腳本；伺服器只連 `127.0.0.1:7373`、不執行系統指令；外掛只監聽 `127.0.0.1`、不執行系統指令，**但沒有驗證機制**（不用時請關掉 Pixelorama） |
+| `PixMcpBridge.pck` | 附帶的二進位檔，已比對：5 個原始檔（extension.json、Main.tscn、Main.gd、command_handler.gd、converter.gd）**一字不差**包含在內，沒有多餘程式 |
+| `Pixelorama.pck` | 用途不明，**沒有使用** |
+| 建置 | 作者的 `package.json` 有 eslint 版本衝突（只影響開發工具）→ 用 `npm ci --legacy-peer-deps`；正式相依套件 `npm audit fix` 後 0 個漏洞；`dist/` 已編譯，提供 103 個工具 |
+| Pixelorama | 官方 v1.1.10 `Pixelorama-Mac.dmg` → `/Applications/Pixelorama.app`。**只有 ad-hoc 簽章，Gatekeeper 會擋**，第一次開啟要由作者在「系統設定 → 隱私權與安全性」允許 |
+| 擴充功能 | ⚠️ **附帶的 `PixMcpBridge.pck` 不能用**：它是用 Godot 4.7 打包（格式第 4 版），但 Pixelorama 1.1.10 內建 Godot 4.6.2，只讀得懂第 3 版，紀錄檔會出現 `Pack version unsupported: 4`。**解法：用已驗證的 5 個原始檔打包成 `PixMcpBridge.zip`**（內部路徑 `src/Extensions/PixMcpBridge/…` 與 `addons/gdgifexporter/converter.gd`；Pixelorama 也讀 zip，沒有版本問題），放到 `~/Library/Application Support/Pixelorama/extensions/` |
+| 啟用 | 擴充功能**預設是停用的**，要在「Edit → Preferences → Extensions」勾選 **pix-MCP Bridge**（等同在 `config.ini` 的 `[extensions]` 寫入 `PixMcpBridge=true`）。啟用後紀錄檔會出現 `[pix-MCP] HTTP server listening on 127.0.0.1:7373` |
+| 不要加入 `Pixelorama.pck` | 擴充功能資料夾裡如果出現 8MB 的 `Pixelorama.pck`，那是 **Pixelorama 自己的程式資料**（與 App 內的檔案相同），被當成擴充功能載入時會跳出錯誤視窗。刪掉即可（安裝期間曾出現過，來源推測是透過 Add Extension 選到了 App 內的同名檔案） |
+| 確認 | `curl -s http://127.0.0.1:7373/health` → `{"server":"pix-mcp-bridge","status":"ok","pixelorama_version":"v1.1.10-stable",...}` |
+| MCP 註冊 | `claude mcp add -s user pixelorama -- node ~/Tools/pixelorama-mcp/mcp-server/dist/index.js`（**user 範圍**）。一開始用 local 範圍，但從某些地方啟動 Claude Code 時 `/mcp` 不會出現，改成 user 範圍後在任何資料夾都會載入。不放進 `.mcp.json`：那個檔案由 Godot 外掛管理、會進 git，且這是本機路徑 |
 
 ### 角色規格（可在開工前調整）
 

@@ -132,4 +132,8 @@ Lv3 起會加入 Pixelorama MCP（像素繪圖），安裝方式寫在 `docs/Lv�
 - **網頁版沒有聲音**：瀏覽器規定使用者要先點擊才能播放聲音，標題畫面的「點擊開始」就是為了這個。
 - **網頁版裡帶著外掛程式碼**：在 Web 匯出設定的 `exclude_filter` 加上 `addons/*`。
 - **中文出現方塊**：確認 `project.godot` 裡 `gui/theme/custom_font` 的設定還在。
+- **Pixelorama 的 Extensions 看不到 pix-MCP Bridge**：看 `~/Library/Application Support/Pixelorama/logs/godot.log`。出現 `Pack version unsupported: 4` 表示 `.pck` 格式太新，改用從原始碼打包的 `PixMcpBridge.zip`（見 `docs/Lv製作流程.md` 的 Lv3）。
+- **pix-MCP Bridge 有出現但 7373 沒回應**：擴充功能預設是停用的，到 Preferences → Extensions 勾選啟用。確認：`curl -s http://127.0.0.1:7373/health`。
+- **擴充功能資料夾出現 8MB 的 `Pixelorama.pck`**：那是 Pixelorama 自己的程式資料，不是擴充功能，刪掉即可（否則每次啟動會跳錯誤視窗）。
+- **`claude mcp list` 有 pixelorama，`/mcp` 卻沒有**：改成 user 範圍註冊（`claude mcp add -s user pixelorama -- node ~/Tools/pixelorama-mcp/mcp-server/dist/index.js`），再重開 Claude Code。
 - **想停用外掛**：在「專案設定 → 外掛」取消勾選（會詢問是否清掉 `.mcp.json`），不要手動改 `project.godot`。
