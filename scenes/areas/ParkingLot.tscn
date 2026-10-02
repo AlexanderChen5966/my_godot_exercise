@@ -23,7 +23,10 @@ size = Vector2(200, 192)
 [node name="ParkingLot" type="Node2D" unique_id=1154784663]
 script = ExtResource("1_q84vj")
 
-[node name="Backdrop" type="TextureRect" parent="." unique_id=1626762249]
+[node name="FarLayer" type="Parallax2D" parent="." unique_id=356163906]
+scroll_scale = Vector2(0.3, 1)
+
+[node name="Backdrop" type="TextureRect" parent="FarLayer" unique_id=1626762249]
 modulate = Color(0.55, 0.55, 0.6, 1)
 offset_right = 2304.0
 offset_bottom = 768.0
@@ -31,6 +34,49 @@ mouse_filter = 2
 texture = ExtResource("2_tpq6i")
 expand_mode = 1
 stretch_mode = 1
+
+[node name="MidLayer" type="Parallax2D" parent="." unique_id=1583612062]
+scroll_scale = Vector2(0.7, 1)
+
+[node name="Pillar1" type="ColorRect" parent="MidLayer" unique_id=120234322]
+offset_left = 172.0
+offset_top = 60.0
+offset_right = 228.0
+offset_bottom = 640.0
+mouse_filter = 2
+color = Color(0.02, 0.03, 0.035, 0.8)
+
+[node name="Pillar2" type="ColorRect" parent="MidLayer" unique_id=274804557]
+offset_left = 622.0
+offset_top = 60.0
+offset_right = 678.0
+offset_bottom = 640.0
+mouse_filter = 2
+color = Color(0.02, 0.03, 0.035, 0.8)
+
+[node name="Pillar3" type="ColorRect" parent="MidLayer" unique_id=766058578]
+offset_left = 1072.0
+offset_top = 60.0
+offset_right = 1128.0
+offset_bottom = 640.0
+mouse_filter = 2
+color = Color(0.02, 0.03, 0.035, 0.8)
+
+[node name="Pillar4" type="ColorRect" parent="MidLayer" unique_id=1239842193]
+offset_left = 1522.0
+offset_top = 60.0
+offset_right = 1578.0
+offset_bottom = 640.0
+mouse_filter = 2
+color = Color(0.02, 0.03, 0.035, 0.8)
+
+[node name="Pillar5" type="ColorRect" parent="MidLayer" unique_id=655939893]
+offset_left = 1972.0
+offset_top = 60.0
+offset_right = 2028.0
+offset_bottom = 640.0
+mouse_filter = 2
+color = Color(0.02, 0.03, 0.035, 0.8)
 
 [node name="Ground" type="ColorRect" parent="." unique_id=350550260]
 offset_top = 640.0
@@ -129,3 +175,34 @@ offset_top = -160.0
 offset_right = 44.0
 mouse_filter = 2
 color = Color(0.35, 0.08, 0.06, 0.75)
+
+[node name="FrontLayer" type="Parallax2D" parent="." unique_id=1888911907]
+scroll_scale = Vector2(1.3, 1)
+
+[node name="Pillar1" type="ColorRect" parent="FrontLayer" unique_id=1981379393]
+offset_left = 360.0
+offset_right = 480.0
+offset_bottom = 768.0
+mouse_filter = 2
+color = Color(0.005, 0.006, 0.008, 0.96)
+
+[node name="Pillar2" type="ColorRect" parent="FrontLayer" unique_id=960153495]
+offset_left = 1190.0
+offset_right = 1310.0
+offset_bottom = 768.0
+mouse_filter = 2
+color = Color(0.005, 0.006, 0.008, 0.96)
+
+[node name="Pillar3" type="ColorRect" parent="FrontLayer" unique_id=911530233]
+offset_left = 2020.0
+offset_right = 2140.0
+offset_bottom = 768.0
+mouse_filter = 2
+color = Color(0.005, 0.006, 0.008, 0.96)
+
+[node name="Pillar4" type="ColorRect" parent="FrontLayer" unique_id=1301448866]
+offset_left = 2240.0
+offset_right = 2360.0
+offset_bottom = 768.0
+mouse_filter = 2
+color = Color(0.005, 0.006, 0.008, 0.96)
