@@ -164,6 +164,7 @@ Main (Control, full rect)
 - 流程較長時（例如一路點到三個結局），可另外寫 headless 測試腳本放在暫存區（不要放進專案）。
   **不要直接對本專案跑 headless**：外掛的 `MCPRuntimeServer` autoload 在 headless 也會啟動，會覆蓋 godot-mcp-toolkit 的 runtime 登錄（`~/Library/Application Support/godot-mcp-toolkit/`），導致正在執行的遊戲之後回報 `GAME_NOT_RUNNING`。
   做法：把專案 rsync 到暫存區（排除 `addons/`、`.mcp.json`、`build/`），刪掉副本 `project.godot` 裡的 `MCPRuntimeServer` autoload 與外掛啟用設定，再對副本執行 `Godot --headless --path <副本> --script <測試腳本>`。
+- 劇本檢查也會檢查 `data/areas/*.json`：引用是否存在、`exit_to`、互動點類型、是否有出口、區域 BGM，以及區域場景的 `point_id` 是否與 JSON 一一對應（場景尚未建立時只顯示 ⚠ 提醒）。
 - 修改劇本或素材後，執行劇本檢查（同樣會啟動 runtime 外掛，請在**沒有用 MCP 執行遊戲時**跑，或照上面的方式對副本執行）：
   `/Applications/Godot.app/Contents/MacOS/Godot --headless --path . --script res://tools/validate_story.gd`
 - 每個步驟結束時，簡短回報：做了什麼、用了哪些 MCP 工具、哪些改用其他方式（與原因）、截圖與 log 是否正常。
