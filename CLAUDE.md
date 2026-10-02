@@ -156,7 +156,7 @@ Main (Control, full rect)
 
 ### 每完成一個步驟
 
-1. `game_start`（`scene_path: "main"`）執行遊戲。若回傳 `runtime_ready: false`，或之後的 runtime 工具回報 `GAME_NOT_RUNNING`（但 log 顯示遊戲有在跑），先呼叫 `game_start`（`if_running: "return"`, `runtime_poll: true`）再重試。
+1. `game_start`（`scene_path: "main"`）執行遊戲。若回傳 `runtime_ready: false`，或之後的 runtime 工具回報 `GAME_NOT_RUNNING`（但 log 顯示遊戲有在跑），先呼叫 `game_start`（`if_running: "return"`, `runtime_poll: true`）再重試；有時要**輪詢兩次**（間隔幾秒）才會連上。
 2. `runtime_screenshot` 截圖確認畫面（**一律用 `image_response_mode: "disk"`** 再讀取存下的 PNG；inline 模式圖片超過約 1MB 會失敗，且曾回傳舊畫面）；需要互動時用 `input_simulate`（`click` 給座標，或 `click_node` 給節點路徑），再截圖確認結果。座標以 1152×768 為準。
 3. `debugger_get_log` 讀錯誤與警告（遊戲剛啟動時 log 可能還沒印完，必要時再讀一次）。
 4. 修好之後 `game_stop`。
