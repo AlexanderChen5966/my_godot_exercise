@@ -108,6 +108,9 @@ func _setup_style() -> void:
 
 func show_title() -> void:
 	current_id = -1
+	_free_area()  # 從區域中回到標題時，一併釋放區域
+	background.visible = true
+	dialog_panel.visible = true
 	title_label.text = story.game_title
 	background.texture = load(StoryData.bg_path(story.title_screen["bg"]))
 	title_layer.visible = true
@@ -175,17 +178,51 @@ func _free_area() -> void:
 	prompt_label.visible = false
 
 
-## 立即顯示區域與開場文字（不含淡入淡出與換曲；Lv1-6 的 enter_area() 會包住它）。
-func _show_area_now(area_id: String) -> void:
-	_instantiate_area(area_id)
-	title_layer.visible = false
-	background.visible = false
-	story_layer.visible = true
+## 進入區域：淡出 → 實例化區域到 World → 隱藏 Background → 換 BGM → 淡入 → 開場文字。
+## fade_out 為 false 時表示畫面已經是黑的（例如從標題「開始」進來）。
+func enter_area(area_id: String, scene_id: int, fade_out := true) -> void:
 	var area := areas.get_area(area_id)
-	if area.has("intro"):
-		_show_area_text(area["intro"])
+	current_id = scene_id
+	state = State.TRANSITION
+	if area.has("bgm"):
+		play_bgm(area["bgm"])
+	var tween := create_tween()
+	if fade_out:
+		tween.tween_property(fade, "color:a", 1.0, FADE_HALF_TIME)
 	else:
-		_begin_explore()
+		fade.color.a = 1.0
+	tween.tween_callback(func() -> void:
+		_instantiate_area(area_id)
+		title_layer.visible = false
+		background.visible = false
+		story_layer.visible = true
+		dialog_panel.visible = false
+		_clear_choices()
+	)
+	tween.tween_property(fade, "color:a", 0.0, FADE_HALF_TIME)
+	tween.tween_callback(func() -> void:
+		if area.has("intro"):
+			_show_area_text(area["intro"])
+		else:
+			_begin_explore()
+	)
+
+
+## 離開區域：淡出 → 釋放區域 → 顯示 Background → 回到視覺小說流程的 next_id。
+func leave_area(next_id: int) -> void:
+	state = State.TRANSITION
+	_area.set_can_move(false)
+	prompt_label.visible = false
+	var tween := create_tween()
+	tween.tween_property(fade, "color:a", 1.0, FADE_HALF_TIME)
+	tween.tween_callback(func() -> void:
+		_free_area()
+		background.visible = true
+		dialog_panel.visible = true
+		scene_title.text = ""
+		body.text = ""
+		show_scene(next_id, false)
+	)
 
 
 func _area_point(point_id: String) -> Dictionary:
@@ -260,9 +297,9 @@ func _close_area_text() -> void:
 	_begin_explore()
 
 
-## 出口文字關閉後。Lv1-6 會改成 leave_area(exit_to)；目前先回到可操作狀態。
+## 出口文字關閉後，前往區域的 exit_to（接回視覺小說流程）。
 func _on_area_exit() -> void:
-	_begin_explore()
+	leave_area(int(areas.get_area(_area_id)["exit_to"]))
 
 
 ## 換曲：與目前曲目相同時不重播；不同時舊曲淡出、新曲淡入。
@@ -289,6 +326,11 @@ func play_bgm(file: String) -> void:
 func show_scene(id: int, fade_out := true) -> void:
 	var scene := story.get_scene(id)
 	if scene.is_empty():
+		return
+	# 被區域接管的場景：改成進入可走動的區域，不顯示視覺小說畫面
+	var area := areas.area_for_scene(id)
+	if not area.is_empty():
+		enter_area(area["id"], id, fade_out)
 		return
 	_clear_choices()
 	hint.visible = false
