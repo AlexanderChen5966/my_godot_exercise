@@ -9,6 +9,7 @@ const BGM_DIR := "res://assets/bgm/"
 var game_title: String = ""
 var start_id: int = 1
 var title_screen: Dictionary = {}
+var stats: Dictionary = {}  # 數值的初始值（v1.5），例如 { "memory": 0, "humanity": 3 }
 
 var _scenes: Dictionary = {}  # int id -> Dictionary
 
@@ -25,6 +26,7 @@ func load_story(path: String = STORY) -> bool:
 	game_title = data.get("game_title", "")
 	start_id = int(data.get("start_id", 1))
 	title_screen = data.get("title_screen", {})
+	stats = data.get("stats", {})
 	_scenes.clear()
 	for s in data.get("scenes", []):
 		_scenes[int(s["id"])] = s

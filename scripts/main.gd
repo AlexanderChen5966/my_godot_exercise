@@ -135,6 +135,7 @@ func show_title() -> void:
 
 
 func _start_game() -> void:
+	GameState.reset(story.stats)  # 新的一輪：清空旗標、物品，數值回到初始值
 	_audio_unlocked = true
 	sfx.play()
 	if _start_blink:
@@ -267,7 +268,7 @@ func _on_point_exited(point_id: String) -> void:
 
 ## 區域文字：沿用對話框與打字機；不顯示選項與提示。
 func _show_area_text(holder: Dictionary, point_id := "") -> void:
-	var resolved := AreaData.resolve(story, holder.get("from", {}))
+	var resolved := AreaData.text_of(story, holder)
 	_closing_point = point_id
 	_area.set_can_move(false)
 	prompt_label.visible = false

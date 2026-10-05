@@ -51,6 +51,8 @@ addons/godot_mcp_toolkit/  Godot MCP Toolkit 編輯器外掛（v1.0.2，MIT）
 scenes/Main.tscn       主場景
 scripts/story_data.gd  劇本讀取（class_name StoryData）
 scripts/main.gd        主畫面邏輯
+scripts/game_state.gd  一輪遊戲的全域狀態（class_name GameStateData；autoload 名稱 GameState，Lv4-1 用 autoload_manage 加入）
+scripts/area_data.gd   區域資料讀取、互動點的文字／條件／variants、區域資料的檢查
 docs/開發路線圖.md       原規劃（階段 1～4）與新路線（Lv1～5）、決策、進度紀錄
 docs/Lv製作流程.md       Lv1～5 的規格、步驟、驗證與完成標準
 docs/v1.5_劇本調整規劃.md  劇本 1.5 原規劃（視覺小說格式；方向仍有效，格式改成區域 × 事件）

@@ -1,6 +1,7 @@
 {
   "game_title": "失語者",
   "start_id": 1,
+  "stats": { "memory": 0, "humanity": 3 },
   "title_screen": {
     "bg": "scene_16.webp",
     "bgm": "bgm_15.ogg"

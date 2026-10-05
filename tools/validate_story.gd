@@ -1,5 +1,6 @@
 ## 劇本檢查工具：確認 data/story.json 格式正確、所有圖片/音樂都存在、沒有斷掉的跳轉；
-## 並檢查 data/areas/*.json 的引用、exit_to、互動點與區域場景是否對應（使用遊戲本身的 StoryData／AreaData）。
+## 並檢查 data/areas/*.json：文字與引用、出口、互動點與區域場景是否對應、物品／旗標／數值是否對得上、每個區域都走得到
+## （使用遊戲本身的 StoryData／AreaData）。
 ## 用法（終端機）：
 ##   Godot --headless --path . --script res://tools/validate_story.gd
 extends SceneTree
@@ -40,6 +41,12 @@ func _init() -> void:
 			if not ids.has(int(c["next_id"])):
 				errors.append("場景 %d 的選項「%s」指向不存在的場景 %s" % [id, c["text"], c["next_id"]])
 	print("場景 %d 個、結局 %d 個" % [ids.size(), endings])
+	var stats: Dictionary = data.get("stats", {})
+	for key in stats:
+		if typeof(stats[key]) not in [TYPE_INT, TYPE_FLOAT]:
+			errors.append("stats 的 %s 不是數字：%s" % [key, stats[key]])
+	if not stats.is_empty():
+		print("數值：%s" % ", ".join(stats.keys().map(func(k): return "%s=%s" % [k, str(stats[k]).trim_suffix(".0")])))
 
 	var warnings: Array[String] = []
 	var story := StoryData.new()
