@@ -10,7 +10,7 @@
   - 每一級的規格、步驟、驗證方式、完成標準：`docs/Lv製作流程.md`
   - 作者貼給你的分步指令：`PROMPTS.md` 的「LvN 分步指令」（每一級開始時補上該級的指令）
 - **暫不支援手機**：Lv1 起可走動區域只做鍵盤操作，不要自行加觸控。按鍵衝突（`interact` 與 `ui_accept`）之後再處理。
-- **Lv1（停車場可走動）、Lv2（景深分層與光影）已完成（2026-10-02）；Lv3（Pixelorama MCP 畫主角）已完成（2026-10-05）**：32×48、放大 2 倍，左右各一套共 20 格（待機 4 fps、行走 8 fps），原始檔 `art/player.pxo`，遊戲用 `assets/sprites/player.png`＋`player_frames.tres`。經過與觀察見 `MCP實驗紀錄.md` 的「Lv3」。**劇本 v1.5 已定稿（2026-10-05）**：`docs/story_v1.5_outline.md`、`docs/story_v1.5_draft.md`，素材需求 `docs/asset_requests.md`。**下一步：Lv4（要等作者指示）**，劇本跟著 Lv4、Lv5 分批寫入 JSON。
+- **Lv1（停車場可走動）、Lv2（景深分層與光影）已完成（2026-10-02）；Lv3（Pixelorama MCP 畫主角）已完成（2026-10-05）**：32×48、放大 2 倍，左右各一套共 20 格（待機 4 fps、行走 8 fps），原始檔 `art/player.pxo`，遊戲用 `assets/sprites/player.png`＋`player_frames.tres`。經過與觀察見 `MCP實驗紀錄.md` 的「Lv3」。**劇本 v1.5 已定稿（2026-10-05）**：`docs/story_v1.5_outline.md`、`docs/story_v1.5_draft.md`，素材需求 `docs/asset_requests.md`。**目前進行：Lv4（多區域、物品與旗標）**：規格、資料格式、步驟在 `docs/Lv製作流程.md` 的「Lv4」，分步指令在 `PROMPTS.md` 的「Lv4 分步指令」。劇本跟著 Lv4、Lv5 分批寫入 JSON。
 - **一次只做一級**：沒有作者的指示，不要開始下一級，也不要提前做後面等級的功能。
 - MCP：**godot-mcp-toolkit**（Godot 編輯器）＋ **pixelorama**（像素繪圖，Lv3 起使用）。
   - pixelorama 註冊在 **user 範圍**（`~/Tools/pixelorama-mcp`），擴充功能用自己從原始碼打包的 `PixMcpBridge.zip`。安裝紀錄與排除問題見 `docs/Lv製作流程.md` 的 Lv3 與 `MCP實驗紀錄.md` 的「Lv3 準備」。
@@ -202,7 +202,7 @@ Main (Control, full rect)
 
 > 下一版 **1.5** 的劇本調整規劃（分歧、快速結局、隱藏數值）見 `docs/v1.5_劇本調整規劃.md`，2026-10-05 起改寫成可移動版的「區域 × 事件」格式（見 `docs/Lv製作流程.md` 的「劇本 v1.5」一節）。實作前仍以本檔的規則為準。
 >
-> Lv1 起，區域資料（`data/areas/*.json`）以 `from` **引用** `story.json` 的文字，不複製。修改 `story.json` 時，若刪除或調換了被引用的場景或選項順序，區域文字也會跟著變，請一併檢查（劇本檢查工具會在 Lv1 擴充這項檢查）。
+> Lv1 的區域資料以 `from` **引用** `story.json` 的文字；**v1.5（Lv4 起）改成把文字直接寫在區域資料裡**（`title`／`text`，格式見 `docs/Lv製作流程.md` 的 Lv4），`from` 仍然支援。修改 `story.json` 時，若刪除或調換了被引用的場景或選項順序，用 `from` 的區域文字也會跟著變，請一併檢查（劇本檢查工具會檢查引用是否有效）。
 
 劇本（`data/story.json`）之後會依 v1.5 定稿修改，例如處理下面的重複劇情。程式是完全依資料運作的，調整劇本時請注意：
 

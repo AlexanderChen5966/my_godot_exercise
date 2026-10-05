@@ -414,11 +414,120 @@ Player
 |---|---|
 | 區域 | 街道（連接停車場與診所）、診所（找錄音筆） |
 | 區域切換 | 出口可以通往另一個區域（不只是接回視覺小說）；記住玩家從哪個出口進來，在對應位置出現 |
-| 全域狀態 | `GameState` autoload：旗標、持有物品、已觸發事件；回標題時重設 |
+| 全域狀態 | `GameState` autoload：旗標、持有物品、數值、已看過的開場；回標題時重設 |
 | 物品 | 例如錄音筆：在診所撿到後，才能觸發「錄音筆記憶」事件 |
-| 條件事件 | 互動點加上 `require_flag`、`set_flag` 欄位 |
+| 條件事件 | 互動點加上 `require`、`variants`、`set_flags` 欄位（見下方「資料格式」） |
 | 美術 | 用 Pixelorama MCP 畫小道具（錄音筆、病歷卡、照片）與簡單的場景物件 |
-| Aseprite（選做） | 購買 Aseprite 後，用 Aseprite MCP 畫同樣的道具，比較兩個 MCP |
+
+### 範圍（2026-10-05 決定）
+
+- 區域：停車場（改成 v1.5）、**街道**、**診所**。三個區域可以來回走。
+- 劇本：這三個區域的 v1.5 文字寫入 `data/areas/*.json`。**離開診所後接回 1.0 的視覺小說（場景 6 起）**，其餘部分在 Lv5 換成 v1.5。
+- 數值（記憶、人性）：Lv4 **只記錄**（存在 `GameState`），不顯示、不影響結局；用法在 Lv5 加入。
+- 素材：街道、診所的背景與 `pickup.ogg` 有就用，沒有就先用 `scene_03`／`scene_04` 代替（見 `docs/asset_requests.md`）。
+
+### 資料格式：v1.5 區域（`data/areas/*.json`）
+
+**和 Lv1 格式的差別**
+1. **文字直接寫在區域資料裡**（`title`／`text`）。v1.5 的文字大多是新寫的，而且被區域取代的舊場景（1～5）不會再出現在 `story.json`。舊的 `from` 引用仍然支援，舊資料不用改。
+2. 新增互動點類型 **`item`**（撿東西）與 **`choice`**（文字＋選項）。
+3. 互動點可以加**條件**（`require`）與**變化**（`variants`：條件不同，顯示的內容不同）。
+4. 出口可以通往**另一個區域**（`to.area`），也可以接回視覺小說（`to.scene`）；一個區域可以有多個出口。
+5. 從哪個區域進來，就出現在對應的位置（`spawns`）。
+
+**區域欄位**
+
+| 欄位 | 必填 | 說明 |
+|---|---|---|
+| `id` | ✓ | 區域代號，例如 `clinic` |
+| `scene` | ✓ | 區域場景 `res://scenes/areas/*.tscn` |
+| `bgm` | ✓ | 區域的背景音樂 |
+| `replaces_scenes` | | 從視覺小說進入時，接管哪些場景 id（Lv1 已有） |
+| `intro` | | 第一次進入時顯示的開場：`{ "title", "text" }`。同一輪遊戲只顯示一次 |
+| `spawns` | | 出現位置（x 座標）：`{ "default": 160, "<來源區域 id>": 2200 }` |
+| `points` | ✓ | 互動點，key 是場景中 InteractPoint 的 `point_id` |
+
+**互動點欄位**
+
+| 欄位 | 說明 |
+|---|---|
+| `type` | `inspect`（文字）／`item`（文字＋得到物品）／`choice`（文字＋選項）／`exit`（出口）／`approach`（Lv1 的舊類型，等同自動觸發的 `inspect`） |
+| `trigger` | `interact`（預設：靠近後按互動鍵）／`approach`（走進範圍自動觸發，用在遇到人的時候） |
+| `label` | 畫面上的提示，例如「藥櫃」 |
+| `title`、`text` | 對話框的標題與內文（或用舊的 `from` 引用） |
+| `item` | `type: item` 時得到的物品代號，例如 `recorder` |
+| `choices` | `type: choice` 時的選項：`[{ "text", "response", "effects"?, "set_flags"? }]` |
+| `effects` | 數值增減，例如 `{ "memory": 1 }`。**同一個互動點的效果，一輪遊戲只套用一次** |
+| `set_flags` | 觸發後設定的旗標 |
+| `require` | 出現的條件：`{ "items": [...], "flags": [...], "not_flags": [...] }`，不符合時互動點不反應 |
+| `variants` | 依條件切換內容：由上往下找第一個 `require` 符合的，用它的欄位**覆蓋**互動點本身的欄位；都不符合時用互動點本身 |
+| `once` | 觸發一次後就不再反應（`choice`、`item` 預設為 `true`） |
+| `hide_on_done` | 觸發後隱藏場景中的人物或道具（例如婦人逃走、錄音筆被拿走） |
+| `to` | `type: exit` 時的去處：`{ "area": "street" }` 或 `{ "scene": 6 }`；沒有 `text` 時直接換區域 |
+
+**自動旗標**：每個互動點觸發後，會自動設定旗標 `<區域 id>.<互動點 id>`（例如 `clinic.chair`），條件可以直接使用。
+
+**範例：診所的診療椅**（拿到錄音筆前後內容不同）
+
+```json
+"chair": {
+  "type": "inspect", "label": "診療椅",
+  "text": "一張蒙塵的診療椅。你覺得自己曾經每天坐在它旁邊。",
+  "variants": [
+    { "require": { "items": ["recorder"] },
+      "type": "choice", "label": "坐下", "once": true,
+      "text": "你在診療椅上坐下，掏出錄音筆，按下開關。……",
+      "choices": [
+        { "text": "反覆播放", "response": "……", "effects": { "memory": 1 } },
+        { "text": "呼喊名字", "response": "……", "effects": { "memory": 1 } },
+        { "text": "摔碎錄音筆", "response": "……", "effects": { "humanity": -1 } }
+      ] }
+  ]
+}
+```
+
+**範例：街道的兩個出口**
+
+```json
+"back": { "type": "exit", "label": "回到停車場", "to": { "area": "parking_lot" } },
+"exit": { "type": "exit", "label": "走向診所", "text": "你踩著碎裂柏油前行……", "to": { "area": "clinic" } }
+```
+
+**數值的初始值**：寫在 `data/story.json` 最上層的 `"stats": { "memory": 0, "humanity": 3 }`（Lv5 的視覺小說選項也會用到）。
+
+### 全域狀態：`GameState`（autoload）
+
+| 內容 | 說明 |
+|---|---|
+| `flags` | 旗標（含自動旗標） |
+| `items` | 持有的物品 |
+| `stats` | 數值，開始遊戲時從 `story.json` 的 `stats` 複製 |
+| `seen_intros` | 已顯示過開場的區域 |
+| `reset()` | 開始新遊戲、回標題時呼叫 |
+
+以 `godot-mcp-toolkit` 的 `autoload_manage` 加入（不要手改 `project.godot`）。
+
+### 劇本檢查（`tools/validate_story.gd`）新增的檢查
+
+- 互動點類型、`trigger` 的值正確；`choice` 至少有一個選項；`item` 有 `item`。
+- `require.items` 用到的物品，必須在某個 `item` 互動點拿得到。
+- `require.flags`／`not_flags` 用到的旗標，必須有地方設定（`set_flags` 或自動旗標）。
+- `effects` 的數值名稱必須在 `story.json` 的 `stats` 裡。
+- 出口的 `to.area` 存在、`to.scene` 存在；每個區域至少有一個出口。
+- 從開始的區域出發，**每個區域都走得到**。
+
+### 步驟
+
+| 步驟 | 內容 | 主要工具 | 作者 |
+|---|---|---|---|
+| Lv4-0 | 範圍、資料格式、步驟與分步指令（本節） | — | 確認格式 |
+| Lv4-1 | `GameState` autoload、`AreaData` 讀新格式、劇本檢查擴充；**舊資料照常運作** | GDScript、Toolkit `autoload_manage`、`script_check` | — |
+| Lv4-2 | 區域切換：多個出口、`to.area`、`spawns`、換區域淡出淡入、開場只顯示一次 | Toolkit 執行、`execute_code`、截圖 | — |
+| Lv4-3 | 互動點新類型：`choice`（對話框＋選項）、`item`、`require`／`variants`、`effects`；停車場換成 v1.5 | Toolkit 建立「醒來的地方」互動點 | 試玩停車場 |
+| Lv4-4 | 街道區域（場景用 Toolkit 建立，背景暫用 `scene_03`） | Toolkit | 有新背景時提供 |
+| Lv4-5 | 診所區域＋錄音筆＋診療椅；離開診所接回場景 6 | Toolkit | 試玩 |
+| Lv4-6 | 用 Pixelorama 畫道具（錄音筆、照片、尋人啟事、字卡、診療椅），取代色塊 | Pixelorama＋Toolkit | 確認造型 |
+| Lv4-7 | headless 測試（有／沒有錄音筆、回標題再玩一輪）、Web 匯出、`MCP實驗紀錄.md`「Lv4」 | headless（副本）、Toolkit | 試玩、瀏覽器確認 |
 
 ### 驗證
 
@@ -431,7 +540,7 @@ Player
 - [ ] 撿到物品前後，事件不同
 - [ ] 回標題後狀態重設，第二輪正常
 - [ ] `validate_story.gd` 能檢查旗標的設定與使用是否對應
-- [ ] `MCP實驗紀錄.md` 新增「Lv4」一節（含兩個像素工具 MCP 的比較，如果有做）
+- [ ] `MCP實驗紀錄.md` 新增「Lv4」一節（專案變大後 AI 的品質、兩個 MCP 的配合）
 
 ---
 
