@@ -7,20 +7,6 @@
 [ext_resource type="Script" uid="uid://u5x8mgenl5y4" path="res://scripts/interact_point.gd" id="4_tpq6i"]
 [ext_resource type="Script" uid="uid://cpx5m37cmu4jq" path="res://scripts/flicker_light.gd" id="5_8ukss"]
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_kipkx"]
-size = Vector2(32, 96)
-
-[sub_resource type="Gradient" id="Gradient_tpq6i"]
-colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0)
-
-[sub_resource type="GradientTexture2D" id="GradientTexture2D_8ukss"]
-gradient = SubResource("Gradient_tpq6i")
-width = 512
-height = 512
-fill = 1
-fill_from = Vector2(0.5, 0.5)
-fill_to = Vector2(1, 0.5)
-
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_k46jg"]
 size = Vector2(140, 192)
 
@@ -35,6 +21,20 @@ size = Vector2(80, 192)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_x3vua"]
 size = Vector2(200, 192)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_kipkx"]
+size = Vector2(32, 96)
+
+[sub_resource type="Gradient" id="Gradient_tpq6i"]
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_8ukss"]
+gradient = SubResource("Gradient_tpq6i")
+width = 512
+height = 512
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
 
 [sub_resource type="Gradient" id="Gradient_kipkx"]
 colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0)
@@ -110,44 +110,6 @@ offset_right = 2304.0
 offset_bottom = 768.0
 mouse_filter = 2
 color = Color(0.07, 0.08, 0.09, 0.92)
-
-[node name="Player" type="CharacterBody2D" parent="." unique_id=1633340741]
-position = Vector2(160, 640)
-motion_mode = 1
-script = ExtResource("3_8ukss")
-
-[node name="Body" type="ColorRect" parent="Player" unique_id=1576433445]
-visible = false
-offset_left = -16.0
-offset_top = -96.0
-offset_right = 16.0
-mouse_filter = 2
-color = Color(0.55, 0.62, 0.5, 1)
-
-[node name="Shape" type="CollisionShape2D" parent="Player" unique_id=858924400]
-position = Vector2(0, -48)
-shape = SubResource("RectangleShape2D_kipkx")
-
-[node name="Camera2D" type="Camera2D" parent="Player" unique_id=1629336938]
-limit_left = 0
-limit_top = 0
-limit_right = 2304
-limit_bottom = 768
-position_smoothing_enabled = true
-position_smoothing_speed = 6.0
-
-[node name="Flashlight" type="PointLight2D" parent="Player" unique_id=333886183]
-position = Vector2(0, -60)
-color = Color(1, 0.93, 0.8, 1)
-texture = SubResource("GradientTexture2D_8ukss")
-
-[node name="Sprite" type="AnimatedSprite2D" parent="Player" unique_id=1572857539]
-texture_filter = 1
-position = Vector2(3, -48)
-scale = Vector2(2, 2)
-sprite_frames = ExtResource("4_kipkx")
-animation = &"idle_right"
-autoplay = "idle_right"
 
 [node name="Points" type="Node2D" parent="." unique_id=1353451513]
 
@@ -231,6 +193,44 @@ offset_top = -160.0
 offset_right = 44.0
 mouse_filter = 2
 color = Color(0.35, 0.08, 0.06, 0.75)
+
+[node name="Player" type="CharacterBody2D" parent="." unique_id=1633340741]
+position = Vector2(160, 640)
+motion_mode = 1
+script = ExtResource("3_8ukss")
+
+[node name="Body" type="ColorRect" parent="Player" unique_id=1576433445]
+visible = false
+offset_left = -16.0
+offset_top = -96.0
+offset_right = 16.0
+mouse_filter = 2
+color = Color(0.55, 0.62, 0.5, 1)
+
+[node name="Shape" type="CollisionShape2D" parent="Player" unique_id=858924400]
+position = Vector2(0, -48)
+shape = SubResource("RectangleShape2D_kipkx")
+
+[node name="Camera2D" type="Camera2D" parent="Player" unique_id=1629336938]
+limit_left = 0
+limit_top = 0
+limit_right = 2304
+limit_bottom = 768
+position_smoothing_enabled = true
+position_smoothing_speed = 6.0
+
+[node name="Flashlight" type="PointLight2D" parent="Player" unique_id=333886183]
+position = Vector2(0, -60)
+color = Color(1, 0.93, 0.8, 1)
+texture = SubResource("GradientTexture2D_8ukss")
+
+[node name="Sprite" type="AnimatedSprite2D" parent="Player" unique_id=1572857539]
+texture_filter = 1
+position = Vector2(3, -48)
+scale = Vector2(2, 2)
+sprite_frames = ExtResource("4_kipkx")
+animation = &"idle_right"
+autoplay = "idle_right"
 
 [node name="FrontLayer" type="Parallax2D" parent="." unique_id=1888911907]
 scroll_scale = Vector2(1.3, 1)

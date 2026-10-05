@@ -64,7 +64,8 @@ art/player.pxo         主角的 Pixelorama 原始檔（含 .gdignore，不匯�
 assets/sprites/        主角 spritesheet 與 SpriteFrames
 data/areas/parking_lot.json  停車場區域資料（Lv4-3 起為 v1.5 格式，文字直接寫在資料裡）
 data/areas/street.json  街道區域資料（Lv4-4）
-scenes/areas/          可走動區域的場景：ParkingLot.tscn、Street.tscn（Street 由停車場另存後用 Toolkit 修改）
+data/areas/clinic.json  診所區域資料（Lv4-5：錄音筆、診療椅的 variants）
+scenes/areas/          可走動區域的場景：ParkingLot.tscn、Street.tscn、Clinic.tscn（後兩個由前一個區域另存後用 Toolkit 修改）
 MCP實驗紀錄.md           每一級的 MCP 實驗觀察
 ```
 
@@ -161,6 +162,10 @@ Main (Control, full rect)
 - 透過 MCP 修改場景後要 `editor_save_scene`。若直接改了 `.tscn` 檔案，要提醒使用者在編輯器重新載入，避免編輯器存檔時覆蓋。
 - 執行時動態產生的節點（例如選項按鈕）寫在腳本裡。
 - **Control 的版面屬性不要在 `scene_create_node` 時一起設定**：建立時帶入的 `position`／`size`，甚至 `offset_*`，位置都可能被重設成 (0, 0)（Lv1-4、Lv1-5 各發生一次）。做法：先建立節點，**再用 `node_set_property` 設定 `offset_left/top/right/bottom`**，存檔後檢查 `.tscn`。
+- **`node_manage` 的 `duplicate` 不會把子節點存進 `.tscn`**（Lv4-5）：複製出來的子節點（Shape、Marker）只存在編輯器裡，存檔後就不見了。要複製互動點時改用 `scene_create_node` 重新建立子節點，存檔後檢查 `.tscn`。
+- 新的可走動區域：用 `editor_save_scene`（帶 `file_path`）把現有區域**另存**，再用 Toolkit 修改（Lv4-4、Lv4-5 的做法）。區域場景裡 **`Points` 要排在 `Player` 前面**，否則高的道具（例如藥櫃）會擋住主角。
+- 遠景背景（FarLayer/Backdrop）用 `stretch_mode = 6`（等比例蓋滿）、寬約 1500，不要重複拼接（會有接縫）。
+- 選項的鍵盤操作要用 `input_simulate` 的 `key` 類型送真正的按鍵（下方向鍵 `keycode 4194322`、Enter `4194309`）；`action` 類型不會移動焦點。用 `execute_code` 瞬移主角後，要等一下物理更新，互動點才會偵測到。
 - 模擬移動用 `input_simulate` 的 `action` 類型（會呼叫 `Input.action_press`）。`key` 類型若要觸發動作，必須帶 `physical_keycode`（本專案的按鍵是用實體按鍵綁定）。
 - 測試期間如果使用者也在操作遊戲視窗，座標與狀態會被干擾；量測前先確認狀態，結果異常時先懷疑外部輸入。
 

@@ -48,16 +48,26 @@ func area_ids() -> Array:
 # ---- 互動點 ----
 
 ## 依目前狀態套用 variants：由上往下找第一個 require 符合的，用它的欄位覆蓋互動點本身的欄位。
+## 套用了第幾個 variant 記在 "_variant"（once 的判斷要分開：沒拿錄音筆時看過診療椅，不代表坐下聽過錄音）。
 static func view(point: Dictionary, state: GameStateData) -> Dictionary:
 	var result := point.duplicate()
 	result.erase("variants")
-	for variant in point.get("variants", []):
-		if state.check(variant.get("require", {})):
-			for key in variant:
+	var variants: Array = point.get("variants", [])
+	for i in variants.size():
+		if state.check(variants[i].get("require", {})):
+			for key in variants[i]:
 				if key != "require":
-					result[key] = variant[key]
+					result[key] = variants[i][key]
+			result["_variant"] = i
 			break
 	return result
+
+
+## once 用的完成紀錄代號：互動點本身用「區域.互動點」，套用 variant 時加上「#編號」。
+static func done_key(point_key: String, view_point: Dictionary) -> String:
+	if view_point.has("_variant"):
+		return "%s#%d" % [point_key, int(view_point["_variant"])]
+	return point_key
 
 
 ## 互動點本身的 require 是否符合（不符合時互動點不反應）。

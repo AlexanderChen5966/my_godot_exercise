@@ -245,11 +245,12 @@ func _area_point(point_id: String) -> Dictionary:
 	return AreaData.view(raw, GameState)
 
 
-## 互動點現在能不能觸發：require 不符合、或 once 且已完成時不反應。
+## 互動點現在能不能觸發：require 不符合、或 once 且（這個 variant）已完成時不反應。
 func _point_active(point_id: String, point: Dictionary) -> bool:
 	if point.is_empty() or not AreaData.is_available(point, GameState):
 		return false
-	return not (AreaData.is_once(point) and _is_done(point_id))
+	var done := GameState.has_flag(AreaData.done_key(_point_key(point_id), point))
+	return not (AreaData.is_once(point) and done)
 
 
 ## 可操作狀態：隱藏對話框，讓主角可以移動。
@@ -294,7 +295,7 @@ func _show_area_text(holder: Dictionary, point_id := "") -> void:
 	_closing_point = point_id
 	_closing_view = holder
 	if not point_id.is_empty() and holder.get("type") != "choice":
-		GameState.apply_effects(holder.get("effects", {}), _point_key(point_id))
+		GameState.apply_effects(holder.get("effects", {}), AreaData.done_key(_point_key(point_id), holder))
 	_area.set_can_move(false)
 	prompt_label.visible = false
 	dialog_panel.visible = true
@@ -331,7 +332,7 @@ func _on_area_choice_pressed(choice: Dictionary) -> void:
 	_area_choosing = false
 	sfx.play()
 	_clear_choices()
-	GameState.apply_effects(choice.get("effects", {}), _point_key(_closing_point))
+	GameState.apply_effects(choice.get("effects", {}), AreaData.done_key(_point_key(_closing_point), _closing_view))
 	for flag in choice.get("set_flags", []):
 		GameState.set_flag(flag)
 	_type_text(choice.get("response", ""), _show_area_continue)
@@ -347,6 +348,7 @@ func _close_area_text() -> void:
 		_begin_explore()
 		return
 	_mark_done(point_id)
+	GameState.set_flag(AreaData.done_key(_point_key(point_id), point))  # variant 自己的完成紀錄
 	if point.get("type") == "item" and point.has("item"):
 		GameState.add_item(point["item"])
 	for flag in point.get("set_flags", []):

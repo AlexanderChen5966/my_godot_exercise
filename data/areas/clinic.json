@@ -1,0 +1,48 @@
+{
+  "id": "clinic",
+  "scene": "res://scenes/areas/Clinic.tscn",
+  "replaces_scenes": [4, 5],
+  "bgm": "bgm_04.ogg",
+  "intro": {
+    "title": "廢棄診所",
+    "text": "你走進一間布滿爬藤的廢診所，藥水氣味讓你腦中閃過殘影。診所曾是什麼樣子？你模糊地記得這裡與某段記憶重疊。"
+  },
+  "spawns": { "default": 220, "street": 220 },
+  "points": {
+    "back": {
+      "type": "exit", "label": "回到街道",
+      "to": { "area": "street" }
+    },
+    "cabinet": {
+      "type": "item", "label": "藥櫃", "title": "藥櫃",
+      "text": "你找到一支沾血的錄音筆與破碎資料夾，熟悉又陌生。",
+      "item": "recorder", "item_name": "錄音筆", "hide_on_done": true
+    },
+    "room": {
+      "type": "inspect", "label": "治療室", "title": "治療室",
+      "text": "小房間的牆上貼滿發音練習的圖卡：「蘋果」、「媽媽」、「回家」。桌上倒著一塊名牌——「語言治療師　楊尚瑜」。你曾經在這裡，教別人重新說話。",
+      "effects": { "memory": 1 }
+    },
+    "chair": {
+      "type": "inspect", "label": "診療椅", "title": "診療椅",
+      "text": "一張蒙塵的診療椅。你覺得自己曾經每天坐在它旁邊。",
+      "variants": [
+        {
+          "require": { "items": ["recorder"] },
+          "type": "choice", "label": "坐下", "title": "錄音筆", "once": true,
+          "text": "你在診療椅上坐下，掏出錄音筆，按下開關。一道稚嫩聲音傳來：「爸爸，你說話很奇怪耶……那天媽媽說你不一樣了。」你腦中刺痛，四肢痙攣，情緒洶湧。",
+          "choices": [
+            { "text": "反覆播放", "response": "你反覆聽著那聲音，回憶與痛苦交織。", "effects": { "memory": 1 } },
+            { "text": "呼喊名字", "response": "你顫抖地喊著自己的名字，某種情緒從心底炸裂，你的記憶微微顫動。", "effects": { "memory": 1 } },
+            { "text": "摔碎錄音筆", "response": "你將錄音筆摔碎，內心卻湧起更深的空洞。", "effects": { "humanity": -1 } }
+          ]
+        }
+      ]
+    },
+    "exit": {
+      "type": "exit", "label": "離開診所", "title": "離開診所",
+      "text": "你推開診所的後門，走進黃昏的街道。",
+      "to": { "scene": 6 }
+    }
+  }
+}
