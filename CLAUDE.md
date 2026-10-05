@@ -10,7 +10,7 @@
   - 每一級的規格、步驟、驗證方式、完成標準：`docs/Lv製作流程.md`
   - 作者貼給你的分步指令：`PROMPTS.md` 的「LvN 分步指令」（每一級開始時補上該級的指令）
 - **暫不支援手機**：Lv1 起可走動區域只做鍵盤操作，不要自行加觸控。按鍵衝突（`interact` 與 `ui_accept`）之後再處理。
-- **Lv1（停車場可走動）、Lv2（景深分層與光影）已完成（2026-10-02）；Lv3（Pixelorama MCP 畫主角）已完成（2026-10-05）**：32×48、放大 2 倍，左右各一套共 20 格（待機 4 fps、行走 8 fps），原始檔 `art/player.pxo`，遊戲用 `assets/sprites/player.png`＋`player_frames.tres`。經過與觀察見 `MCP實驗紀錄.md` 的「Lv3」。**劇本 v1.5 已定稿（2026-10-05）**：`docs/story_v1.5_outline.md`、`docs/story_v1.5_draft.md`，素材需求 `docs/asset_requests.md`。**Lv4（多區域、物品與旗標）已完成（2026-10-05）**：停車場（v1.5）→ 街道 → 診所，格式與步驟見 `docs/Lv製作流程.md` 的「Lv4」，經過見 `MCP實驗紀錄.md` 的「Lv4」。**下一步：Lv5（要等作者指示）**：其餘 4 個區域、數值的使用、衝動機制、Bad End、結局條件，並把其餘劇本寫入 JSON。
+- **Lv1（停車場可走動）、Lv2（景深分層與光影）已完成（2026-10-02）；Lv3（Pixelorama MCP 畫主角）已完成（2026-10-05）**：32×48、放大 2 倍，左右各一套共 20 格（待機 4 fps、行走 8 fps），原始檔 `art/player.pxo`，遊戲用 `assets/sprites/player.png`＋`player_frames.tres`。經過與觀察見 `MCP實驗紀錄.md` 的「Lv3」。**劇本 v1.5 已定稿（2026-10-05）**：`docs/story_v1.5_outline.md`、`docs/story_v1.5_draft.md`，素材需求 `docs/asset_requests.md`。**Lv4（多區域、物品與旗標）已完成（2026-10-05）**：停車場（v1.5）→ 街道 → 診所，格式與步驟見 `docs/Lv製作流程.md` 的「Lv4」，經過見 `MCP實驗紀錄.md` 的「Lv4」。**目前進行：Lv5（其餘區域、Bad End 與結局）**：2026-10-05 作者決定把原 Lv5 拆成 Lv5／Lv6（衝動機制、像素人物、平衡在 Lv6）。規格與格式擴充見 `docs/Lv製作流程.md` 的「Lv5」，分步指令在 `PROMPTS.md` 的「Lv5 分步指令」。
 - **一次只做一級**：沒有作者的指示，不要開始下一級，也不要提前做後面等級的功能。
 - MCP：**godot-mcp-toolkit**（Godot 編輯器）＋ **pixelorama**（像素繪圖，Lv3 起使用）。
   - pixelorama 註冊在 **user 範圍**（`~/Tools/pixelorama-mcp`），擴充功能用自己從原始碼打包的 `PixMcpBridge.zip`。安裝紀錄與排除問題見 `docs/Lv製作流程.md` 的 Lv3 與 `MCP實驗紀錄.md` 的「Lv3 準備」。
