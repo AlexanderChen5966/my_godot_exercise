@@ -62,7 +62,9 @@ docs/asset_requests.md      v1.5 素材需求與生成提示詞（作者準備�
 docs/story_v1.0.json        1.0 版劇本備份（不放 data/，避免被匯出）
 art/player.pxo         主角的 Pixelorama 原始檔（含 .gdignore，不匯出）
 assets/sprites/        主角 spritesheet 與 SpriteFrames
-data/areas/parking_lot.json  Lv1 停車場區域資料（文字以引用方式取自 story.json）
+data/areas/parking_lot.json  停車場區域資料（Lv4-3 起為 v1.5 格式，文字直接寫在資料裡）
+data/areas/street.json  街道區域資料（Lv4-4）
+scenes/areas/          可走動區域的場景：ParkingLot.tscn、Street.tscn（Street 由停車場另存後用 Toolkit 修改）
 MCP實驗紀錄.md           每一級的 MCP 實驗觀察
 ```
 

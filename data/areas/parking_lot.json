@@ -3,6 +3,7 @@
   "scene": "res://scenes/areas/ParkingLot.tscn",
   "replaces_scenes": [1, 2],
   "bgm": "bgm_01.ogg",
+  "spawns": { "default": 160, "street": 2150 },
   "intro": {
     "title": "停車場甦醒",
     "text": "你在昏暗的地下停車場醒來，手上有乾裂的血跡。記憶斷裂，視線模糊，耳中嗡嗡作響。遠處有人聲，你試圖發聲卻只能低吼。一張掉落的病歷卡上寫著你的名字——楊尚瑜。"
@@ -36,7 +37,7 @@
     "exit": {
       "type": "exit", "label": "離開停車場", "title": "離開停車場",
       "text": "你循著微弱的光，爬上通往地面的坡道。",
-      "to": { "scene": 3 }
+      "to": { "area": "street" }
     }
   }
 }

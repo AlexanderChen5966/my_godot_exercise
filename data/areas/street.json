@@ -1,0 +1,31 @@
+{
+  "id": "street",
+  "scene": "res://scenes/areas/Street.tscn",
+  "replaces_scenes": [3],
+  "bgm": "bgm_03.ogg",
+  "intro": {
+    "title": "斷裂街道",
+    "text": "你走上街道，前方是一段塌陷的道路。焦黑的車體與殘火靜靜燃燒，空氣中混合著焦味與寂靜。"
+  },
+  "spawns": { "default": 220, "parking_lot": 220 },
+  "points": {
+    "back": {
+      "type": "exit", "label": "回到停車場",
+      "to": { "area": "parking_lot" }
+    },
+    "car": {
+      "type": "inspect", "label": "燃燒的車體", "title": "燃燒的車體",
+      "text": "你停下腳步，凝視遠方燃燒的殘骸，心跳微微加速。"
+    },
+    "poster": {
+      "type": "inspect", "label": "尋人啟事", "title": "尋人啟事",
+      "text": "電線桿上貼著一張褪色的尋人啟事。照片裡的男人穿著白袍，笑得很溫和。名字被雨水暈開，只剩一個「楊」字。你盯著那張臉很久，才認出那是你自己。",
+      "effects": { "memory": 1 }
+    },
+    "exit": {
+      "type": "exit", "label": "走向診所", "title": "走向診所",
+      "text": "你踩著碎裂柏油前行，心中一股熟悉感逐漸浮現。前方，是一間爬滿藤蔓的診所。",
+      "to": { "scene": 4 }
+    }
+  }
+}
