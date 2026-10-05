@@ -376,7 +376,7 @@ Player
 - [x] 主角是像素角色，待機與行走動畫正確切換，左右兩個方向的動畫正確
 - [x] 像素清晰不模糊
 - [x] `MCP實驗紀錄.md` 新增「Lv3」一節：Pixelorama MCP 的穩定度、繪圖品質、兩個 MCP 的配合情況
-- [ ] 依結果決定：繼續用 Pixelorama，或購買 Aseprite 在 Lv4 比較
+- [x] 依結果決定：繼續用 Pixelorama，或購買 Aseprite 在 Lv4 比較（2026-10-05 作者決定：**繼續用 Pixelorama**）
 
 ---
 

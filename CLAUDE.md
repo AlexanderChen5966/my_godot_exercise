@@ -10,13 +10,13 @@
   - 每一級的規格、步驟、驗證方式、完成標準：`docs/Lv製作流程.md`
   - 作者貼給你的分步指令：`PROMPTS.md` 的「LvN 分步指令」（每一級開始時補上該級的指令）
 - **暫不支援手機**：Lv1 起可走動區域只做鍵盤操作，不要自行加觸控。按鍵衝突（`interact` 與 `ui_accept`）之後再處理。
-- **Lv1（停車場可走動）、Lv2（景深分層與光影）已完成（2026-10-02）；Lv3（Pixelorama MCP 畫主角）已完成（2026-10-05）**：32×48、放大 2 倍，左右各一套共 20 格（待機 4 fps、行走 8 fps），原始檔 `art/player.pxo`，遊戲用 `assets/sprites/player.png`＋`player_frames.tres`。經過與觀察見 `MCP實驗紀錄.md` 的「Lv3」。**下一步：劇本 v1.5（區域 × 事件格式），要等作者指示才開始。**
+- **Lv1（停車場可走動）、Lv2（景深分層與光影）已完成（2026-10-02）；Lv3（Pixelorama MCP 畫主角）已完成（2026-10-05）**：32×48、放大 2 倍，左右各一套共 20 格（待機 4 fps、行走 8 fps），原始檔 `art/player.pxo`，遊戲用 `assets/sprites/player.png`＋`player_frames.tres`。經過與觀察見 `MCP實驗紀錄.md` 的「Lv3」。**目前進行：劇本 v1.5（區域 × 事件格式，2026-10-05 開始）**。
 - **一次只做一級**：沒有作者的指示，不要開始下一級，也不要提前做後面等級的功能。
 - MCP：**godot-mcp-toolkit**（Godot 編輯器）＋ **pixelorama**（像素繪圖，Lv3 起使用）。
   - pixelorama 註冊在 **user 範圍**（`~/Tools/pixelorama-mcp`），擴充功能用自己從原始碼打包的 `PixMcpBridge.zip`。安裝紀錄與排除問題見 `docs/Lv製作流程.md` 的 Lv3 與 `MCP實驗紀錄.md` 的「Lv3 準備」。
   - 使用時要**同時開著 Godot 編輯器和 Pixelorama**；開始前先呼叫一次 `list_canvases` 確認連線（擴充功能也可用 `curl -s http://127.0.0.1:7373/health` 確認）。
   - Pixelorama 的擴充功能在 `127.0.0.1:7373` **沒有驗證機制**，不畫圖時請作者關掉 Pixelorama。
-- 劇本 **v1.5 暫停**，Lv3 完成後才會改寫成「區域 × 事件」格式；在那之前不要依 `docs/v1.5_劇本調整規劃.md` 實作任何東西。
+- 劇本 **v1.5 進行中**：流程見 `docs/Lv製作流程.md` 的「劇本 v1.5」（大綱 → 作者審 → 文字草稿 → 作者審 → 定稿寫入）。`docs/v1.5_劇本調整規劃.md` 的方向（Bad End、隱藏數值、改寫重複的場景 11～14）仍有效，但格式改成「區域 × 事件」。**程式的修改（Lv4、Lv5）要等劇本定稿、作者指示後才開始。**
 - 每一級完成時：在 `MCP實驗紀錄.md` 新增該級的一節，並更新 `docs/開發路線圖.md` 的「進度紀錄」。
 
 ## 目標
@@ -30,7 +30,7 @@
 - 渲染器固定 `gl_compatibility`（網頁需要），已在 `project.godot` 設好。
 - 基準解析度 1152×768（3:2，與背景圖相同），stretch 模式 `canvas_items` + `keep`。
 - 字型已在專案設定指定為 `res://assets/fonts/NotoSansTC-Regular.ttf`，不需要每個節點個別設定。
-- **不要修改 `data/story.json` 的文字內容**（劇本由作者負責）。可以讀、不可以改寫劇情。
+- **劇本規則（2026-10-05 作者同意修改）**：Claude 可以**起草**劇本（大綱、文字草稿，寫在 `docs/`），但必須經作者審核**定稿**後，才能寫入 `data/story.json` 與 `data/areas/*.json`。未經作者定稿，不可以改寫劇情。
 - 不要手動編輯 `.godot/` 資料夾。
 - 不要修改 `addons/godot_mcp_toolkit/`（第三方外掛），也不要手動改 `project.godot` 的 `[editor_plugins]`、`[autoload] MCPRuntimeServer`（外掛自己管理）。
 - 子資料夾裡**不可以有 `project.godot`**（例如 `scripts/project.godot`），否則 Godot 會把整個資料夾當成別的專案而略過，導致 `class_name` 找不到。
@@ -53,7 +53,7 @@ scripts/story_data.gd  劇本讀取（class_name StoryData）
 scripts/main.gd        主畫面邏輯
 docs/開發路線圖.md       原規劃（階段 1～4）與新路線（Lv1～5）、決策、進度紀錄
 docs/Lv製作流程.md       Lv1～5 的規格、步驟、驗證與完成標準
-docs/v1.5_劇本調整規劃.md  劇本 1.5 原規劃（暫停中）
+docs/v1.5_劇本調整規劃.md  劇本 1.5 原規劃（視覺小說格式；方向仍有效，格式改成區域 × 事件）
 data/areas/parking_lot.json  Lv1 停車場區域資料（文字以引用方式取自 story.json）
 MCP實驗紀錄.md           每一級的 MCP 實驗觀察
 ```
@@ -194,12 +194,11 @@ Main (Control, full rect)
 
 ## 劇本之後可能再調整（附註）
 
-> 下一版 **1.5** 的劇本調整規劃（分歧、快速結局、隱藏數值）見 `docs/v1.5_劇本調整規劃.md`，目前**暫停**：
-> 等 Lv3 完成後，會改寫成可移動版的「區域 × 事件」格式再開始（見 `docs/Lv製作流程.md` 的「劇本 v1.5」一節）。實作前仍以本檔的規則為準。
+> 下一版 **1.5** 的劇本調整規劃（分歧、快速結局、隱藏數值）見 `docs/v1.5_劇本調整規劃.md`，2026-10-05 起改寫成可移動版的「區域 × 事件」格式（見 `docs/Lv製作流程.md` 的「劇本 v1.5」一節）。實作前仍以本檔的規則為準。
 >
 > Lv1 起，區域資料（`data/areas/*.json`）以 `from` **引用** `story.json` 的文字，不複製。修改 `story.json` 時，若刪除或調換了被引用的場景或選項順序，區域文字也會跟著變，請一併檢查（劇本檢查工具會在 Lv1 擴充這項檢查）。
 
-劇本（`data/story.json`）之後會由作者修改，例如處理下面的重複劇情。程式是完全依資料運作的，調整劇本時請注意：
+劇本（`data/story.json`）之後會依 v1.5 定稿修改，例如處理下面的重複劇情。程式是完全依資料運作的，調整劇本時請注意：
 
 - **程式不需要跟著改**的情況：修改文字、標題、hint、選項文字／response、增減場景或選項、改 `next_id`、改背景／BGM 檔名、改 `title_screen`、改 `start_id`。
 - 結局判斷只看 `is_ending: true`；結局的選項不論 `next_id` 是多少，都會回到**標題畫面**。
@@ -207,7 +206,7 @@ Main (Control, full rect)
 - 主文字很長時（超過約 3～4 行），對話框（畫面高度 35%）會不夠放，Body 會出現捲動；需要時再調整版面或字級。
 - 新增素材放進 `assets/bg/`、`assets/bgm/`；新的 ogg BGM 會自動循環。**新增音效時要把該檔的匯入設定改成不循環**（專案預設 ogg 都循環，click.ogg 已處理）。
 - 改完一定要跑劇本檢查（`tools/validate_story.gd`，注意上面「headless 會覆蓋 runtime 登錄」的說明），再重新匯出 Web 版。
-- Claude 仍然**不可以自行改寫劇情**；作者提供新版劇本後，只負責檢查格式、跑驗證與測試。
+- Claude 可以起草，但**未經作者定稿不可以寫入**；寫入後負責檢查格式、跑驗證與測試。
 
 ## 已知劇本問題（階段 1 不處理，僅供參考）
 
