@@ -47,8 +47,34 @@ func apply_effects(effects: Dictionary, source: String) -> bool:
 	return true
 
 
-## 條件：{ items: [...], flags: [...], not_flags: [...] }，全部符合才回傳 true；空條件一律符合。
+## 數值門檻：{ "memory": 6, "humanity": 3 }，每一項都要大於或等於才回傳 true。
+func meets(minimums: Dictionary) -> bool:
+	for key in minimums:
+		if int(stats.get(key, 0)) < int(minimums[key]):
+			return false
+	return true
+
+
+## 檢查點用：完整複製目前的狀態（Bad End 的「從這裡重試」會還原成這一份）。
+func snapshot() -> Dictionary:
+	return {
+		"flags": flags.duplicate(true), "items": items.duplicate(true), "stats": stats.duplicate(true),
+		"seen_intros": seen_intros.duplicate(true), "applied": _applied.duplicate(true),
+	}
+
+
+func restore(snap: Dictionary) -> void:
+	flags = snap.get("flags", {}).duplicate(true)
+	items = snap.get("items", {}).duplicate(true)
+	stats = snap.get("stats", {}).duplicate(true)
+	seen_intros = snap.get("seen_intros", {}).duplicate(true)
+	_applied = snap.get("applied", {}).duplicate(true)
+
+
+## 條件：{ items: [...], flags: [...], not_flags: [...], stats: {數值: 最低值} }，全部符合才回傳 true；空條件一律符合。
 func check(require: Dictionary) -> bool:
+	if not meets(require.get("stats", {})):
+		return false
 	for item in require.get("items", []):
 		if not has_item(item):
 			return false

@@ -1,7 +1,6 @@
 {
   "id": "clinic",
   "scene": "res://scenes/areas/Clinic.tscn",
-  "replaces_scenes": [4, 5],
   "bgm": "bgm_04.ogg",
   "intro": {
     "title": "廢棄診所",

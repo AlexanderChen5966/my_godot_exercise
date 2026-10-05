@@ -96,7 +96,8 @@ Lv1 之後會新增（依 `docs/Lv製作流程.md`）：`scenes/areas/`、`scrip
 }
 ```
 
-- 共 20 個場景、3 個結局（id 18、19、20，`is_ending: true`）。
+- **v1.5（Lv5-1 起）**：`story.json` 只留過場與結局：6 搜捕隊、7 手術台、15 營火、18～20 結局 A／B／C、21～23 Bad End（`ending_type: bad`）；場景 17「最後的動作」是暫時的，Lv5-5 做好牆前後移除。開始遊戲進入 `start_area`（停車場）。新欄位（`effects`、`require`、`locked_text`、`next_area`、`action`、`ending_label`）見 `docs/Lv製作流程.md` 的 Lv5。1.0 版備份在 `docs/story_v1.0.json`。
+- 以下是 1.0 的說明（格式相容，舊欄位都還能用）：共 20 個場景、3 個結局（id 18、19、20，`is_ending: true`）。
 - 結局場景只有一個選項「重新開始」，`next_id` 為 1。
 - 有些選項的 `next_id` 等於自己的場景 id（例如「停留不動」），代表留在原場景：顯示回應後重新顯示同一場景的選項即可。
   回到同一場景時，**已選過的選項以半透明顯示**（仍可點），換到新場景時重置，讓玩家知道哪些選過了（場景 4 有 3 個留在原地的選項）。

@@ -10,6 +10,9 @@ const CHARS_PER_SECOND := 30.0
 const SILENT_CHARS := " \n，。、！？：；「」『』（）…—,.!?:;\"'()-"  # 打到這些字元時不出打字聲
 const FADE_HALF_TIME := 0.2  # 淡出 + 淡入共約 0.4 秒
 const BGM_FADE_TIME := 0.8
+const LOCKED_TEXT := "……（你想不起來）"   # 數值不夠時，選項顯示的文字
+const ENDING_LABEL := "— 結局 —"
+const BAD_ENDING_COLOR := Color(0.85, 0.35, 0.3)
 
 # 節點都設為 unique name（%Name），之後搬動節點層級時不用改這裡。
 @onready var background: TextureRect = %Background
@@ -40,6 +43,10 @@ var _nearby_point := ""      # 玩家目前所在範圍內、可按互動鍵的�
 var _closing_point := ""     # 目前顯示的區域文字屬於哪個互動點（開場文字為空字串）
 var _closing_view: Dictionary = {}  # 打開時套用 variants 後的互動點內容（關閉時用同一份，不受途中狀態改變影響）
 var _area_choosing := false  # 目前的選項屬於區域的 choice 互動點（不是視覺小說的選項）
+var _area_choice: Dictionary = {}     # 區域裡選了哪個選項（有 to 時，關閉文字後前往）
+var _pending_choice: Dictionary = {}  # 視覺小說裡選了哪個選項（回應讀完後決定去處）
+var _checkpoint: Dictionary = {}      # Bad End「從這裡重試」回到的位置與狀態
+var _debug_label: Label               # F3 數值顯示（只在 debug 版建立）
 var current_id: int = -1
 var state: State = State.TITLE
 var _pending_next_id: int = -1
@@ -68,6 +75,8 @@ func _ready() -> void:
 	if not story.load_story():
 		return
 	areas.load_areas()
+	if OS.is_debug_build():
+		_create_debug_label()
 	show_title()
 
 
@@ -105,6 +114,10 @@ func _setup_style() -> void:
 		sb.content_margin_bottom = 10
 		_button_styles[style_name] = sb
 	_button_styles["focus"] = _button_styles["hover"]
+	var disabled: StyleBoxFlat = _button_styles["normal"].duplicate()
+	disabled.bg_color = Color(0.05, 0.05, 0.06, 0.55)
+	disabled.border_color = Color(1.0, 0.86, 0.6, 0.15)
+	_button_styles["disabled"] = disabled
 
 
 func show_title() -> void:
@@ -153,7 +166,11 @@ func _start_game() -> void:
 		_clear_choices()
 		hint.visible = false
 		continue_label.visible = false
-		show_scene(story.start_id, false)
+		_checkpoint = {}
+		if not story.start_area.is_empty():
+			enter_area(story.start_area, -1, false)  # v1.5：直接從停車場開始
+		else:
+			show_scene(story.start_id, false)
 	)
 
 
@@ -195,6 +212,7 @@ func _free_area() -> void:
 ## from_area：從另一個區域走過來時的來源區域（決定出現位置）。
 func enter_area(area_id: String, scene_id: int, fade_out := true, from_area := "") -> void:
 	var area := areas.get_area(area_id)
+	_save_checkpoint({ "area": area_id, "from": from_area })  # 進入區域時的狀態（開場還沒看過）
 	current_id = scene_id
 	state = State.TRANSITION
 	if area.has("bgm"):
@@ -324,12 +342,15 @@ func _show_area_choices(choices: Array) -> void:
 	_area_choosing = true
 	_chosen_in_scene.clear()
 	_build_choices(choices)
-	if choices_box.get_child_count() > 0:
-		(choices_box.get_child(0) as Button).grab_focus()
+	for button in choices_box.get_children():
+		if not (button as Button).disabled:
+			(button as Button).grab_focus()
+			break
 
 
 func _on_area_choice_pressed(choice: Dictionary) -> void:
 	_area_choosing = false
+	_area_choice = choice
 	sfx.play()
 	_clear_choices()
 	GameState.apply_effects(choice.get("effects", {}), AreaData.done_key(_point_key(_closing_point), _closing_view))
@@ -355,6 +376,11 @@ func _close_area_text() -> void:
 		GameState.set_flag(flag)
 	if _hides_when_done(point):
 		_area.consume_point(point_id)  # 例如婦人逃走後消失
+	var chosen := _area_choice
+	_area_choice = {}
+	if chosen.has("to"):
+		_go_to(chosen["to"])  # 例如警衛逼近時選「停下不動」→ Bad End
+		return
 	if point.get("type") == "exit":
 		_go_through_exit(point)
 		return
@@ -382,7 +408,11 @@ func _hides_when_done(point: Dictionary) -> bool:
 
 ## 出口：通往另一個區域（to.area），或接回視覺小說（to.scene／Lv1 的 exit_to）。
 func _go_through_exit(point: Dictionary) -> void:
-	var target := AreaData.exit_target(areas.get_area(_area_id), point)
+	_go_to(AreaData.exit_target(areas.get_area(_area_id), point))
+
+
+## 從區域前往 { "area": id }（另一個區域）或 { "scene": id }（視覺小說／Bad End）。
+func _go_to(target: Dictionary) -> void:
 	if target.has("area"):
 		_switch_area(target["area"])
 	elif target.has("scene"):
@@ -441,6 +471,8 @@ func show_scene(id: int, fade_out := true) -> void:
 
 	current_id = id
 	_chosen_in_scene.clear()
+	if not scene.get("is_ending", false):
+		_save_checkpoint({ "scene": id })
 	state = State.TRANSITION
 	play_bgm(scene["bgm"])
 	var tween := create_tween()
@@ -452,6 +484,9 @@ func show_scene(id: int, fade_out := true) -> void:
 		background.texture = load(StoryData.bg_path(scene["bg"]))
 		scene_title.text = scene["title"]
 		ending_tag.visible = scene.get("is_ending", false)
+		ending_tag.text = scene.get("ending_label", ENDING_LABEL)
+		var bad: bool = scene.get("ending_type", "normal") == "bad"
+		ending_tag.add_theme_color_override("font_color", BAD_ENDING_COLOR if bad else Color(1, 1, 1))
 		body.text = ""
 	)
 	tween.tween_property(fade, "color:a", 0.0, FADE_HALF_TIME)
@@ -487,6 +522,12 @@ func _build_choices(choices: Array) -> void:
 			button.add_theme_stylebox_override(style_name, _button_styles[style_name])
 		if _chosen_in_scene.has(i):
 			button.modulate = CHOSEN_MODULATE
+		if choice.has("require") and not GameState.meets(choice["require"]):
+			# 數值不夠：顯示灰色「……（你想不起來）」，不能選
+			button.text = choice.get("locked_text", LOCKED_TEXT)
+			button.disabled = true
+			button.add_theme_stylebox_override("disabled", _button_styles["disabled"])
+			button.add_theme_color_override("font_disabled_color", Color(0.55, 0.55, 0.55))
 		button.pressed.connect(_on_choice_pressed.bind(i, choice))
 		choices_box.add_child(button)
 
@@ -554,13 +595,78 @@ func _on_choice_pressed(index: int, choice: Dictionary) -> void:
 	sfx.play()
 	_clear_choices()
 	hint.visible = false
-	_pending_next_id = int(choice["next_id"])
+	_pending_choice = choice
+	_pending_next_id = int(choice.get("next_id", -1))
+	GameState.apply_effects(choice.get("effects", {}), "scene.%d" % current_id)  # 同一個場景一輪只算一次
+	if str(choice.get("response", "")).is_empty():
+		_resolve_choice()  # 沒有回應文字（例如 Bad End 的「從這裡重試」）時直接前往
+		return
 	_type_text(choice["response"], _show_continue)
+
+
+## 視覺小說的選項讀完回應後的去處：action（retry／title）> next_area > 結局回標題 > next_id。
+func _resolve_choice() -> void:
+	var choice := _pending_choice
+	_pending_choice = {}
+	continue_label.visible = false
+	match choice.get("action", ""):
+		"retry":
+			_retry()
+		"title":
+			_return_to_title()
+		_:
+			if choice.has("next_area"):
+				enter_area(choice["next_area"], -1, true)
+			elif story.get_scene(current_id).get("is_ending", false):
+				_return_to_title()  # 1.0 格式的結局：選「重新開始」回到標題畫面
+			else:
+				# next_id 等於目前場景時（例如「停留不動」）會重新顯示同一場景的選項。
+				show_scene(_pending_next_id)
+
+
+## 檢查點：進入區域或非結局的過場時存一份（位置＋完整狀態），Bad End 重試時還原。
+func _save_checkpoint(place: Dictionary) -> void:
+	_checkpoint = place.duplicate()
+	_checkpoint["state"] = GameState.snapshot()
+
+
+func _retry() -> void:
+	if _checkpoint.is_empty():
+		_return_to_title()
+		return
+	GameState.restore(_checkpoint["state"])
+	current_id = -1
+	if _checkpoint.has("area"):
+		enter_area(_checkpoint["area"], -1, true, _checkpoint.get("from", ""))
+	else:
+		show_scene(int(_checkpoint["scene"]))
 
 
 func _show_continue() -> void:
 	state = State.RESPONSE
 	continue_label.visible = true
+
+
+## 除錯用：F3 顯示目前的數值（只在 debug 版建立，Web 正式版不會出現）。
+func _create_debug_label() -> void:
+	_debug_label = Label.new()
+	_debug_label.name = "DebugStats"
+	_debug_label.position = Vector2(16, 12)
+	_debug_label.add_theme_font_size_override("font_size", 18)
+	_debug_label.add_theme_color_override("font_color", Color(0.6, 1.0, 0.6))
+	_debug_label.add_theme_color_override("font_outline_color", Color.BLACK)
+	_debug_label.add_theme_constant_override("outline_size", 4)
+	_debug_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_debug_label.visible = false
+	add_child(_debug_label)
+
+
+func _process(_delta: float) -> void:
+	if _debug_label and _debug_label.visible:
+		var parts: Array[String] = []
+		for key in GameState.stats:
+			parts.append("%s %d" % [{ "memory": "記憶", "humanity": "人性" }.get(key, key), GameState.stats[key]])
+		_debug_label.text = "【F3】" + "　".join(parts) + ("　物品：" + "、".join(GameState.items.keys()) if not GameState.items.is_empty() else "")
 
 
 ## 除錯用：回傳目前 FPS（給 MCP 的 execute_code 讀取；execute_code 不能直接存取 Engine）。正式版回傳 -1。
@@ -578,6 +684,11 @@ func update_rotate_hint(window_size: Vector2i) -> void:
 
 
 func _input(event: InputEvent) -> void:
+	var key := event as InputEventKey
+	if _debug_label and key and key.pressed and not key.echo and key.keycode == KEY_F3:
+		_debug_label.visible = not _debug_label.visible
+		get_viewport().set_input_as_handled()
+		return
 	if rotate_hint.visible:
 		get_viewport().set_input_as_handled()
 		return
@@ -608,11 +719,8 @@ func _input(event: InputEvent) -> void:
 		_start_game()
 	elif state == State.TYPING:
 		_finish_typing()  # 打字中點擊：直接顯示全部
-	elif story.get_scene(current_id).get("is_ending", false):
-		_return_to_title()  # 結局選「重新開始」回到標題畫面，而不是直接回場景 1
 	else:
-		# next_id 等於目前場景時（例如「停留不動」）會重新顯示同一場景的選項。
-		show_scene(_pending_next_id)
+		_resolve_choice()
 
 
 func _return_to_title() -> void:

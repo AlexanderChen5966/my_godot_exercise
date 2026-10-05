@@ -182,7 +182,7 @@ func validate(story: StoryData, warnings: Array[String] = []) -> Array[String]:
 	for key in stat_keys:
 		if not story.stats.has(key):
 			errors.append("%s 的 effects 用到 %s，但 story.json 的 stats 沒有定義" % [stat_keys[key], key])
-	errors.append_array(_validate_reachable())
+	errors.append_array(_validate_reachable(story))
 	return errors
 
 
@@ -219,6 +219,11 @@ func _validate_shape(story: StoryData, area: Dictionary, shape: Dictionary, ptag
 		for choice in choices:
 			if str(choice.get("text", "")).is_empty() or str(choice.get("response", "")).is_empty():
 				errors.append("%s 的選項缺少 text 或 response：%s" % [ptag, choice])
+			if choice.has("to"):
+				errors.append_array(_validate_target(story, choice["to"], "%s 的選項「%s」" % [ptag, choice.get("text", "")]))
+			for key in choice.get("require", {}):
+				if not story.stats.has(key):
+					errors.append("%s 的選項 require 用到 %s，但 story.json 的 stats 沒有定義" % [ptag, key])
 	return errors
 
 
@@ -235,13 +240,21 @@ func _validate_target(story: StoryData, target: Dictionary, ptag: String) -> Arr
 	return errors
 
 
-## 從視覺小說接管的區域（replaces_scenes）出發，沿著出口的 to.area，每個區域都要走得到。
-func _validate_reachable() -> Array[String]:
+## 從入口出發（story.json 的 start_area、視覺小說選項的 next_area、被接管的場景），
+## 沿著出口與選項的 to.area，每個區域都要走得到。
+func _validate_reachable(story: StoryData) -> Array[String]:
 	var errors: Array[String] = []
 	var queue: Array = []
 	var seen := {}
+	var entries: Array = [story.start_area]
+	for scene_id in story.scene_ids():
+		for choice in story.get_scene(scene_id).get("choices", []):
+			entries.append(choice.get("next_area", ""))
 	for area_id in _areas:
 		if not _areas[area_id].get("replaces_scenes", []).is_empty():
+			entries.append(area_id)
+	for area_id in entries:
+		if _areas.has(area_id) and not seen.has(area_id):
 			queue.append(area_id)
 			seen[area_id] = true
 	while not queue.is_empty():
@@ -249,13 +262,17 @@ func _validate_reachable() -> Array[String]:
 		for point_id in area.get("points", {}):
 			var point: Dictionary = area["points"][point_id]
 			for shape in [point] + point.get("variants", []):
-				var next_id = shape.get("to", {}).get("area", "")
-				if _areas.has(next_id) and not seen.has(next_id):
-					seen[next_id] = true
-					queue.append(next_id)
+				var targets: Array = [shape.get("to", {})]
+				for choice in shape.get("choices", []):
+					targets.append(choice.get("to", {}))
+				for target in targets:
+					var next_id = target.get("area", "")
+					if _areas.has(next_id) and not seen.has(next_id):
+						seen[next_id] = true
+						queue.append(next_id)
 	for area_id in _areas:
 		if not seen.has(area_id):
-			errors.append("區域 %s 走不到（沒有被視覺小說接管，也沒有出口通往它）" % area_id)
+			errors.append("區域 %s 走不到（不是 start_area、沒有視覺小說進入它，也沒有出口通往它）" % area_id)
 	return errors
 
 

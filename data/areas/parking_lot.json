@@ -1,7 +1,6 @@
 {
   "id": "parking_lot",
   "scene": "res://scenes/areas/ParkingLot.tscn",
-  "replaces_scenes": [1, 2],
   "bgm": "bgm_01.ogg",
   "spawns": { "default": 160, "street": 2150 },
   "intro": {

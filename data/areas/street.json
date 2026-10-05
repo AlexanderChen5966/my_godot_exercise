@@ -1,7 +1,6 @@
 {
   "id": "street",
   "scene": "res://scenes/areas/Street.tscn",
-  "replaces_scenes": [3],
   "bgm": "bgm_03.ogg",
   "intro": {
     "title": "斷裂街道",
