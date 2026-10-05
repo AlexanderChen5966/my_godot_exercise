@@ -4,6 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://7wiab8lqf2o8" path="res://assets/bg/scene_04.webp" id="2_or88c"]
 [ext_resource type="Script" uid="uid://dkcse5tmlbfke" path="res://scripts/player.gd" id="3_4wa2n"]
 [ext_resource type="SpriteFrames" uid="uid://b872yo2d63qvl" path="res://assets/sprites/player_frames.tres" id="4_1g32l"]
+[ext_resource type="Texture2D" uid="uid://bdyn2s3mi2jff" path="res://assets/sprites/props/cabinet.png" id="4_2bfil"]
 [ext_resource type="Texture2D" uid="uid://bwwjgv6vnyfk1" path="res://assets/sprites/props/recorder.png" id="4_lmpgy"]
 [ext_resource type="Texture2D" uid="uid://bclnbtearke1q" path="res://assets/sprites/props/cards.png" id="5_2bfil"]
 [ext_resource type="Script" uid="uid://u5x8mgenl5y4" path="res://scripts/interact_point.gd" id="5_lmpgy"]
@@ -102,12 +103,11 @@ point_id = "cabinet"
 position = Vector2(0, -96)
 shape = SubResource("RectangleShape2D_8ukss")
 
-[node name="Marker" type="ColorRect" parent="Points/Cabinet" unique_id=1766618398]
-offset_left = -50.0
-offset_top = -120.0
-offset_right = 50.0
-mouse_filter = 2
-color = Color(0.25, 0.22, 0.18, 1)
+[node name="Prop" type="Sprite2D" parent="Points/Cabinet" unique_id=928366721]
+texture_filter = 1
+position = Vector2(0, -60)
+scale = Vector2(2, 2)
+texture = ExtResource("4_2bfil")
 
 [node name="Figure" type="Sprite2D" parent="Points/Cabinet" unique_id=1473533842]
 texture_filter = 1
@@ -126,7 +126,7 @@ shape = SubResource("RectangleShape2D_2mgj5")
 
 [node name="Prop" type="Sprite2D" parent="Points/Room" unique_id=2077540633]
 texture_filter = 1
-position = Vector2(0, -230)
+position = Vector2(0, -165)
 scale = Vector2(2, 2)
 texture = ExtResource("5_2bfil")
 
