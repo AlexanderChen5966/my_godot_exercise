@@ -10,13 +10,13 @@
   - 每一級的規格、步驟、驗證方式、完成標準：`docs/Lv製作流程.md`
   - 作者貼給你的分步指令：`PROMPTS.md` 的「LvN 分步指令」（每一級開始時補上該級的指令）
 - **暫不支援手機**：Lv1 起可走動區域只做鍵盤操作，不要自行加觸控。按鍵衝突（`interact` 與 `ui_accept`）之後再處理。
-- **Lv1（停車場可走動）、Lv2（景深分層與光影）已完成（2026-10-02）；Lv3（Pixelorama MCP 畫主角）已完成（2026-10-05）**：32×48、放大 2 倍，左右各一套共 20 格（待機 4 fps、行走 8 fps），原始檔 `art/player.pxo`，遊戲用 `assets/sprites/player.png`＋`player_frames.tres`。經過與觀察見 `MCP實驗紀錄.md` 的「Lv3」。**目前進行：劇本 v1.5（區域 × 事件格式，2026-10-05 開始）**。
+- **Lv1（停車場可走動）、Lv2（景深分層與光影）已完成（2026-10-02）；Lv3（Pixelorama MCP 畫主角）已完成（2026-10-05）**：32×48、放大 2 倍，左右各一套共 20 格（待機 4 fps、行走 8 fps），原始檔 `art/player.pxo`，遊戲用 `assets/sprites/player.png`＋`player_frames.tres`。經過與觀察見 `MCP實驗紀錄.md` 的「Lv3」。**劇本 v1.5 已定稿（2026-10-05）**：`docs/story_v1.5_outline.md`、`docs/story_v1.5_draft.md`，素材需求 `docs/asset_requests.md`。**下一步：Lv4（要等作者指示）**，劇本跟著 Lv4、Lv5 分批寫入 JSON。
 - **一次只做一級**：沒有作者的指示，不要開始下一級，也不要提前做後面等級的功能。
 - MCP：**godot-mcp-toolkit**（Godot 編輯器）＋ **pixelorama**（像素繪圖，Lv3 起使用）。
   - pixelorama 註冊在 **user 範圍**（`~/Tools/pixelorama-mcp`），擴充功能用自己從原始碼打包的 `PixMcpBridge.zip`。安裝紀錄與排除問題見 `docs/Lv製作流程.md` 的 Lv3 與 `MCP實驗紀錄.md` 的「Lv3 準備」。
   - 使用時要**同時開著 Godot 編輯器和 Pixelorama**；開始前先呼叫一次 `list_canvases` 確認連線（擴充功能也可用 `curl -s http://127.0.0.1:7373/health` 確認）。
   - Pixelorama 的擴充功能在 `127.0.0.1:7373` **沒有驗證機制**，不畫圖時請作者關掉 Pixelorama。
-- 劇本 **v1.5 進行中**：流程見 `docs/Lv製作流程.md` 的「劇本 v1.5」（大綱 → 作者審 → 文字草稿 → 作者審 → 定稿寫入）。`docs/v1.5_劇本調整規劃.md` 的方向（Bad End、隱藏數值、改寫重複的場景 11～14）仍有效，但格式改成「區域 × 事件」。**程式的修改（Lv4、Lv5）要等劇本定稿、作者指示後才開始。**
+- 劇本 **v1.5 已定稿**：Lv4 寫入停車場、街道、診所的資料，Lv5 寫入其餘部分（作者決定分批，讓遊戲每一步都能玩）。1.0 版劇本備份在 `docs/story_v1.0.json`。`docs/v1.5_劇本調整規劃.md` 是原規劃，內容以新大綱與草稿為準。
 - 每一級完成時：在 `MCP實驗紀錄.md` 新增該級的一節，並更新 `docs/開發路線圖.md` 的「進度紀錄」。
 
 ## 目標
@@ -54,6 +54,12 @@ scripts/main.gd        主畫面邏輯
 docs/開發路線圖.md       原規劃（階段 1～4）與新路線（Lv1～5）、決策、進度紀錄
 docs/Lv製作流程.md       Lv1～5 的規格、步驟、驗證與完成標準
 docs/v1.5_劇本調整規劃.md  劇本 1.5 原規劃（視覺小說格式；方向仍有效，格式改成區域 × 事件）
+docs/story_v1.5_outline.md  劇本 v1.5 大綱（定稿：區域、事件、數值、Bad End）
+docs/story_v1.5_draft.md    劇本 v1.5 完整文字（定稿，標示原文／改／新）
+docs/asset_requests.md      v1.5 素材需求與生成提示詞（作者準備背景、BGM、音效）
+docs/story_v1.0.json        1.0 版劇本備份（不放 data/，避免被匯出）
+art/player.pxo         主角的 Pixelorama 原始檔（含 .gdignore，不匯出）
+assets/sprites/        主角 spritesheet 與 SpriteFrames
 data/areas/parking_lot.json  Lv1 停車場區域資料（文字以引用方式取自 story.json）
 MCP實驗紀錄.md           每一級的 MCP 實驗觀察
 ```

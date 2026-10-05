@@ -395,6 +395,7 @@ Player
    → **停：作者審大綱**
 2. Claude 寫 `docs/story_v1.5_draft.md`：完整文字草稿。→ **停：作者審文字**
 3. 定稿後寫入 `data/story.json` 與 `data/areas/*.json`；舊版備份到 `docs/story_v1.0.json`。
+   **2026-10-05 作者決定：跟著 Lv4、Lv5 分批寫入**（新劇本用到的物品、數值、區域切換要等程式支援；JSON 格式和程式一起設計，遊戲每一步都能玩）。Lv4 寫入停車場、街道、診所，Lv5 寫入其餘部分。
 4. 同時寫 `docs/asset_requests.md`：新背景、BGM、音效、像素素材的需求與生成提示詞。
 
 > 開始前要先修改 `CLAUDE.md` 的劇本規則：從「Claude 不可改寫劇情」改成「Claude 可以起草，經作者審核定稿後才能寫入」。
