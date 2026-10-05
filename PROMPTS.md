@@ -289,12 +289,21 @@ Backdrop 搬進 FarLayer，中景與前景用暗色柱子剪影。在起點、�
 
 ---
 
+### Lv3-4b：面向左的一套
+
+```
+以面向右的 10 格為基礎，畫出面向左的待機 4 格與行走 6 格（不是單純鏡像：靠近鏡頭的是乾淨的左手，
+有血跡的右手只露出一點；光源維持在左上）。截圖或匯出 GIF 給我看。
+```
+
+---
+
 ### Lv3-5：放進遊戲
 
 ```
 匯出 spritesheet 到 assets/sprites/player.png，用 godot-mcp-toolkit 在 Player 底下建立 AnimatedSprite2D
-（Nearest、放大 2 倍、腳底對齊），建立 idle／walk 動畫，修改 player.gd（移動播 walk、停下播 idle、向左 flip_h），
-隱藏原本的色塊。art/* 加進 Web 匯出的 exclude_filter。
+（Nearest、放大 2 倍、腳底對齊），建立 idle_right／walk_right／idle_left／walk_left 四個動畫，修改 player.gd（依移動與面向播放對應動畫），
+隱藏原本的色塊、移除暫時的 PreviewSprite。art/* 加進 Web 匯出的 exclude_filter。
 ```
 
 ---

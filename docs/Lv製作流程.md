@@ -329,7 +329,8 @@ Player
 | 造型 | **感染者特徵明顯**（2026-10-05 作者決定）：灰青膚色、破損的深色外套、駝背前傾、手上有暗紅血跡（呼應劇本開場「手上有乾裂的血跡」），一眼看出是靜語者 |
 | 調色盤 | 約 12～16 色，偏灰綠、褐色的低飽和色調，配合背景插畫；血跡是唯一的暗紅點綴 |
 | 動畫 | 待機 4 格（輕微搖晃、喘息）、行走 6 格（**拖著腳、步履蹣跚**） |
-| 方向 | 只畫面向右，向左時在 Godot 水平翻轉 |
+| 方向 | **左右各畫一套，共 20 格**（2026-10-05 作者決定，不用水平鏡像）。面向右時看到的是主角的**右側**，靠近鏡頭的是有血跡的右手；面向左時看到**左側**，靠近鏡頭的是左手（乾淨），有血跡的右手在身體另一側、只露出一點。光源固定在左上，不跟著翻轉 |
+| 畫格配置 | 同一個畫布：0～3 `idle_right`、4～9 `walk_right`、10～13 `idle_left`、14～19 `walk_left`（用 `add_animation_tag` 標記） |
 | 輸出 | spritesheet 到 `assets/sprites/player.png`；原始檔 `.pxo` 存到 `art/player.pxo`（`art/` 加進 Web 匯出的 `exclude_filter`） |
 
 ### 繪圖方式（依 pixelorama-mcp 的 `AGENTIC_DRAWING_PLAYBOOK.md`）
@@ -353,9 +354,10 @@ Player
 | 步驟 | 內容 | 停止點 |
 |---|---|---|
 | Lv3-2 | 建立 32×48 畫布與調色盤，畫**待機第一格**；`capture_canvas_image` 自我檢查；另外把它放進遊戲裡截一張（放大 2 倍、在停車場的燈光下）給作者看 | **作者確認造型、比例、配色** |
-| Lv3-3 | 待機 4 格（輕微搖晃、喘息） | **作者確認動態** |
-| Lv3-4 | 行走 6 格（**拖著腳、步履蹣跚**） | **作者確認動態** |
-| Lv3-5 | 匯出 `assets/sprites/player.png`；Godot：`Player` 底下新增 `AnimatedSprite2D`（`texture_filter = Nearest`、放大 2 倍、腳底對齊 y=0），用 Toolkit 建立 `idle`／`walk`；隱藏原本的色塊 `Body`；`player.gd` 移動時播 `walk`、停下播 `idle`、向左時 `flip_h`；`art/*` 加進 Web 匯出的 `exclude_filter` | — |
+| Lv3-3 | 面向右的待機 4 格（輕微搖晃、喘息） | **作者確認動態** |
+| Lv3-4 | 面向右的行走 6 格（**拖著腳、步履蹣跚**） | **作者確認動態** |
+| Lv3-4b | 面向左的待機 4 格＋行走 6 格（以右向為基礎鏡像後，修正血跡在哪隻手、光源方向等不對稱的細節） | **作者確認** |
+| Lv3-5 | 匯出 `assets/sprites/player.png`；Godot：`Player` 底下新增 `AnimatedSprite2D`（`texture_filter = Nearest`、放大 2 倍、腳底對齊 y=0），用 Toolkit 建立 `idle_right`／`walk_right`／`idle_left`／`walk_left`；隱藏原本的色塊 `Body`、移除 Lv3-2 的暫時 `PreviewSprite`；`player.gd` 依「是否移動 × 面向」播放對應動畫（**不用 `flip_h`**）；`art/*` 加進 Web 匯出的 `exclude_filter` | — |
 | Lv3-6 | MCP 驗證 → 作者試玩 → Web 匯出 → 紀錄 | 作者確認 |
 
 ### 要注意
@@ -366,12 +368,12 @@ Player
 
 ### 驗證
 
-- Claude：Pixelorama 端用 `capture_canvas_image`／`get_canvas_snapshot` 檢查畫面；Godot 端截圖確認角色清晰；用 `runtime_get_node_state` 讀 `AnimatedSprite2D` 的 `animation`（移動中是 `walk`、停下是 `idle`）與 `flip_h`（向左時為 true）。
+- Claude：Pixelorama 端用 `capture_canvas_image`／`get_canvas_snapshot` 檢查畫面；Godot 端截圖確認角色清晰；用 `runtime_get_node_state` 讀 `AnimatedSprite2D` 的 `animation`（移動中是 `walk`、停下是 `idle`）與面向（向左走時播 `*_left`）。
 - 作者：**造型和動態好不好看只能靠人判斷**。請記錄 AI 畫了幾次、哪些描述方式有效、哪些需要你手動在 Pixelorama 修。
 
 ### 完成標準
 
-- [ ] 主角是像素角色，待機與行走動畫正確切換，左右翻轉正確
+- [ ] 主角是像素角色，待機與行走動畫正確切換，左右兩個方向的動畫正確
 - [ ] 像素清晰不模糊
 - [ ] `MCP實驗紀錄.md` 新增「Lv3」一節：Pixelorama MCP 的穩定度、繪圖品質、兩個 MCP 的配合情況
 - [ ] 依結果決定：繼續用 Pixelorama，或購買 Aseprite 在 Lv4 比較
