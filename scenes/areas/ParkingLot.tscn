@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://r853iujge1v" path="res://scripts/area.gd" id="1_q84vj"]
 [ext_resource type="Texture2D" uid="uid://d4m68tgy57mwv" path="res://assets/bg/scene_01.webp" id="2_tpq6i"]
 [ext_resource type="Script" uid="uid://dkcse5tmlbfke" path="res://scripts/player.gd" id="3_8ukss"]
+[ext_resource type="Texture2D" uid="uid://bo6wrfk73jsc3" path="res://assets/sprites/player_idle0.png" id="4_kipkx"]
 [ext_resource type="Script" uid="uid://u5x8mgenl5y4" path="res://scripts/interact_point.gd" id="4_tpq6i"]
 [ext_resource type="Script" uid="uid://cpx5m37cmu4jq" path="res://scripts/flicker_light.gd" id="5_8ukss"]
 
@@ -113,6 +114,7 @@ motion_mode = 1
 script = ExtResource("3_8ukss")
 
 [node name="Body" type="ColorRect" parent="Player" unique_id=1576433445]
+visible = false
 offset_left = -16.0
 offset_top = -96.0
 offset_right = 16.0
@@ -135,6 +137,12 @@ position_smoothing_speed = 6.0
 position = Vector2(0, -60)
 color = Color(1, 0.93, 0.8, 1)
 texture = SubResource("GradientTexture2D_8ukss")
+
+[node name="PreviewSprite" type="Sprite2D" parent="Player" unique_id=1183297848]
+texture_filter = 1
+position = Vector2(3, -48)
+scale = Vector2(2, 2)
+texture = ExtResource("4_kipkx")
 
 [node name="Points" type="Node2D" parent="." unique_id=1353451513]
 
