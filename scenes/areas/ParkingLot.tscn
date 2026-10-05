@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://r853iujge1v" path="res://scripts/area.gd" id="1_q84vj"]
 [ext_resource type="Texture2D" uid="uid://d4m68tgy57mwv" path="res://assets/bg/scene_01.webp" id="2_tpq6i"]
 [ext_resource type="Script" uid="uid://dkcse5tmlbfke" path="res://scripts/player.gd" id="3_8ukss"]
+[ext_resource type="Texture2D" uid="uid://cclfpnwmh2aoe" path="res://assets/sprites/props/photo.png" id="4_2mgj5"]
 [ext_resource type="SpriteFrames" uid="uid://b872yo2d63qvl" path="res://assets/sprites/player_frames.tres" id="4_kipkx"]
 [ext_resource type="Script" uid="uid://u5x8mgenl5y4" path="res://scripts/interact_point.gd" id="4_tpq6i"]
 [ext_resource type="Script" uid="uid://cpx5m37cmu4jq" path="res://scripts/flicker_light.gd" id="5_8ukss"]
@@ -128,6 +129,13 @@ offset_top = -6.0
 offset_right = 30.0
 mouse_filter = 2
 color = Color(0.3, 0.08, 0.07, 0.9)
+
+[node name="Prop" type="Sprite2D" parent="Points/Wake" unique_id=869137178]
+texture_filter = 1
+position = Vector2(8, -10)
+rotation = 0.12
+scale = Vector2(2, 2)
+texture = ExtResource("4_2mgj5")
 
 [node name="Light" type="Area2D" parent="Points" unique_id=405087221]
 position = Vector2(600, 640)
