@@ -2,13 +2,41 @@
   "id": "parking_lot",
   "scene": "res://scenes/areas/ParkingLot.tscn",
   "replaces_scenes": [1, 2],
-  "exit_to": 3,
   "bgm": "bgm_01.ogg",
-  "intro": { "from": { "scene": 1 } },
+  "intro": {
+    "title": "停車場甦醒",
+    "text": "你在昏暗的地下停車場醒來，手上有乾裂的血跡。記憶斷裂，視線模糊，耳中嗡嗡作響。遠處有人聲，你試圖發聲卻只能低吼。一張掉落的病歷卡上寫著你的名字——楊尚瑜。"
+  },
   "points": {
-    "light":  { "type": "inspect",  "label": "閃爍的燈光", "from": { "scene": 1, "choice": 0 } },
-    "debris": { "type": "inspect",  "label": "地面殘骸",   "from": { "scene": 2, "choice": 1 } },
-    "woman":  { "type": "approach", "once": true,          "from": { "scene": 2 } },
-    "exit":   { "type": "exit",     "label": "離開停車場", "from": { "scene": 2, "choice": 0 } }
+    "wake": {
+      "type": "inspect", "label": "醒來的地方", "title": "醒來的地方",
+      "text": "你回到醒來的地方，在口袋裡摸到一張發黃的照片，是你與一個小女孩的合影。你想不起她的名字，卻捨不得放手。",
+      "effects": { "memory": 1 }
+    },
+    "light": {
+      "type": "inspect", "label": "閃爍的燈光", "title": "閃爍的燈光",
+      "text": "你努力轉頭，光線閃爍，一團模糊的人影在遠處。"
+    },
+    "debris": {
+      "type": "inspect", "label": "地面殘骸", "title": "地面殘骸",
+      "text": "你翻找落葉與灰塵，發現些殘骸與碎布。"
+    },
+    "woman": {
+      "type": "choice", "trigger": "approach", "hide_on_done": true, "title": "婦人",
+      "text": "遠處的人聲越來越近，是一個婦人。你聞到她的氣味，喉嚨深處湧起難以忍受的飢餓。",
+      "choices": [
+        { "text": "強行壓制自己",
+          "response": "你追向聲音來源，在即將撲咬時強行壓制自己，撞上牆壁。那名婦人驚慌逃去。你意識到某些行為你還能控制，但對進食的衝動卻毫無抵抗力。",
+          "effects": { "humanity": 1 } },
+        { "text": "撲上去",
+          "response": "你失控衝上去，對方尖叫逃跑。你跌坐地上，確認自己無法控制進食的衝動。",
+          "effects": { "humanity": -1 } }
+      ]
+    },
+    "exit": {
+      "type": "exit", "label": "離開停車場", "title": "離開停車場",
+      "text": "你循著微弱的光，爬上通往地面的坡道。",
+      "to": { "scene": 3 }
+    }
   }
 }

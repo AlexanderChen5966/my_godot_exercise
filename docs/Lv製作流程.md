@@ -456,7 +456,8 @@ Player
 | `label` | 畫面上的提示，例如「藥櫃」 |
 | `title`、`text` | 對話框的標題與內文（或用舊的 `from` 引用） |
 | `item` | `type: item` 時得到的物品代號，例如 `recorder` |
-| `choices` | `type: choice` 時的選項：`[{ "text", "response", "effects"?, "set_flags"? }]` |
+| `item_name` | 物品的顯示名稱，例如「錄音筆」；撿到時對話框下方顯示「（獲得：錄音筆）」 |
+| `choices` | `type: choice` 時的選項：`[{ "text", "response", "effects"?, "set_flags"? }]`。選項會自動選好第一個，用方向鍵與 Enter／空白鍵操作（滑鼠也可以） |
 | `effects` | 數值增減，例如 `{ "memory": 1 }`。**同一個互動點的效果，一輪遊戲只套用一次** |
 | `set_flags` | 觸發後設定的旗標 |
 | `require` | 出現的條件：`{ "items": [...], "flags": [...], "not_flags": [...] }`，不符合時互動點不反應 |

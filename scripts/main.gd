@@ -38,6 +38,8 @@ var _area: Node2D = null  # 目前在 World 底下的區域場景
 var _area_id := ""
 var _nearby_point := ""      # 玩家目前所在範圍內、可按互動鍵的互動點
 var _closing_point := ""     # 目前顯示的區域文字屬於哪個互動點（開場文字為空字串）
+var _closing_view: Dictionary = {}  # 打開時套用 variants 後的互動點內容（關閉時用同一份，不受途中狀態改變影響）
+var _area_choosing := false  # 目前的選項屬於區域的 choice 互動點（不是視覺小說的選項）
 var current_id: int = -1
 var state: State = State.TITLE
 var _pending_next_id: int = -1
@@ -184,6 +186,7 @@ func _free_area() -> void:
 		_area = null
 	_area_id = ""
 	_nearby_point = ""
+	_area_choosing = false
 	prompt_label.visible = false
 
 
@@ -236,8 +239,17 @@ func leave_area(next_id: int) -> void:
 	)
 
 
+## 互動點目前的內容：依 GameState 套用 variants。
 func _area_point(point_id: String) -> Dictionary:
-	return areas.get_area(_area_id).get("points", {}).get(point_id, {})
+	var raw: Dictionary = areas.get_area(_area_id).get("points", {}).get(point_id, {})
+	return AreaData.view(raw, GameState)
+
+
+## 互動點現在能不能觸發：require 不符合、或 once 且已完成時不反應。
+func _point_active(point_id: String, point: Dictionary) -> bool:
+	if point.is_empty() or not AreaData.is_available(point, GameState):
+		return false
+	return not (AreaData.is_once(point) and _is_done(point_id))
 
 
 ## 可操作狀態：隱藏對話框，讓主角可以移動。
@@ -250,20 +262,20 @@ func _begin_explore() -> void:
 
 
 func _update_prompt() -> void:
-	if state != State.EXPLORE or _nearby_point.is_empty():
+	var point := _area_point(_nearby_point) if not _nearby_point.is_empty() else {}
+	if state != State.EXPLORE or not _point_active(_nearby_point, point):
 		prompt_label.visible = false
 		return
-	prompt_label.text = "E　%s" % _area_point(_nearby_point).get("label", "調查")
+	prompt_label.text = "E　%s" % point.get("label", "調查")
 	prompt_label.visible = true
 
 
 func _on_point_entered(point_id: String) -> void:
 	var point := _area_point(point_id)
-	if point.get("type") == "approach":
-		# 接近類：走進範圍自動觸發；once 的只觸發一次
-		if state != State.EXPLORE or (point.get("once", false) and _is_done(point_id)):
-			return
-		_show_area_text(point, point_id)
+	if AreaData.trigger_of(point) == "approach":
+		# 接近類：走進範圍自動觸發（遇到人的時候）
+		if state == State.EXPLORE and _point_active(point_id, point):
+			_show_area_text(point, point_id)
 		return
 	_nearby_point = point_id
 	_update_prompt()
@@ -275,10 +287,14 @@ func _on_point_exited(point_id: String) -> void:
 		_update_prompt()
 
 
-## 區域文字：沿用對話框與打字機；不顯示選項與提示。
+## 區域文字：沿用對話框與打字機。choice 打完字後顯示選項，其他類型顯示「點擊繼續」。
+## 調查、撿東西的數值效果在打開時套用（同一個互動點一輪只算一次）。
 func _show_area_text(holder: Dictionary, point_id := "") -> void:
 	var resolved := AreaData.text_of(story, holder)
 	_closing_point = point_id
+	_closing_view = holder
+	if not point_id.is_empty() and holder.get("type") != "choice":
+		GameState.apply_effects(holder.get("effects", {}), _point_key(point_id))
 	_area.set_can_move(false)
 	prompt_label.visible = false
 	dialog_panel.visible = true
@@ -287,22 +303,54 @@ func _show_area_text(holder: Dictionary, point_id := "") -> void:
 	continue_label.visible = false
 	_clear_choices()
 	scene_title.text = resolved.get("title", "")
-	_type_text(resolved.get("text", ""), _show_area_continue)
+	if holder.get("type") == "choice":
+		_type_text(resolved.get("text", ""), _show_area_choices.bind(holder.get("choices", [])))
+	else:
+		_type_text(resolved.get("text", ""), _show_area_continue)
 
 
 func _show_area_continue() -> void:
 	state = State.AREA_TEXT
+	if _closing_view.get("type") == "item" and _closing_view.has("item_name"):
+		hint.text = "[color=%s]（獲得：%s）[/color]" % [EXTRA_HINT_COLOR, _closing_view["item_name"]]
+		hint.visible = true
 	continue_label.visible = true
+
+
+## 區域的選項：沿用視覺小說的按鈕；自動選好第一個，可以用方向鍵與 Enter／空白鍵操作（可走動區域只用鍵盤）。
+func _show_area_choices(choices: Array) -> void:
+	state = State.CHOOSING
+	_area_choosing = true
+	_chosen_in_scene.clear()
+	_build_choices(choices)
+	if choices_box.get_child_count() > 0:
+		(choices_box.get_child(0) as Button).grab_focus()
+
+
+func _on_area_choice_pressed(choice: Dictionary) -> void:
+	_area_choosing = false
+	sfx.play()
+	_clear_choices()
+	GameState.apply_effects(choice.get("effects", {}), _point_key(_closing_point))
+	for flag in choice.get("set_flags", []):
+		GameState.set_flag(flag)
+	_type_text(choice.get("response", ""), _show_area_continue)
 
 
 func _close_area_text() -> void:
 	var point_id := _closing_point
+	var point := _closing_view
 	_closing_point = ""
+	_closing_view = {}
+	hint.visible = false
 	if point_id.is_empty():  # 開場文字
 		_begin_explore()
 		return
-	var point := _area_point(point_id)
 	_mark_done(point_id)
+	if point.get("type") == "item" and point.has("item"):
+		GameState.add_item(point["item"])
+	for flag in point.get("set_flags", []):
+		GameState.set_flag(flag)
 	if _hides_when_done(point):
 		_area.consume_point(point_id)  # 例如婦人逃走後消失
 	if point.get("type") == "exit":
@@ -313,11 +361,16 @@ func _close_area_text() -> void:
 
 ## 互動點觸發過後設定自動旗標「區域.互動點」（同一輪記得，換區域、回頭走都有效）。
 func _mark_done(point_id: String) -> void:
-	GameState.set_flag("%s.%s" % [_area_id, point_id])
+	GameState.set_flag(_point_key(point_id))
 
 
 func _is_done(point_id: String) -> bool:
-	return GameState.has_flag("%s.%s" % [_area_id, point_id])
+	return GameState.has_flag(_point_key(point_id))
+
+
+## 互動點在整個遊戲中的代號「區域.互動點」：自動旗標與數值效果的來源都用它。
+func _point_key(point_id: String) -> String:
+	return "%s.%s" % [_area_id, point_id]
 
 
 ## 完成後要隱藏場景中人物或道具的互動點：hide_on_done，或 Lv1 格式的 approach（婦人）。
@@ -492,6 +545,9 @@ func _finish_typing() -> void:
 func _on_choice_pressed(index: int, choice: Dictionary) -> void:
 	if state != State.CHOOSING:
 		return
+	if _area_choosing:
+		_on_area_choice_pressed(choice)
+		return
 	_chosen_in_scene[index] = true
 	sfx.play()
 	_clear_choices()
@@ -528,6 +584,8 @@ func _input(event: InputEvent) -> void:
 		if event.is_action_pressed("interact") and not _nearby_point.is_empty():
 			get_viewport().set_input_as_handled()
 			var point := _area_point(_nearby_point)
+			if not _point_active(_nearby_point, point):
+				return
 			if point.get("type") == "exit" and AreaData.text_of(story, point).is_empty():
 				_mark_done(_nearby_point)
 				_go_through_exit(point)  # 沒有文字的出口（例如「回到停車場」）直接換區域
