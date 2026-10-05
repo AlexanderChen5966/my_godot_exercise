@@ -325,24 +325,48 @@ Player
 
 | 項目 | 規格 |
 |---|---|
-| 尺寸 | 32×64 像素，遊戲中放大 3 倍顯示（約 96px 高，和 Lv1 的色塊一樣） |
-| 調色盤 | 約 12～16 色，偏灰綠、褐色的低飽和色調，配合背景插畫 |
+| 尺寸 | **32×48 像素，遊戲中放大 2 倍**（64×96，和 Lv1 的色塊一樣高；碰撞範圍、互動點都不用改）。原規格「32×64 放大 3 倍」= 192px，與「約 96px」矛盾，2026-10-05 作者改定。像素圖只用**整數倍**放大 |
+| 造型 | **感染者特徵明顯**（2026-10-05 作者決定）：灰青膚色、破損的深色外套、駝背前傾、手上有暗紅血跡（呼應劇本開場「手上有乾裂的血跡」），一眼看出是靜語者 |
+| 調色盤 | 約 12～16 色，偏灰綠、褐色的低飽和色調，配合背景插畫；血跡是唯一的暗紅點綴 |
 | 動畫 | 待機 4 格（輕微搖晃、喘息）、行走 6 格（**拖著腳、步履蹣跚**） |
 | 方向 | 只畫面向右，向左時在 Godot 水平翻轉 |
 | 輸出 | spritesheet 到 `assets/sprites/player.png`；原始檔 `.pxo` 存到 `art/player.pxo`（`art/` 加進 Web 匯出的 `exclude_filter`） |
 
-### 流程
+### 繪圖方式（依 pixelorama-mcp 的 `AGENTIC_DRAWING_PLAYBOOK.md`）
 
-1. **先畫一張待機的第一格**，Claude 截圖給作者看。作者確認造型、比例、配色後才繼續。
-2. 完成待機 4 格 → 作者確認動態。
-3. 完成行走 6 格 → 作者確認動態。
-4. 匯出 spritesheet。
-5. 在 Godot：主角改用 `AnimatedSprite2D`，用 Toolkit 的 spriteframes 工具建立 `idle`、`walk` 兩個動畫；貼圖濾鏡設為 **Nearest**（否則像素會模糊）。
-6. `player.gd`：移動時播 `walk`，停下播 `idle`，向左時 `flip_h`。
+- Claude 先在本機**用文字格線（ASCII，每個字元代表一種顏色）設計每一格**，存在暫存區，轉成像素清單後，用 **`draw_pixels` 一次送出**（不要逐點呼叫 `draw_pixel`）。
+- 每畫完一格用 **`capture_canvas_image`** 截圖自我檢查（多模態），再給作者看。
+- 動畫用 **`duplicate_frame`** 複製上一格再修改；**`set_onion_skinning`** 方便比對前後格；`add_animation_tag` 標記 `idle`（0～3 格）與 `walk`（4～9 格）。
+- 原始檔用 `save_project` 存成 `art/player.pxo`。
+
+### 兩個 MCP 的分工
+
+| 步驟 | MCP |
+|---|---|
+| 畫圖、動畫、匯出 spritesheet（`export_animation` 的 `spritesheet` 模式）| **pixelorama** |
+| 匯入圖片、建立 `idle`／`walk` 的 SpriteFrames（`spriteframes` 群組）、改場景、驗證 | **godot-mcp-toolkit** |
+
+> pixelorama 也有 `export_godot_spriteframes`，但它一次只能把**整個畫布**匯出成**一個**動畫。待機和行走放在同一個畫布，所以改用「匯出一張 spritesheet → 在 Godot 用 Toolkit 切成兩個動畫」，也正好練習兩個 MCP 的配合。
+
+### 流程（分步指令見 `PROMPTS.md` 的「Lv3 分步指令」）
+
+| 步驟 | 內容 | 停止點 |
+|---|---|---|
+| Lv3-2 | 建立 32×48 畫布與調色盤，畫**待機第一格**；`capture_canvas_image` 自我檢查；另外把它放進遊戲裡截一張（放大 2 倍、在停車場的燈光下）給作者看 | **作者確認造型、比例、配色** |
+| Lv3-3 | 待機 4 格（輕微搖晃、喘息） | **作者確認動態** |
+| Lv3-4 | 行走 6 格（**拖著腳、步履蹣跚**） | **作者確認動態** |
+| Lv3-5 | 匯出 `assets/sprites/player.png`；Godot：`Player` 底下新增 `AnimatedSprite2D`（`texture_filter = Nearest`、放大 2 倍、腳底對齊 y=0），用 Toolkit 建立 `idle`／`walk`；隱藏原本的色塊 `Body`；`player.gd` 移動時播 `walk`、停下播 `idle`、向左時 `flip_h`；`art/*` 加進 Web 匯出的 `exclude_filter` | — |
+| Lv3-6 | MCP 驗證 → 作者試玩 → Web 匯出 → 紀錄 | 作者確認 |
+
+### 要注意
+
+- 像素清晰：只用 `AnimatedSprite2D` 的 `texture_filter = Nearest`，**不改專案全域的貼圖濾鏡**（背景插畫要維持平滑）。
+- 光影：主角會被 Lv2 的世界亮度（0.32）調暗、被手電筒照亮。色塊時期主角會過曝，換成像素圖後要重新確認亮度。
+- Pixelorama 不用時請作者關掉（7373 沒有驗證機制）。
 
 ### 驗證
 
-- Claude：Pixelorama 端用讀像素或快照工具檢查畫面；Godot 端截圖確認角色清晰、方向翻轉正確、動畫切換正確。
+- Claude：Pixelorama 端用 `capture_canvas_image`／`get_canvas_snapshot` 檢查畫面；Godot 端截圖確認角色清晰；用 `runtime_get_node_state` 讀 `AnimatedSprite2D` 的 `animation`（移動中是 `walk`、停下是 `idle`）與 `flip_h`（向左時為 true）。
 - 作者：**造型和動態好不好看只能靠人判斷**。請記錄 AI 畫了幾次、哪些描述方式有效、哪些需要你手動在 Pixelorama 修。
 
 ### 完成標準

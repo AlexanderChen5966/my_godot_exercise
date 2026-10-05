@@ -255,6 +255,59 @@ Backdrop 搬進 FarLayer，中景與前景用暗色柱子剪影。在起點、�
 
 ---
 
+# Lv3 分步指令：用 Pixelorama MCP 畫主角
+
+> 規格在 `docs/Lv製作流程.md` 的「Lv3」一節：32×48、放大 2 倍、感染者特徵明顯。
+> 開始前：**Godot 編輯器和 Pixelorama 都要開著**；Claude 測試時請不要操作遊戲視窗與 Pixelorama。
+
+---
+
+### Lv3-2：待機第一格
+
+```
+用 pixelorama MCP 建立 32×48 的畫布與 12～16 色的調色盤，依 Lv3 的造型規格畫待機第一格。
+用 capture_canvas_image 自我檢查後，存成 art/player.pxo。再把這一格放進遊戲的停車場（放大 2 倍）截圖給我看。
+```
+
+✅ 預期結果：看到主角的造型。**造型、比例、配色由你確認**，不滿意就描述哪裡要改（例如「頭太大」「看不出是感染者」）。
+
+---
+
+### Lv3-3：待機 4 格
+
+```
+以第一格為基礎完成待機 4 格（輕微搖晃、喘息），用 onion skinning 比對前後格，截圖或匯出 GIF 給我看動態。
+```
+
+---
+
+### Lv3-4：行走 6 格
+
+```
+完成行走 6 格（拖著腳、步履蹣跚），截圖或匯出 GIF 給我看動態。
+```
+
+---
+
+### Lv3-5：放進遊戲
+
+```
+匯出 spritesheet 到 assets/sprites/player.png，用 godot-mcp-toolkit 在 Player 底下建立 AnimatedSprite2D
+（Nearest、放大 2 倍、腳底對齊），建立 idle／walk 動畫，修改 player.gd（移動播 walk、停下播 idle、向左 flip_h），
+隱藏原本的色塊。art/* 加進 Web 匯出的 exclude_filter。
+```
+
+---
+
+### Lv3-6：驗證、試玩、匯出、紀錄
+
+```
+用 MCP 驗證動畫切換、左右翻轉、像素清晰、手電筒下的亮度。我試玩確認後匯出 Web 版，
+在 MCP實驗紀錄.md 新增「Lv3」一節（Pixelorama MCP 的穩定度、繪圖品質、畫了幾次、兩個 MCP 的配合），並更新路線圖。
+```
+
+---
+
 ## 實驗時可以觀察的重點
 
 - 哪些步驟 Claude **真的用了 MCP 工具**（scene_create_node、node_set_property、theme_edit、game_start、runtime_screenshot、input_simulate、debugger_get_log），哪些是直接改檔案？
