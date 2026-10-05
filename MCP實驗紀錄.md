@@ -320,3 +320,91 @@
 2. **「讀紀錄檔＋讀原始碼」是排除問題最有效的方式**：版本不相容、預設停用都是從 Pixelorama 的紀錄檔和原始碼找到的，而不是靠猜。
 3. **自己從原始碼打包，比使用附帶的二進位檔更安全**：裝進去的就是檢查過的程式碼。
 4. **需要作者的地方**：允許未認證的 App 開啟（安全設定）、在 App 介面中操作、確認 `/mcp` 的顯示。
+
+---
+---
+
+# Lv3：用 Pixelorama MCP 畫主角（第一次兩個 MCP 配合）
+
+- 日期：2026-10-05
+- MCP：**pixelorama**（畫圖、動畫、匯出）＋ **godot-mcp-toolkit**（匯入、SpriteFrames、場景、驗證）
+- 成果：32×48 像素、放大 2 倍的主角（感染者造型）。左右各一套，共 **20 格**：待機 4 格（4 fps）＋行走 6 格（8 fps）× 2 個方向。
+- 狀態：作者在 Godot 試玩確認「看起來很好」；Web 版已匯出（`index.pck` 約 47.8MB），**等作者在瀏覽器確認**。
+
+## 1. 各步驟使用的工具
+
+| 步驟 | 內容 | MCP 工具 | 繞過 MCP 的部分（原因） |
+|---|---|---|---|
+| Lv3-2 | 待機第 1 格 | pixelorama `draw_pixels`（一次 497 像素、16 色）、`capture_canvas_image`、`export_image`（放大 8 倍自我檢查）、`save_project` | 造型用 Python 以形狀設計並自動加外框（MCP 沒有「設計」能力，只負責畫）；Godot 預覽用 Toolkit 建立暫時的 Sprite2D |
+| Lv3-3 | 待機 4 格 | `duplicate_frame`、`select_rect`＋`transform_selection`（上半身下沉 1px、頭再下垂 1px）、`add_animation_tag`、`set_fps` | — |
+| Lv3-4 | 面向右行走 6 格 | `add_frame`、`draw_pixels`（第 1 格整格）、**`copy_cel`＋只送差異像素**（擦除用 `#00000000`）、`get_pixel`、`export_gif`、`delete_animation_tag`／`add_animation_tag` | 腿部姿勢用 Python 依姿勢表產生；放大 GIF 用 ImageMagick 製作 |
+| Lv3-4b | 面向左 10 格 | 同上；9 格依「與哪一格差最少」排順序再用 `copy_cel` | 翻轉與修正（血跡換手、陰影換邊、遠側的手）用 Python 計算 |
+| Lv3-5 | 放進遊戲 | pixelorama `export_animation`（spritesheet）；Toolkit `editor_refresh`、**`spriteframes_from_spritesheet`**、`scene_create_node`、`node_set_property`、`scene_delete_node`、`editor_save_scene`、`script_check`、`lsp_project_diagnostics`；驗證用 `game_start`、`input_simulate`（action）、`execute_code`、`runtime_screenshot`、`debugger_get_log` | `player.gd`（GDScript）、`.import` 改無損、`export_presets.cfg` |
+| Lv3-6 | 匯出 | — | headless 匯出（專案副本，MCP 沒有匯出工具） |
+
+所有節點與 SpriteFrames 都用 MCP 建立，**沒有手改 `.tscn`／`.tres`**。
+
+## 2. 畫了幾次、改了幾輪
+
+| 項目 | 誰發現 | 經過 |
+|---|---|---|
+| 第 1 版沒有駝背、兩腿黏在一起 | Claude（文字格線預覽） | 重畫第 2 版 |
+| 後腦勺有兩格膚色（像耳朵長在後面） | Claude（放大 8 倍檢查） | 改成頭髮 |
+| 待機第 3 格頭部移動後，下巴外框缺口、血跡少一格 | Claude（逐像素比對） | 補 2 格 |
+| 「沒有走路的移動感、轉向沒有另一方向的像素」 | **作者** | Lv3-4／3-4b 處理；作者決定左右各畫一套（不用鏡像） |
+| 行走後半步的步幅比前半步窄 | Claude（並排圖） | 兩腿的髖部差 2px，用相同偏移會不對稱 → 加大後半步的偏移 |
+| 左向的外框變成兩層 | Claude（文字格線預覽） | 補外框時把舊外框當成身體 → 改成只看非外框像素 |
+| 行走速度 8 fps 或 12 fps | **作者選擇** | Claude 做兩個 GIF，作者選 8 fps |
+
+作者**沒有手動在 Pixelorama 修改任何像素**，全部透過 MCP 完成。
+
+合計：Claude 自己發現並修正 **5 次**，作者回饋 **1 次**、做選擇 **3 次**（造型方案、左右畫法、行走速度），作者確認 **5 次**（造型、待機、行走、左向、試玩）。
+
+## 3. 兩個 MCP 的配合
+
+```
+Python 設計像素 ──▶ pixelorama 畫格、標籤、存 .pxo
+                     │ export_gif → 放大 GIF 給作者確認
+                     │ export_animation（spritesheet）
+                     ▼
+            assets/sprites/player.png
+                     │ Toolkit editor_refresh（匯入）
+                     │ spriteframes_from_spritesheet（切成 4 個動畫）
+                     ▼
+     ParkingLot 的 Player/Sprite（AnimatedSprite2D）→ Toolkit 執行、操作、讀狀態驗證
+```
+
+- 兩個 MCP 之間**沒有直接連結**，靠檔案交接（spritesheet）。交接前用 ImageMagick 把 spritesheet 和已確認的畫格逐像素比對（0 差異），避免傳錯版本。
+- 原本計畫用 pixelorama 的 `export_godot_spriteframes`，但它只能把**整個畫布**匯出成**一個**動畫，所以改用「spritesheet ＋ Toolkit 切割」。結果 Toolkit 的 `spriteframes_from_spritesheet` 一次呼叫就切好 4 個動畫，比預期簡單。
+
+## 4. Pixelorama MCP 的穩定度與特性
+
+| 觀察 | 內容 |
+|---|---|
+| 穩定度 | 整個 Lv3 呼叫了數十次，**沒有斷線或失敗**。需要 Pixelorama 一直開著 |
+| 繪圖精確度 | 每一步都匯出後逐像素比對，**20 格全部 0 差異**：送出什麼就畫出什麼 |
+| 傳送量 | 每格約 500 像素（約 17KB JSON）。改成「`copy_cel` 複製最相近的格 → 只送差異」後，每格只需 0～157 像素，**行走與左向共 16 格的傳送量約少了 3 分之 2**（約 2,600 像素，整格送出要約 7,800） |
+| 擦除 | `draw_pixels` 的顏色用 `#00000000` 就能擦除（文件沒寫，用 `get_pixel` 驗證過） |
+| **標籤會自動延伸** | 在最後一個標籤後面 `add_frame`，該標籤會被延長到包含新畫格（發生 2 次）。新增畫格後一定要 `get_animation_tags` 檢查 |
+| fps 是整個專案共用 | 各動畫不同速度無法存在 `.pxo` 裡，改在 Godot 的 SpriteFrames 設定 |
+
+## 5. AI 畫像素圖的方式
+
+- **AI 不是「看著畫」，而是「算出來」**：用 Python 以形狀（橢圓、矩形、每列寬度表）組出角色 → 自動加外框 → 印成文字格線檢查 → 再送給 MCP。姿勢用數字表描述（膝蓋與腳踝的偏移、身體下沉量）。
+- **好處**：修改很精準（「後半步偏移加大 2px」）、左右兩套可以從同一份資料推導，且每格都能驗證。
+- **限制**：「好不好看」AI 判斷不了。造型方案、動作是否自然、播放速度，都是作者看 GIF 後決定的。
+- **給作者看的形式很重要**：原尺寸 32×48 太小，一律放大 8 倍並做成 GIF；兩種速度並排讓作者比較，比文字描述有效。
+
+## 6. Godot 端的重點
+
+- 圖片匯入改成**無損**（專案預設有損 0.82，像素圖會糊）；節點用 Nearest 濾鏡、放大 2 倍。
+- 角色在畫格中偏左 1px，左右兩套互為翻轉，所以 Sprite 的 x 在面向右時是 3、面向左時是 −1，轉身時身體中心才不會跳動。
+- 動畫依「**實際**有沒有移動」切換（不是看有沒有按鍵），走到區域邊緣被擋住時會回到待機。
+- `editor_refresh` 指定單一**新**檔案時不會匯入，要用全專案掃描。
+
+## 7. Lv3 結論
+
+1. **兩個 MCP 能完成「畫圖 → 進遊戲」的完整流程**，中間只靠一張 spritesheet 交接。
+2. **Pixelorama MCP 很精確也很穩定**，但它只是「畫筆」：造型與動作要另外用程式設計，AI 的優勢在精確修改與驗證。
+3. **「複製相近的格＋只送差異」是畫動畫的關鍵技巧**，傳送量大幅減少。
+4. **主觀判斷仍然靠人**：作者指出「沒有走路感、沒有轉向」，並選了左右分開畫和 8 fps。

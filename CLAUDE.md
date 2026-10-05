@@ -1,4 +1,4 @@
-g# 失語者 — Godot 專案（階段 1、Lv1、Lv2 完成，進行中：Lv3）
+# 失語者 — Godot 專案（階段 1、Lv1～Lv3 完成）
 
 這份檔案是給 Claude Code 讀的專案說明。每次開新對話都會自動載入。
 
@@ -10,7 +10,7 @@ g# 失語者 — Godot 專案（階段 1、Lv1、Lv2 完成，進行中：Lv3）
   - 每一級的規格、步驟、驗證方式、完成標準：`docs/Lv製作流程.md`
   - 作者貼給你的分步指令：`PROMPTS.md` 的「LvN 分步指令」（每一級開始時補上該級的指令）
 - **暫不支援手機**：Lv1 起可走動區域只做鍵盤操作，不要自行加觸控。按鍵衝突（`interact` 與 `ui_accept`）之後再處理。
-- **Lv1（停車場可走動）、Lv2（景深分層與光影）已完成（2026-10-02）。目前進行：Lv3（Pixelorama MCP 畫主角）**。Pixelorama 與 MCP 已安裝完成（2026-10-02）。開始前先讀 `docs/Lv製作流程.md` 的「0. 每一級共通的流程」與「Lv3」一節；分步指令在 `PROMPTS.md` 的「Lv3 分步指令」。Lv3-1（計畫）已完成：**32×48、放大 2 倍、感染者特徵明顯**。
+- **Lv1（停車場可走動）、Lv2（景深分層與光影）已完成（2026-10-02）；Lv3（Pixelorama MCP 畫主角）已完成（2026-10-05）**：32×48、放大 2 倍，左右各一套共 20 格（待機 4 fps、行走 8 fps），原始檔 `art/player.pxo`，遊戲用 `assets/sprites/player.png`＋`player_frames.tres`。經過與觀察見 `MCP實驗紀錄.md` 的「Lv3」。**下一步：劇本 v1.5（區域 × 事件格式），要等作者指示才開始。**
 - **一次只做一級**：沒有作者的指示，不要開始下一級，也不要提前做後面等級的功能。
 - MCP：**godot-mcp-toolkit**（Godot 編輯器）＋ **pixelorama**（像素繪圖，Lv3 起使用）。
   - pixelorama 註冊在 **user 範圍**（`~/Tools/pixelorama-mcp`），擴充功能用自己從原始碼打包的 `PixMcpBridge.zip`。安裝紀錄與排除問題見 `docs/Lv製作流程.md` 的 Lv3 與 `MCP實驗紀錄.md` 的「Lv3 準備」。
