@@ -65,7 +65,8 @@ assets/sprites/        主角 spritesheet 與 SpriteFrames
 data/areas/parking_lot.json  停車場區域資料（Lv4-3 起為 v1.5 格式，文字直接寫在資料裡）
 data/areas/street.json  街道區域資料（Lv4-4）
 data/areas/clinic.json  診所區域資料（Lv4-5：錄音筆、診療椅的 variants）
-scenes/areas/          可走動區域的場景：ParkingLot.tscn、Street.tscn、Clinic.tscn（後兩個由前一個區域另存後用 Toolkit 修改）
+data/areas/lab.json     設施走廊區域資料（Lv5-2：女科學家給筆記本、警衛 → BE2）
+scenes/areas/          可走動區域的場景：ParkingLot.tscn、Street.tscn、Clinic.tscn、Lab.tscn（之後的都由前一個區域另存後用 Toolkit 修改）
 MCP實驗紀錄.md           每一級的 MCP 實驗觀察
 ```
 

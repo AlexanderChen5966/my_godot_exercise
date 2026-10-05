@@ -330,8 +330,9 @@ func _show_area_text(holder: Dictionary, point_id := "") -> void:
 
 func _show_area_continue() -> void:
 	state = State.AREA_TEXT
-	if _closing_view.get("type") == "item" and _closing_view.has("item_name"):
-		hint.text = "[color=%s]（獲得：%s）[/color]" % [EXTRA_HINT_COLOR, _closing_view["item_name"]]
+	var item_name: String = _area_choice.get("item_name", _closing_view.get("item_name", "") if _closing_view.get("type") == "item" else "")
+	if not item_name.is_empty():
+		hint.text = "[color=%s]（獲得：%s）[/color]" % [EXTRA_HINT_COLOR, item_name]
 		hint.visible = true
 	continue_label.visible = true
 
@@ -356,6 +357,8 @@ func _on_area_choice_pressed(choice: Dictionary) -> void:
 	GameState.apply_effects(choice.get("effects", {}), AreaData.done_key(_point_key(_closing_point), _closing_view))
 	for flag in choice.get("set_flags", []):
 		GameState.set_flag(flag)
+	if choice.has("item"):
+		GameState.add_item(choice["item"])  # 例如收下女科學家的筆記本
 	_type_text(choice.get("response", ""), _show_area_continue)
 
 

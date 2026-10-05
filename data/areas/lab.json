@@ -1,0 +1,47 @@
+{
+  "id": "lab",
+  "scene": "res://scenes/areas/Lab.tscn",
+  "bgm": "bgm_08.ogg",
+  "intro": {
+    "title": "實驗逃脫",
+    "text": "不知過了多少天。某個夜裡，警報響了。實驗設施失控，警報大作。你趁機掙脫，奪門而出。火焰、碎裂玻璃與混亂人聲交織成地獄般景象。"
+  },
+  "spawns": { "default": 220 },
+  "points": {
+    "scientist": {
+      "type": "choice", "trigger": "approach", "hide_on_done": true, "title": "女科學家",
+      "text": "走廊盡頭，那位曾用憐憫眼神看你的女科學家沒有逃。她抱著一本筆記本，慢慢走近，像怕驚動你。\n「這是你這幾個月比過的手勢，和你還說得出的字。」她把筆記本遞向你。「帶著它。別忘了你是誰。」",
+      "choices": [
+        { "text": "收下筆記本",
+          "response": "你接過筆記本，指尖碰到她的手。她沒有退縮。你們對看了一眼，她轉身跑進濃煙裡。",
+          "effects": { "memory": 1 }, "item": "notebook", "item_name": "筆記本" },
+        { "text": "撲向她",
+          "response": "飢餓比你更快。你撲上去，她跌倒，筆記本散落一地。你在最後一刻停住，她爬起來逃走了。",
+          "effects": { "humanity": -2 } }
+      ]
+    },
+    "records": {
+      "type": "inspect", "label": "實驗紀錄", "title": "實驗紀錄",
+      "text": "散落的紀錄寫著：「記憶重建實驗——受試者：楊尚瑜，編號 07。」下面有一行小字：「對女兒的聲音反應最強烈。」"
+    },
+    "guard": {
+      "type": "choice", "trigger": "approach", "hide_on_done": true, "title": "警衛",
+      "text": "腳步聲從轉角逼近，手電筒的光掃過牆面。",
+      "choices": [
+        { "text": "躲進通風管",
+          "response": "你擠進狹窄的通風管，屏住呼吸。腳步聲停了一下，又走遠了。" },
+        { "text": "撲向警衛",
+          "response": "你從暗處撲出，撞倒警衛，他的槍滑過地面。你強迫自己鬆口，跌跌撞撞地跑開。",
+          "effects": { "humanity": -1 } },
+        { "text": "停下不動",
+          "response": "你徘徊不定，警衛聲音逐漸靠近。",
+          "to": { "scene": 22 } }
+      ]
+    },
+    "exit": {
+      "type": "exit", "label": "逃出設施", "title": "逃出設施",
+      "text": "你朝出口狂奔，衝出破碎的鐵門，心中只剩一個目標——回家。",
+      "to": { "scene": 15 }
+    }
+  }
+}

@@ -57,7 +57,7 @@
           "effects": {
             "memory": 1
           },
-          "next_id": 15
+          "next_area": "lab"
         },
         {
           "text": "靜靜聆聽",
@@ -65,12 +65,12 @@
           "effects": {
             "memory": 1
           },
-          "next_id": 15
+          "next_area": "lab"
         },
         {
           "text": "拼命掙扎",
           "response": "你拚命掙扎，喚來更多人按住你。你無法離開。",
-          "next_id": 15
+          "next_area": "lab"
         }
       ]
     },

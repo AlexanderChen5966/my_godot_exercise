@@ -167,6 +167,8 @@ func validate(story: StoryData, warnings: Array[String] = []) -> Array[String]:
 				for key in shape.get("effects", {}):
 					stat_keys[key] = ptag
 				for choice in shape.get("choices", []):
+					if choice.has("item"):
+						given_items[choice["item"]] = true
 					for flag in choice.get("set_flags", []):
 						set_flags[flag] = true
 					for key in choice.get("effects", {}):
