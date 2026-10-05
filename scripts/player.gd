@@ -25,6 +25,12 @@ func _physics_process(_delta: float) -> void:
 	_update_animation(not is_equal_approx(position.x, old_x))  # 走到區域邊緣被擋住時改回待機
 
 
+## 直接設定面向（換區域時使用），並立刻換成對應的待機動畫。
+func face(direction: int) -> void:
+	facing = direction
+	_update_animation(false)
+
+
 ## 左右各一套動畫（不用 flip_h），依「是否移動 × 面向」選擇
 func _update_animation(moving: bool) -> void:
 	var side := "right" if facing > 0 else "left"

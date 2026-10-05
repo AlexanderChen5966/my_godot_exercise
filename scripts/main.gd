@@ -38,7 +38,6 @@ var _area: Node2D = null  # 目前在 World 底下的區域場景
 var _area_id := ""
 var _nearby_point := ""      # 玩家目前所在範圍內、可按互動鍵的互動點
 var _closing_point := ""     # 目前顯示的區域文字屬於哪個互動點（開場文字為空字串）
-var _consumed: Dictionary = {}  # 本次進入區域已觸發過的 once 互動點
 var current_id: int = -1
 var state: State = State.TITLE
 var _pending_next_id: int = -1
@@ -157,16 +156,25 @@ func _start_game() -> void:
 
 
 ## 把區域場景實例化到 World 底下（同時只會有一個區域）。
-func _instantiate_area(area_id: String) -> Node2D:
+## from_area：從哪個區域走過來，用來決定出現位置（spawns）；從視覺小說進來時為空字串。
+func _instantiate_area(area_id: String, from_area := "") -> Node2D:
 	_free_area()
 	var area := areas.get_area(area_id)
 	_area = (load(area["scene"]) as PackedScene).instantiate()
 	_area_id = area_id
 	_nearby_point = ""
-	_consumed.clear()
 	world.add_child(_area)
 	_area.point_entered.connect(_on_point_entered)
 	_area.point_exited.connect(_on_point_exited)
+	var spawns: Dictionary = area.get("spawns", {})
+	var spawn_key := from_area if spawns.has(from_area) else "default"
+	if spawns.has(spawn_key):
+		_area.place_player(float(spawns[spawn_key]))
+	# 已經完成的事件（例如婦人逃走），回到這個區域時不再出現
+	var points: Dictionary = area.get("points", {})
+	for point_id in points:
+		if _is_done(point_id) and _hides_when_done(points[point_id]):
+			_area.consume_point(point_id)
 	return _area
 
 
@@ -179,9 +187,10 @@ func _free_area() -> void:
 	prompt_label.visible = false
 
 
-## 進入區域：淡出 → 實例化區域到 World → 隱藏 Background → 換 BGM → 淡入 → 開場文字。
+## 進入區域：淡出 → 實例化區域到 World → 隱藏 Background → 換 BGM → 淡入 → 開場文字（同一輪只顯示一次）。
 ## fade_out 為 false 時表示畫面已經是黑的（例如從標題「開始」進來）。
-func enter_area(area_id: String, scene_id: int, fade_out := true) -> void:
+## from_area：從另一個區域走過來時的來源區域（決定出現位置）。
+func enter_area(area_id: String, scene_id: int, fade_out := true, from_area := "") -> void:
 	var area := areas.get_area(area_id)
 	current_id = scene_id
 	state = State.TRANSITION
@@ -193,7 +202,7 @@ func enter_area(area_id: String, scene_id: int, fade_out := true) -> void:
 	else:
 		fade.color.a = 1.0
 	tween.tween_callback(func() -> void:
-		_instantiate_area(area_id)
+		_instantiate_area(area_id, from_area)
 		title_layer.visible = false
 		background.visible = false
 		story_layer.visible = true
@@ -202,7 +211,8 @@ func enter_area(area_id: String, scene_id: int, fade_out := true) -> void:
 	)
 	tween.tween_property(fade, "color:a", 0.0, FADE_HALF_TIME)
 	tween.tween_callback(func() -> void:
-		if area.has("intro"):
+		if area.has("intro") and not GameState.seen_intros.has(area_id):
+			GameState.seen_intros[area_id] = true
 			_show_area_text(area["intro"])
 		else:
 			_begin_explore()
@@ -251,9 +261,8 @@ func _on_point_entered(point_id: String) -> void:
 	var point := _area_point(point_id)
 	if point.get("type") == "approach":
 		# 接近類：走進範圍自動觸發；once 的只觸發一次
-		if state != State.EXPLORE or (point.get("once", false) and _consumed.has(point_id)):
+		if state != State.EXPLORE or (point.get("once", false) and _is_done(point_id)):
 			return
-		_consumed[point_id] = true
 		_show_area_text(point, point_id)
 		return
 	_nearby_point = point_id
@@ -289,18 +298,48 @@ func _show_area_continue() -> void:
 func _close_area_text() -> void:
 	var point_id := _closing_point
 	_closing_point = ""
+	if point_id.is_empty():  # 開場文字
+		_begin_explore()
+		return
 	var point := _area_point(point_id)
-	if point.get("type") == "approach":
+	_mark_done(point_id)
+	if _hides_when_done(point):
 		_area.consume_point(point_id)  # 例如婦人逃走後消失
 	if point.get("type") == "exit":
-		_on_area_exit()
+		_go_through_exit(point)
 		return
 	_begin_explore()
 
 
-## 出口文字關閉後，前往區域的 exit_to（接回視覺小說流程）。
-func _on_area_exit() -> void:
-	leave_area(int(areas.get_area(_area_id)["exit_to"]))
+## 互動點觸發過後設定自動旗標「區域.互動點」（同一輪記得，換區域、回頭走都有效）。
+func _mark_done(point_id: String) -> void:
+	GameState.set_flag("%s.%s" % [_area_id, point_id])
+
+
+func _is_done(point_id: String) -> bool:
+	return GameState.has_flag("%s.%s" % [_area_id, point_id])
+
+
+## 完成後要隱藏場景中人物或道具的互動點：hide_on_done，或 Lv1 格式的 approach（婦人）。
+func _hides_when_done(point: Dictionary) -> bool:
+	return point.get("hide_on_done", point.get("type") == "approach")
+
+
+## 出口：通往另一個區域（to.area），或接回視覺小說（to.scene／Lv1 的 exit_to）。
+func _go_through_exit(point: Dictionary) -> void:
+	var target := AreaData.exit_target(areas.get_area(_area_id), point)
+	if target.has("area"):
+		_switch_area(target["area"])
+	elif target.has("scene"):
+		leave_area(int(target["scene"]))
+
+
+## 區域之間移動：記住從哪裡來，決定在新區域的出現位置。
+func _switch_area(next_area: String) -> void:
+	var from_area := _area_id
+	_area.set_can_move(false)
+	prompt_label.visible = false
+	enter_area(next_area, -1, true, from_area)
 
 
 ## 換曲：與目前曲目相同時不重播；不同時舊曲淡出、新曲淡入。
@@ -488,7 +527,12 @@ func _input(event: InputEvent) -> void:
 		# 同一個輸入事件只處理一次：開啟文字後立即標記為已處理，不會同時被當成「關閉」。
 		if event.is_action_pressed("interact") and not _nearby_point.is_empty():
 			get_viewport().set_input_as_handled()
-			_show_area_text(_area_point(_nearby_point), _nearby_point)
+			var point := _area_point(_nearby_point)
+			if point.get("type") == "exit" and AreaData.text_of(story, point).is_empty():
+				_mark_done(_nearby_point)
+				_go_through_exit(point)  # 沒有文字的出口（例如「回到停車場」）直接換區域
+			else:
+				_show_area_text(point, _nearby_point)
 		return
 	if state != State.TITLE and state != State.TYPING and state != State.RESPONSE \
 			and state != State.AREA_TEXT:

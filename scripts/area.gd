@@ -65,6 +65,14 @@ func _apply_lighting() -> void:
 		$RedLight.pulse_speed = red_light_speed
 
 
+## 換區域時的出現位置：放到 x，靠近右半邊時面向左（從右邊的出口進來）。
+func place_player(x: float) -> void:
+	player.position.x = clampf(x, player.min_x, player.max_x)
+	player.face(-1 if x > area_width / 2.0 else 1)
+	camera.force_update_scroll()
+	camera.reset_smoothing()  # 鏡頭直接跳到新位置，不從起點滑過去
+
+
 func set_can_move(value: bool) -> void:
 	player.can_move = value
 
