@@ -6,10 +6,13 @@
 [ext_resource type="SpriteFrames" uid="uid://b872yo2d63qvl" path="res://assets/sprites/player_frames.tres" id="4_1g32l"]
 [ext_resource type="Texture2D" uid="uid://bdyn2s3mi2jff" path="res://assets/sprites/props/cabinet.png" id="4_2bfil"]
 [ext_resource type="Texture2D" uid="uid://bwwjgv6vnyfk1" path="res://assets/sprites/props/recorder.png" id="4_lmpgy"]
+[ext_resource type="Texture2D" uid="uid://crodufi7o8xm0" path="res://assets/sprites/props/sign_street.png" id="4_oev4m"]
 [ext_resource type="Texture2D" uid="uid://bclnbtearke1q" path="res://assets/sprites/props/cards.png" id="5_2bfil"]
 [ext_resource type="Script" uid="uid://u5x8mgenl5y4" path="res://scripts/interact_point.gd" id="5_lmpgy"]
 [ext_resource type="Script" uid="uid://cpx5m37cmu4jq" path="res://scripts/flicker_light.gd" id="6_2bfil"]
 [ext_resource type="Texture2D" uid="uid://dgxyaptg1huss" path="res://assets/sprites/props/chair.png" id="6_rqvkt"]
+[ext_resource type="Texture2D" uid="uid://cvykgmj0y4l2q" path="res://assets/sprites/props/clinic_pillar.png" id="7_87sov"]
+[ext_resource type="Texture2D" uid="uid://cbi08dk70gytu" path="res://assets/sprites/props/exit_door_wood.png" id="10_wqg5i"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_k46jg"]
 size = Vector2(140, 192)
@@ -87,12 +90,11 @@ point_id = "back"
 position = Vector2(0, -96)
 shape = SubResource("RectangleShape2D_k46jg")
 
-[node name="Marker" type="ColorRect" parent="Points/Back" unique_id=882885396]
-offset_left = -20.0
-offset_top = -160.0
-offset_right = 20.0
-mouse_filter = 2
-color = Color(0.35, 0.32, 0.25, 0.6)
+[node name="Prop" type="Sprite2D" parent="Points/Back" unique_id=1569543423]
+texture_filter = 1
+position = Vector2(0, -72)
+scale = Vector2(2, 2)
+texture = ExtResource("4_oev4m")
 
 [node name="Cabinet" type="Area2D" parent="Points" unique_id=405087221]
 position = Vector2(600, 640)
@@ -124,19 +126,11 @@ point_id = "room"
 position = Vector2(0, -96)
 shape = SubResource("RectangleShape2D_2mgj5")
 
-[node name="Pillar" type="ColorRect" parent="Points/Room" unique_id=688621374]
-offset_left = -56.0
-offset_top = -320.0
-offset_right = 56.0
-mouse_filter = 2
-color = Color(0.2, 0.18, 0.15, 1)
-
-[node name="PillarShade" type="ColorRect" parent="Points/Room" unique_id=563260232]
-offset_left = 44.0
-offset_top = -320.0
-offset_right = 56.0
-mouse_filter = 2
-color = Color(0.12, 0.11, 0.09, 1)
+[node name="Pillar" type="Sprite2D" parent="Points/Room" unique_id=67593898]
+texture_filter = 1
+position = Vector2(0, -160)
+scale = Vector2(2, 2)
+texture = ExtResource("7_87sov")
 
 [node name="Prop" type="Sprite2D" parent="Points/Room" unique_id=2077540633]
 texture_filter = 1
@@ -168,12 +162,11 @@ point_id = "exit"
 position = Vector2(0, -96)
 shape = SubResource("RectangleShape2D_x3vua")
 
-[node name="Marker" type="ColorRect" parent="Points/Exit" unique_id=91825239]
-offset_left = -44.0
-offset_top = -160.0
-offset_right = 44.0
-mouse_filter = 2
-color = Color(0.18, 0.14, 0.1, 0.85)
+[node name="Prop" type="Sprite2D" parent="Points/Exit" unique_id=1825613370]
+texture_filter = 1
+position = Vector2(0, -76)
+scale = Vector2(2, 2)
+texture = ExtResource("10_wqg5i")
 
 [node name="Player" type="CharacterBody2D" parent="." unique_id=1633340741]
 position = Vector2(160, 640)
