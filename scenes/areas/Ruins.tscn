@@ -1,0 +1,179 @@
+[gd_scene format=3 uid="uid://dvr3ajvwqmxum"]
+
+[ext_resource type="Script" uid="uid://r853iujge1v" path="res://scripts/area.gd" id="1_pxqrw"]
+[ext_resource type="Texture2D" uid="uid://c1itui8tftjeh" path="res://assets/bg/scene_09.webp" id="2_pxqrw"]
+[ext_resource type="Script" uid="uid://u5x8mgenl5y4" path="res://scripts/interact_point.gd" id="3_d8cse"]
+[ext_resource type="Script" uid="uid://dkcse5tmlbfke" path="res://scripts/player.gd" id="4_hnolj"]
+[ext_resource type="SpriteFrames" uid="uid://b872yo2d63qvl" path="res://assets/sprites/player_frames.tres" id="5_rbspv"]
+[ext_resource type="Script" uid="uid://cpx5m37cmu4jq" path="res://scripts/flicker_light.gd" id="6_xlq1f"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_8ukss"]
+size = Vector2(160, 192)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_or88c"]
+size = Vector2(160, 192)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_x3vua"]
+size = Vector2(200, 192)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_kipkx"]
+size = Vector2(32, 96)
+
+[sub_resource type="Gradient" id="Gradient_tpq6i"]
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_8ukss"]
+gradient = SubResource("Gradient_tpq6i")
+width = 512
+height = 512
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[sub_resource type="Gradient" id="Gradient_kipkx"]
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_2mgj5"]
+gradient = SubResource("Gradient_kipkx")
+width = 512
+height = 512
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[node name="Ruins" type="Node2D" unique_id=1154784663]
+script = ExtResource("1_pxqrw")
+world_brightness = 0.3
+
+[node name="FarLayer" type="Parallax2D" parent="." unique_id=356163906]
+scroll_scale = Vector2(0.3, 1)
+
+[node name="Backdrop" type="TextureRect" parent="FarLayer" unique_id=1626762249]
+offset_right = 1500.0
+offset_bottom = 768.0
+mouse_filter = 2
+texture = ExtResource("2_pxqrw")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="MidLayer" type="Parallax2D" parent="." unique_id=1583612062]
+scroll_scale = Vector2(0.7, 1)
+
+[node name="Ground" type="ColorRect" parent="." unique_id=350550260]
+offset_top = 640.0
+offset_right = 2304.0
+offset_bottom = 768.0
+mouse_filter = 2
+color = Color(0.1, 0.1, 0.11, 0.94)
+
+[node name="Points" type="Node2D" parent="." unique_id=1353451513]
+
+[node name="Horde" type="Area2D" parent="Points" unique_id=405087221]
+position = Vector2(800, 640)
+script = ExtResource("3_d8cse")
+point_id = "horde"
+
+[node name="Shape" type="CollisionShape2D" parent="Points/Horde" unique_id=33630925]
+position = Vector2(0, -96)
+shape = SubResource("RectangleShape2D_8ukss")
+
+[node name="Figure" type="ColorRect" parent="Points/Horde" unique_id=1276178335]
+offset_left = 40.0
+offset_top = -80.0
+offset_right = 150.0
+mouse_filter = 2
+color = Color(0.2, 0.25, 0.21, 1)
+
+[node name="Shelter" type="Area2D" parent="Points" unique_id=1020138718]
+position = Vector2(1600, 640)
+script = ExtResource("3_d8cse")
+point_id = "shelter"
+
+[node name="Shape" type="CollisionShape2D" parent="Points/Shelter" unique_id=1835799782]
+position = Vector2(0, -96)
+shape = SubResource("RectangleShape2D_or88c")
+
+[node name="Figure" type="ColorRect" parent="Points/Shelter" unique_id=2141673917]
+offset_left = 90.0
+offset_top = -88.0
+offset_right = 116.0
+mouse_filter = 2
+color = Color(0.72, 0.52, 0.46, 1)
+
+[node name="Fence" type="ColorRect" parent="Points/Shelter" unique_id=1287519956]
+offset_left = 40.0
+offset_top = -170.0
+offset_right = 260.0
+mouse_filter = 2
+color = Color(0.45, 0.47, 0.5, 0.45)
+
+[node name="Exit" type="Area2D" parent="Points" unique_id=1483213795]
+position = Vector2(2150, 640)
+script = ExtResource("3_d8cse")
+point_id = "exit"
+
+[node name="Shape" type="CollisionShape2D" parent="Points/Exit" unique_id=860071180]
+position = Vector2(0, -96)
+shape = SubResource("RectangleShape2D_x3vua")
+
+[node name="Marker" type="ColorRect" parent="Points/Exit" unique_id=91825239]
+offset_left = -44.0
+offset_top = -160.0
+offset_right = 44.0
+mouse_filter = 2
+color = Color(0.2, 0.2, 0.22, 0.7)
+
+[node name="Player" type="CharacterBody2D" parent="." unique_id=1633340741]
+position = Vector2(160, 640)
+motion_mode = 1
+script = ExtResource("4_hnolj")
+
+[node name="Body" type="ColorRect" parent="Player" unique_id=1576433445]
+visible = false
+offset_left = -16.0
+offset_top = -96.0
+offset_right = 16.0
+mouse_filter = 2
+color = Color(0.55, 0.62, 0.5, 1)
+
+[node name="Shape" type="CollisionShape2D" parent="Player" unique_id=858924400]
+position = Vector2(0, -48)
+shape = SubResource("RectangleShape2D_kipkx")
+
+[node name="Camera2D" type="Camera2D" parent="Player" unique_id=1629336938]
+limit_left = 0
+limit_top = 0
+limit_right = 2304
+limit_bottom = 768
+position_smoothing_enabled = true
+position_smoothing_speed = 6.0
+
+[node name="Flashlight" type="PointLight2D" parent="Player" unique_id=333886183]
+position = Vector2(0, -60)
+color = Color(1, 0.93, 0.8, 1)
+texture = SubResource("GradientTexture2D_8ukss")
+
+[node name="Sprite" type="AnimatedSprite2D" parent="Player" unique_id=1572857539]
+texture_filter = 1
+position = Vector2(3, -48)
+scale = Vector2(2, 2)
+sprite_frames = ExtResource("5_rbspv")
+animation = &"idle_right"
+autoplay = "idle_right"
+
+[node name="FrontLayer" type="Parallax2D" parent="." unique_id=1888911907]
+scroll_scale = Vector2(1.3, 1)
+
+[node name="Darkness" type="CanvasModulate" parent="." unique_id=413259386]
+color = Color(0.32, 0.32, 0.3456, 1)
+
+[node name="ShelterLight" type="PointLight2D" parent="." unique_id=105667896]
+position = Vector2(1700, 480)
+color = Color(1, 0.75, 0.45, 1)
+texture = SubResource("GradientTexture2D_2mgj5")
+texture_scale = 3.0
+script = ExtResource("6_xlq1f")
+base_energy = 2.0
+pulse_speed = 0.4
+min_ratio = 0.85
+dropout_chance = 0.0

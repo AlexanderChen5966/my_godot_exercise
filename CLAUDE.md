@@ -46,6 +46,7 @@ assets/bgm/            20 首背景音樂 bgm_01.ogg ~ bgm_20.ogg（匯入時已
 assets/sfx/click.ogg   點擊音效
 assets/fonts/          Noto Sans TC
 tools/validate_story.gd  劇本檢查工具
+tests/                 自動遊玩測試（test_*.gd）與執行腳本 run_tests.sh（在拿掉外掛的副本上執行）
 addons/godot_mcp_toolkit/  Godot MCP Toolkit 編輯器外掛（v1.0.2，MIT）
 .mcp.json              Claude Code 的專案 MCP 設定（由外掛產生，連到 godot-mcp-toolkit）
 scenes/Main.tscn       主場景
@@ -66,7 +67,8 @@ data/areas/parking_lot.json  停車場區域資料（Lv4-3 起為 v1.5 格式，
 data/areas/street.json  街道區域資料（Lv4-4）
 data/areas/clinic.json  診所區域資料（Lv4-5：錄音筆、診療椅的 variants）
 data/areas/lab.json     設施走廊區域資料（Lv5-2：女科學家給筆記本、警衛 → BE2）
-scenes/areas/          可走動區域的場景：ParkingLot.tscn、Street.tscn、Clinic.tscn、Lab.tscn（之後的都由前一個區域另存後用 Toolkit 修改）
+data/areas/ruins.json   廢墟與避難所區域資料（Lv5-3：同類、妻子 → BE3）
+scenes/areas/          可走動區域的場景：ParkingLot.tscn、Street.tscn、Clinic.tscn、Lab.tscn、Ruins.tscn（之後的都由前一個區域另存後用 Toolkit 修改）
 MCP實驗紀錄.md           每一級的 MCP 實驗觀察
 ```
 
@@ -184,7 +186,8 @@ Main (Control, full rect)
 3. `debugger_get_log` 讀錯誤與警告（遊戲剛啟動時 log 可能還沒印完，必要時再讀一次）。
 4. 修好之後 `game_stop`。
 
-- 流程較長時（例如一路點到三個結局），可另外寫 headless 測試腳本放在暫存區（不要放進專案）。
+- **自動測試放在專案的 `tests/`**（2026-10-06 作者決定；暫存區會被系統清空，Lv4 的測試因此遺失過一次）：`tests/test_*.gd`（`extends SceneTree`，載入真正的 `Main.tscn` 跑遊玩流程）。Web 匯出已排除 `tests/*`。
+  **執行一律用 `zsh tests/run_tests.sh`**（或 `zsh tests/run_tests.sh test_lv4` 只跑一個）：它會自動建立拿掉外掛的副本（`$TMPDIR/shiyuzhe_test_copy`），在副本上跑劇本檢查與所有測試，約 10 秒。新增測試時照 `tests/test_lv4.gd` 的寫法。
   **不要直接對本專案跑 headless**：外掛的 `MCPRuntimeServer` autoload 在 headless 也會啟動，會覆蓋 godot-mcp-toolkit 的 runtime 登錄（`~/Library/Application Support/godot-mcp-toolkit/`），導致正在執行的遊戲之後回報 `GAME_NOT_RUNNING`。
   做法：把專案 rsync 到暫存區（排除 `addons/`、`.mcp.json`、`build/`），刪掉副本 `project.godot` 裡的 `MCPRuntimeServer` autoload 與外掛啟用設定，再對副本執行 `Godot --headless --path <副本> --script <測試腳本>`。
 - 劇本檢查也會檢查 `data/areas/*.json`：引用是否存在、`exit_to`、互動點類型、是否有出口、區域 BGM，以及區域場景的 `point_id` 是否與 JSON 一一對應（場景尚未建立時只顯示 ⚠ 提醒）。

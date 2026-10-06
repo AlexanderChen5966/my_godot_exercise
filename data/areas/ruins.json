@@ -1,0 +1,46 @@
+{
+  "id": "ruins",
+  "scene": "res://scenes/areas/Ruins.tscn",
+  "bgm": "bgm_09.ogg",
+  "intro": {
+    "title": "廢墟徘徊",
+    "text": "你穿越城市廢墟。熟悉又陌生的街道掩藏在瓦礫與殘火後。遠處，是你曾經的家。"
+  },
+  "spawns": { "default": 220 },
+  "points": {
+    "horde": {
+      "type": "choice", "trigger": "approach", "hide_on_done": true, "title": "同類",
+      "text": "巷子裡，一群感染者蹲在地上啃食著什麼。他們抬起頭，空洞的眼睛看著你，沒有敵意——他們把你當成同類。不遠處，傳來倖存者壓低的說話聲。",
+      "choices": [
+        { "text": "加入他們",
+          "response": "你蹲下來，和他們一起。飢餓終於安靜了，你心裡的某個東西，也跟著安靜了。",
+          "effects": { "humanity": -2 } },
+        { "text": "把他們引開",
+          "response": "你用力敲打鐵捲門，發出低吼，朝反方向跑。感染者們跟著你湧去，倖存者的聲音沒有被發現。",
+          "effects": { "humanity": 2 } },
+        { "text": "躲起來",
+          "response": "你退進陰影裡，等他們散去。" }
+      ]
+    },
+    "shelter": {
+      "type": "choice", "trigger": "approach", "title": "避難所的燈火",
+      "text": "鐵絲網圍起的避難所裡亮著燈。一個女人正在幫孩子們分麵包——是她，你的妻子。她瘦了很多，頭髮剪短了，但你一眼就認出她。你的喉嚨發出聲音，不知道是想喊她，還是飢餓。",
+      "choices": [
+        { "text": "隔著圍籬看著她",
+          "response": "你站在暗處，看她把最後一塊麵包分給別人。她笑起來的樣子，和你記憶裡一樣。你把這一幕記住了。",
+          "effects": { "memory": 1 } },
+        { "text": "轉身離開",
+          "response": "你轉身離開。你知道，她現在最需要的，是你不要出現。",
+          "effects": { "humanity": 1 } },
+        { "text": "撲向她",
+          "response": "你撞上圍籬，鐵絲割進手臂。她看見了你，發出尖叫——",
+          "to": { "scene": 23 } }
+      ]
+    },
+    "exit": {
+      "type": "exit", "label": "走向舊家", "title": "走向舊家",
+      "text": "你沿著記憶前行，那棟老屋就在盡頭。",
+      "to": { "scene": 15 }
+    }
+  }
+}
