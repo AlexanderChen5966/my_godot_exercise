@@ -1,4 +1,4 @@
-# 失語者 — Godot 專案（階段 1、Lv1～Lv4 完成）
+# 失語者 — Godot 專案（階段 1、Lv1～Lv5 完成）
 
 這份檔案是給 Claude Code 讀的專案說明。每次開新對話都會自動載入。
 
@@ -10,7 +10,7 @@
   - 每一級的規格、步驟、驗證方式、完成標準：`docs/Lv製作流程.md`
   - 作者貼給你的分步指令：`PROMPTS.md` 的「LvN 分步指令」（每一級開始時補上該級的指令）
 - **暫不支援手機**：Lv1 起可走動區域只做鍵盤操作，不要自行加觸控。按鍵衝突（`interact` 與 `ui_accept`）之後再處理。
-- **Lv1（停車場可走動）、Lv2（景深分層與光影）已完成（2026-10-02）；Lv3（Pixelorama MCP 畫主角）已完成（2026-10-05）**：32×48、放大 2 倍，左右各一套共 20 格（待機 4 fps、行走 8 fps），原始檔 `art/player.pxo`，遊戲用 `assets/sprites/player.png`＋`player_frames.tres`。經過與觀察見 `MCP實驗紀錄.md` 的「Lv3」。**劇本 v1.5 已定稿（2026-10-05）**：`docs/story_v1.5_outline.md`、`docs/story_v1.5_draft.md`，素材需求 `docs/asset_requests.md`。**Lv4（多區域、物品與旗標）已完成（2026-10-05）**：停車場（v1.5）→ 街道 → 診所，格式與步驟見 `docs/Lv製作流程.md` 的「Lv4」，經過見 `MCP實驗紀錄.md` 的「Lv4」。**目前進行：Lv5（其餘區域、Bad End 與結局）**：2026-10-05 作者決定把原 Lv5 拆成 Lv5／Lv6（衝動機制、像素人物、平衡在 Lv6）。規格與格式擴充見 `docs/Lv製作流程.md` 的「Lv5」，分步指令在 `PROMPTS.md` 的「Lv5 分步指令」。
+- **Lv1（停車場可走動）、Lv2（景深分層與光影）已完成（2026-10-02）；Lv3（Pixelorama MCP 畫主角）已完成（2026-10-05）**：32×48、放大 2 倍，左右各一套共 20 格（待機 4 fps、行走 8 fps），原始檔 `art/player.pxo`，遊戲用 `assets/sprites/player.png`＋`player_frames.tres`。經過與觀察見 `MCP實驗紀錄.md` 的「Lv3」。**劇本 v1.5 已定稿（2026-10-05）**：`docs/story_v1.5_outline.md`、`docs/story_v1.5_draft.md`，素材需求 `docs/asset_requests.md`。**Lv4（多區域、物品與旗標）已完成（2026-10-05）**：停車場（v1.5）→ 街道 → 診所，格式與步驟見 `docs/Lv製作流程.md` 的「Lv4」，經過見 `MCP實驗紀錄.md` 的「Lv4」。**Lv5（其餘區域、Bad End 與結局）已完成（2026-10-06）**：7 個區域＋3 段過場、6 個結局、Bad End 重試，規格見 `docs/Lv製作流程.md` 的「Lv5」，經過見 `MCP實驗紀錄.md` 的「Lv5」。**下一級：Lv6**（衝動機制、像素人物與場景物件、過場選項的鍵盤操作、平衡、整體總結），等作者指示再開始，規格見 `docs/Lv製作流程.md` 的「Lv6」。
 - **一次只做一級**：沒有作者的指示，不要開始下一級，也不要提前做後面等級的功能。
 - MCP：**godot-mcp-toolkit**（Godot 編輯器）＋ **pixelorama**（像素繪圖，Lv3 起使用）。
   - pixelorama 註冊在 **user 範圍**（`~/Tools/pixelorama-mcp`），擴充功能用自己從原始碼打包的 `PixMcpBridge.zip`。安裝紀錄與排除問題見 `docs/Lv製作流程.md` 的 Lv3 與 `MCP實驗紀錄.md` 的「Lv3 準備」。
@@ -46,7 +46,7 @@ assets/bgm/            20 首背景音樂 bgm_01.ogg ~ bgm_20.ogg（匯入時已
 assets/sfx/click.ogg   點擊音效
 assets/fonts/          Noto Sans TC
 tools/validate_story.gd  劇本檢查工具
-tests/                 自動遊玩測試（test_*.gd）與執行腳本 run_tests.sh（在拿掉外掛的副本上執行）
+tests/                 自動遊玩測試（test_lv4.gd、test_lv5.gd，共用操作在 play_base.gd）與執行腳本 run_tests.sh（在拿掉外掛的副本上執行）
 addons/godot_mcp_toolkit/  Godot MCP Toolkit 編輯器外掛（v1.0.2，MIT）
 .mcp.json              Claude Code 的專案 MCP 設定（由外掛產生，連到 godot-mcp-toolkit）
 scenes/Main.tscn       主場景
@@ -189,7 +189,7 @@ Main (Control, full rect)
 4. 修好之後 `game_stop`。
 
 - **自動測試放在專案的 `tests/`**（2026-10-06 作者決定；暫存區會被系統清空，Lv4 的測試因此遺失過一次）：`tests/test_*.gd`（`extends SceneTree`，載入真正的 `Main.tscn` 跑遊玩流程）。Web 匯出已排除 `tests/*`。
-  **執行一律用 `zsh tests/run_tests.sh`**（或 `zsh tests/run_tests.sh test_lv4` 只跑一個）：它會自動建立拿掉外掛的副本（`$TMPDIR/shiyuzhe_test_copy`），在副本上跑劇本檢查與所有測試，約 10 秒。新增測試時照 `tests/test_lv4.gd` 的寫法。
+  **執行一律用 `zsh tests/run_tests.sh`**（或 `zsh tests/run_tests.sh test_lv4` 只跑一個）：它會自動建立拿掉外掛的副本（`$TMPDIR/shiyuzhe_test_copy`），在副本上跑劇本檢查與所有測試，約 10 秒。新增測試時繼承 `tests/play_base.gd`（`extends "res://tests/play_base.gd"`，覆寫 `run_tests()`），照 `tests/test_lv5.gd` 的寫法。
   **不要直接對本專案跑 headless**：外掛的 `MCPRuntimeServer` autoload 在 headless 也會啟動，會覆蓋 godot-mcp-toolkit 的 runtime 登錄（`~/Library/Application Support/godot-mcp-toolkit/`），導致正在執行的遊戲之後回報 `GAME_NOT_RUNNING`。
   做法：把專案 rsync 到暫存區（排除 `addons/`、`.mcp.json`、`build/`），刪掉副本 `project.godot` 裡的 `MCPRuntimeServer` autoload 與外掛啟用設定，再對副本執行 `Godot --headless --path <副本> --script <測試腳本>`。
 - 劇本檢查也會檢查 `data/areas/*.json`：引用是否存在、`exit_to`、互動點類型、是否有出口、區域 BGM，以及區域場景的 `point_id` 是否與 JSON 一一對應（場景尚未建立時只顯示 ⚠ 提醒）。

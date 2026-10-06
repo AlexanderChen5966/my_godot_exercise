@@ -1,31 +1,12 @@
-## Lv4-7 自動測試：載入真正的 Main.tscn，用和玩家一樣的輸入（互動鍵、按選項）跑三輪。
-## 不要直接對專案執行：用 tests/run_tests.sh（會先建立拿掉外掛的副本，再在副本上執行）。
-extends SceneTree
-
-const TITLE := 0
-const TRANSITION := 1
-const TYPING := 2
-const CHOOSING := 3
-const RESPONSE := 4
-const EXPLORE := 5
-const AREA_TEXT := 6
-
-var main: Control
-var fails := 0
-var checks := 0
+## Lv4-7 自動測試：停車場 → 街道 → 診所，跑三輪（不拿錄音筆／拿錄音筆／回標題重設）。
+## 共用操作在 play_base.gd。執行：zsh tests/run_tests.sh test_lv4
+extends "res://tests/play_base.gd"
 
 
-func _initialize() -> void:
-	main = (load("res://scenes/Main.tscn") as PackedScene).instantiate()
-	root.add_child(main)
-	await frames(5)
+func run_tests() -> void:
 	await run_a()
 	await run_b()
 	await run_c()
-	print("\n共 %d 項檢查，失敗 %d 項" % [checks, fails])
-	main.queue_free()
-	await frames(3)
-	quit(1 if fails > 0 else 0)
 
 
 # ---- 三輪 ----
@@ -94,120 +75,3 @@ func run_c() -> void:
 	ok(figure_visible("Woman"), "婦人重新出現")
 	await walk_to(300); await interact(); await read()
 	ok(gs().stats["memory"] == 1, "重設後同一處可以再加記憶")
-
-
-# ---- 操作 ----
-
-func start_game(skip_intro := true) -> void:
-	main.call("_start_game")
-	await wait_for(func(): return main.state in [TYPING, AREA_TEXT], 5.0)
-	if skip_intro:
-		await read()
-
-
-func back_to_title() -> void:
-	main.call("_return_to_title")
-	await wait_for(func(): return main.state == TITLE, 5.0)
-
-
-## 主角走到 x（直接設定位置，再等物理更新讓互動點偵測到）
-func walk_to(x: float) -> void:
-	player().position.x = x
-	await physics(4)
-	await wait_for(func(): return main.state != TRANSITION, 3.0)
-
-
-func interact() -> void:
-	await key("interact")
-
-
-## 讀完目前的文字：打字中先按一次顯示全部，再按一次關閉
-func read() -> void:
-	await wait_for(func(): return main.state in [TYPING, AREA_TEXT, RESPONSE], 5.0)
-	if main.state == TYPING:
-		await key("interact")
-	await wait_for(func(): return main.state in [AREA_TEXT, RESPONSE], 3.0)
-	await key("interact")
-	await wait_for(func(): return main.state in [EXPLORE, TRANSITION, CHOOSING] or main.current_id >= 3, 3.0)
-
-
-func choose(index: int) -> void:
-	await wait_for(func(): return main.state in [TYPING, CHOOSING], 5.0)
-	if main.state == TYPING:
-		await key("interact")
-	await wait_for(func(): return main.state == CHOOSING, 3.0)
-	(main.choices_box.get_child(index) as Button).pressed.emit()
-	await read()
-
-
-## 走到出口、按互動鍵、讀完出口文字，等新區域的開場（第一次）並讀完
-func go_exit(x: float, next_area: String) -> void:
-	await walk_to(x)
-	await interact()
-	if main.state in [TYPING, AREA_TEXT]:
-		await read()
-	await wait_for(func(): return area() == next_area and main.state != TRANSITION, 5.0)
-	if main.state in [TYPING, AREA_TEXT]:
-		await read()
-
-
-func key(action: String) -> void:
-	var press := InputEventAction.new()
-	press.action = action
-	press.pressed = true
-	Input.parse_input_event(press)
-	await frames(2)
-	var release := InputEventAction.new()
-	release.action = action
-	release.pressed = false
-	Input.parse_input_event(release)
-	await frames(2)
-
-
-# ---- 查詢 ----
-
-func gs() -> GameStateData:
-	return root.get_node("GameState")
-
-
-func area() -> String:
-	return main.get("_area_id")
-
-
-func player() -> CharacterBody2D:
-	return main.get("_area").get_node("Player")
-
-
-func prompt() -> String:
-	return main.prompt_label.text if main.prompt_label.visible else ""
-
-
-func figure_visible(point_name: String) -> bool:
-	return main.get("_area").get_node("Points/%s/Figure" % point_name).visible
-
-
-func ok(cond: bool, name: String) -> void:
-	checks += 1
-	print(("  ✓ " if cond else "  ✗ ") + name)
-	if not cond:
-		fails += 1
-		print("    狀態 state=%d area=%s scene=%d stats=%s flags=%s" % [main.state, area(), main.current_id, gs().stats, gs().flags.keys()])
-
-
-# ---- 等待 ----
-
-func frames(n: int) -> void:
-	for i in n:
-		await process_frame
-
-
-func physics(n: int) -> void:
-	for i in n:
-		await physics_frame
-
-
-## 以真實時間計算逾時（headless 不等螢幕更新，畫格會跑得很快，但淡入淡出與打字是用秒計算）
-func wait_for(cond: Callable, timeout: float) -> void:
-	var until := Time.get_ticks_msec() + int(timeout * 1000)
-	while not cond.call() and Time.get_ticks_msec() < until:
-		await process_frame
