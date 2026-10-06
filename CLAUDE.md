@@ -68,7 +68,8 @@ data/areas/street.json  街道區域資料（Lv4-4）
 data/areas/clinic.json  診所區域資料（Lv4-5：錄音筆、診療椅的 variants）
 data/areas/lab.json     設施走廊區域資料（Lv5-2：女科學家給筆記本、警衛 → BE2）
 data/areas/ruins.json   廢墟與避難所區域資料（Lv5-3：同類、妻子 → BE3）
-scenes/areas/          可走動區域的場景：ParkingLot.tscn、Street.tscn、Clinic.tscn、Lab.tscn、Ruins.tscn（之後的都由前一個區域另存後用 Toolkit 修改）
+data/areas/home.json    舊家區域資料（Lv5-4：牆上的蠟筆字、女兒的房間、窗外的女兒〔有無筆記本用 variants 換文字〕）
+scenes/areas/          可走動區域的場景：ParkingLot.tscn、Street.tscn、Clinic.tscn、Lab.tscn、Ruins.tscn、Home.tscn（之後的都由前一個區域另存後用 Toolkit 修改）
 MCP實驗紀錄.md           每一級的 MCP 實驗觀察
 ```
 

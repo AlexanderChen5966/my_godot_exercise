@@ -40,7 +40,7 @@
     "exit": {
       "type": "exit", "label": "走向舊家", "title": "走向舊家",
       "text": "你沿著記憶前行，那棟老屋就在盡頭。",
-      "to": { "scene": 15 }
+      "to": { "area": "home" }
     }
   }
 }
