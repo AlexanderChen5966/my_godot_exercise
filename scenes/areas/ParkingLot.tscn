@@ -7,6 +7,7 @@
 [ext_resource type="SpriteFrames" uid="uid://b872yo2d63qvl" path="res://assets/sprites/player_frames.tres" id="4_kipkx"]
 [ext_resource type="Script" uid="uid://u5x8mgenl5y4" path="res://scripts/interact_point.gd" id="4_tpq6i"]
 [ext_resource type="Script" uid="uid://cpx5m37cmu4jq" path="res://scripts/flicker_light.gd" id="5_8ukss"]
+[ext_resource type="Texture2D" uid="uid://dy0p8jen3y560" path="res://assets/sprites/characters/woman.png" id="5_ef6w0"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_k46jg"]
 size = Vector2(140, 192)
@@ -179,12 +180,11 @@ point_id = "woman"
 position = Vector2(-40, -96)
 shape = SubResource("RectangleShape2D_ef6w0")
 
-[node name="Figure" type="ColorRect" parent="Points/Woman" unique_id=401183864]
-offset_left = 24.0
-offset_top = -88.0
-offset_right = 52.0
-mouse_filter = 2
-color = Color(0.62, 0.42, 0.36, 1)
+[node name="Figure" type="Sprite2D" parent="Points/Woman" unique_id=1439783069]
+texture_filter = 1
+position = Vector2(38, -48)
+scale = Vector2(2, 2)
+texture = ExtResource("5_ef6w0")
 
 [node name="Exit" type="Area2D" parent="Points" unique_id=1483213795]
 position = Vector2(2150, 640)
