@@ -7,7 +7,9 @@
 [ext_resource type="Script" uid="uid://dkcse5tmlbfke" path="res://scripts/player.gd" id="4_hnolj"]
 [ext_resource type="Texture2D" uid="uid://d0ryurb452r8m" path="res://assets/sprites/characters/wife.png" id="5_hnolj"]
 [ext_resource type="SpriteFrames" uid="uid://b872yo2d63qvl" path="res://assets/sprites/player_frames.tres" id="5_rbspv"]
+[ext_resource type="Texture2D" uid="uid://bbreeny8ht8rk" path="res://assets/sprites/props/shelter_fence.png" id="6_rbspv"]
 [ext_resource type="Script" uid="uid://cpx5m37cmu4jq" path="res://scripts/flicker_light.gd" id="6_xlq1f"]
+[ext_resource type="Texture2D" uid="uid://bef5n6bpw3ky1" path="res://assets/sprites/props/sign_home.png" id="7_xlq1f"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_8ukss"]
 size = Vector2(160, 192)
@@ -100,12 +102,11 @@ position = Vector2(103, -48)
 scale = Vector2(2, 2)
 texture = ExtResource("5_hnolj")
 
-[node name="Fence" type="ColorRect" parent="Points/Shelter" unique_id=1287519956]
-offset_left = 40.0
-offset_top = -170.0
-offset_right = 260.0
-mouse_filter = 2
-color = Color(0.45, 0.47, 0.5, 0.45)
+[node name="Fence" type="Sprite2D" parent="Points/Shelter" unique_id=675990430]
+texture_filter = 1
+position = Vector2(150, -85)
+scale = Vector2(2, 2)
+texture = ExtResource("6_rbspv")
 
 [node name="Exit" type="Area2D" parent="Points" unique_id=1483213795]
 position = Vector2(2150, 640)
@@ -116,12 +117,11 @@ point_id = "exit"
 position = Vector2(0, -96)
 shape = SubResource("RectangleShape2D_x3vua")
 
-[node name="Marker" type="ColorRect" parent="Points/Exit" unique_id=91825239]
-offset_left = -44.0
-offset_top = -160.0
-offset_right = 44.0
-mouse_filter = 2
-color = Color(0.2, 0.2, 0.22, 0.7)
+[node name="Prop" type="Sprite2D" parent="Points/Exit" unique_id=1328948784]
+texture_filter = 1
+position = Vector2(0, -72)
+scale = Vector2(2, 2)
+texture = ExtResource("7_xlq1f")
 
 [node name="Player" type="CharacterBody2D" parent="." unique_id=1633340741]
 position = Vector2(160, 640)
