@@ -1,0 +1,565 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>失語者 MCP 實驗紀錄</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Silkscreen&family=JetBrains+Mono:wght@400;600&family=Noto+Sans+TC:wght@400;500;700;900&display=swap">
+<style>
+/* Layout: a game save screen — stat readout on top, a level-select track (Stage 1 → Lv6) that plays through, the asset pipeline replayed with real Lv6 assets, then the import-loss chart and the AI/human split. */
+:root {
+  --bg: #E9ECEF;
+  --surface: #F6F7F8;
+  --surface-2: #DDE1E6;
+  --fg: #181B20;
+  --muted: #59616C;
+  --line: #C3C9D1;
+  --accent: #B3202D;        /* 衝動機制的紅 */
+  --accent-soft: #F4D9DB;
+  --toolkit: #2E6DB4;       /* godot-mcp-toolkit */
+  --pixel: #7647AD;         /* pixelorama */
+  --script: #47705A;        /* Python／ImageMagick／腳本 */
+  --human: #A8650F;         /* 作者 */
+  --ok: #2E7D4F;
+  --font-pixel: "Silkscreen", "JetBrains Mono", monospace;
+  --font-body: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --radius: 4px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #101216; --surface: #181B21; --surface-2: #232730; --fg: #E4E7EC; --muted: #98A0AB; --line: #343A45;
+    --accent: #F0525D; --accent-soft: #3B1A1E; --toolkit: #6EA6EA; --pixel: #B08CE6; --script: #7DBB98; --human: #E9A54A; --ok: #5CC98A;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #101216; --surface: #181B21; --surface-2: #232730; --fg: #E4E7EC; --muted: #98A0AB; --line: #343A45;
+  --accent: #F0525D; --accent-soft: #3B1A1E; --toolkit: #6EA6EA; --pixel: #B08CE6; --script: #7DBB98; --human: #E9A54A; --ok: #5CC98A;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 15px; line-height: 1.65; }
+.wrap { max-width: 1120px; margin: 0 auto; padding-inline: 20px; padding-block: 28px 56px; display: grid; gap: 22px; }
+@media (max-width: 480px) { .wrap { padding-inline: 16px; } }
+p { margin: 0; }
+.eyebrow { font-family: var(--font-mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+h1 { font-weight: 900; font-size: clamp(30px, 5.4vw, 46px); line-height: 1.1; margin: 8px 0 10px; letter-spacing: .02em; text-wrap: balance; }
+h1 .px { font-family: var(--font-pixel); font-weight: 400; color: var(--accent); font-size: .62em; letter-spacing: 0; vertical-align: .18em; margin-left: .3em; }
+h2 { font-weight: 700; font-size: 20px; margin: 0; letter-spacing: .02em; text-wrap: balance; }
+.lede { color: var(--muted); max-width: 64ch; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.sq { width: 10px; height: 10px; display: inline-block; flex: none; border-radius: 1px; }
+
+/* stat readout */
+.board { display: grid; grid-template-columns: repeat(auto-fit, minmax(128px, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+.tile { background: var(--surface); padding: 12px 14px; display: grid; gap: 2px; min-width: 0; }
+.tile .k { font-size: 12px; color: var(--muted); }
+.tile .v { font-family: var(--font-mono); font-weight: 600; font-size: 24px; font-variant-numeric: tabular-nums; line-height: 1.2; }
+.tile .v small { font-size: 13px; color: var(--muted); font-weight: 400; margin-left: 2px; }
+
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; display: grid; gap: 16px; min-width: 0; }
+.panel-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 6px 12px; }
+.caption { font-size: 14px; color: var(--muted); }
+.caption b { color: var(--fg); }
+
+/* level track */
+.track-scroll { overflow-x: auto; padding-bottom: 4px; }
+.track { position: relative; display: grid; grid-template-columns: repeat(7, minmax(112px, 1fr)); gap: 10px; min-width: 820px; padding-top: 6px; }
+.track::before { content: ""; position: absolute; left: 40px; right: 40px; top: 34px; height: 4px; background: repeating-linear-gradient(90deg, var(--line) 0 8px, transparent 8px 12px); }
+.track .fillbar { position: absolute; left: 40px; top: 34px; height: 4px; background: var(--accent); transition: width .4s ease; width: 0; }
+.stop { position: relative; z-index: 1; display: grid; justify-items: center; gap: 6px; text-align: center; background: none; border: 0; padding: 0 2px 6px; cursor: pointer; color: var(--fg); font: inherit; border-radius: var(--radius); }
+.stop .badge { width: 58px; height: 58px; display: grid; place-items: center; font-family: var(--font-pixel); font-size: 15px; background: var(--surface); border: 3px solid var(--line); border-radius: 2px; box-shadow: 3px 3px 0 var(--line); transition: border-color .2s, background .2s, box-shadow .2s; }
+.stop .name { font-size: 13px; font-weight: 700; line-height: 1.35; }
+.stop .date { font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
+.stop .mcps { display: flex; gap: 4px; }
+.stop.past .badge { border-color: var(--accent); }
+.stop.cur .badge { border-color: var(--accent); background: var(--accent-soft); box-shadow: 3px 3px 0 var(--accent); }
+.stop:hover .badge { border-color: var(--muted); }
+.stop.cur:hover .badge { border-color: var(--accent); }
+
+.controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.btn { font: inherit; font-size: 14px; font-weight: 500; color: var(--fg); background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius); padding: 7px 14px; cursor: pointer; }
+.btn:hover { border-color: var(--muted); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--surface); font-weight: 700; min-width: 96px; }
+.btn:disabled { opacity: .45; cursor: default; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.progress { font-family: var(--font-mono); font-size: 12px; color: var(--muted); margin-left: auto; font-variant-numeric: tabular-nums; }
+@media (max-width: 520px) { .progress { margin-left: 0; width: 100%; } }
+
+/* level detail */
+.detail { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr); gap: 20px; border-top: 1px solid var(--line); padding-top: 16px; }
+@media (max-width: 820px) { .detail { grid-template-columns: minmax(0, 1fr); } }
+.detail h3 { font-size: 22px; font-weight: 900; margin: 0 0 4px; text-wrap: balance; }
+.detail .result { color: var(--muted); }
+.facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; margin: 0; }
+.facts div { background: var(--surface); padding: 8px 12px; min-width: 0; }
+.facts dt { font-size: 12px; color: var(--muted); }
+.facts dd { margin: 0; font-family: var(--font-mono); font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; word-break: break-word; }
+.col { display: grid; gap: 14px; align-content: start; min-width: 0; }
+.tabs { display: flex; flex-wrap: wrap; gap: 6px; }
+.tab { font: inherit; font-size: 13px; padding: 5px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); cursor: pointer; }
+.tab[aria-selected="true"] { border-color: var(--accent); background: var(--accent-soft); font-weight: 700; }
+.list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.list li { display: grid; grid-template-columns: 4px minmax(0, 1fr); gap: 10px; font-size: 14px; }
+.list li::before { content: ""; border-radius: 1px; background: var(--c, var(--line)); }
+.list li b { font-weight: 700; }
+.list .who { font-family: var(--font-mono); font-size: 11px; color: var(--muted); margin-left: 6px; white-space: nowrap; }
+code { font-family: var(--font-mono); font-size: .88em; background: var(--surface-2); padding: 1px 5px; border-radius: 3px; word-break: break-word; }
+
+/* pipeline */
+.diagram { overflow-x: auto; }
+.diagram svg { display: block; width: 100%; min-width: 720px; height: auto; }
+svg .edge { fill: none; stroke: var(--line); stroke-width: 2; }
+svg .edge.on { stroke: var(--accent); stroke-width: 3; stroke-dasharray: 7 5; animation: flow .9s linear infinite; }
+@keyframes flow { to { stroke-dashoffset: -12; } }
+svg .node rect.box { fill: var(--surface); stroke: var(--line); stroke-width: 1.5; transition: fill .2s, stroke .2s; }
+svg .node .t1 { fill: var(--fg); font-family: var(--font-body); font-weight: 700; font-size: 14px; }
+svg .node .t2 { fill: var(--muted); font-family: var(--font-mono); font-size: 10.5px; }
+svg .node.on rect.box { stroke: var(--accent); stroke-width: 3; fill: var(--accent-soft); }
+svg .node.done rect.box { stroke: var(--ok); stroke-width: 2.5; }
+svg .node.skip { opacity: .35; }
+svg .elabel { fill: var(--muted); font-family: var(--font-mono); font-size: 10.5px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font: inherit; font-size: 13px; padding: 4px 11px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); cursor: pointer; }
+.chip[aria-current="true"] { border-color: var(--accent); background: var(--accent-soft); font-weight: 700; }
+.asset { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; }
+@media (max-width: 760px) { .asset { grid-template-columns: minmax(0, 1fr); } }
+.note { font-size: 14px; border-left: 3px solid var(--accent); padding: 4px 0 4px 12px; }
+
+/* loss chart */
+.bars { display: grid; gap: 7px; }
+.bar { display: grid; grid-template-columns: 8.6em minmax(0, 1fr) 4.4em; align-items: center; gap: 10px; font-size: 13px; }
+.bar .name { font-family: var(--font-mono); min-width: 0; overflow-wrap: anywhere; }
+.bar .lane { position: relative; height: 14px; background: var(--surface-2); border-radius: 2px; }
+.bar .fill { position: absolute; inset: 0 auto 0 0; background: var(--pixel); border-radius: 2px; }
+.bar.alpha .fill { background: var(--accent); }
+.bar .val { font-family: var(--font-mono); text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+.axis { display: grid; grid-template-columns: 8.6em minmax(0, 1fr) 4.4em; gap: 10px; font-family: var(--font-mono); font-size: 10.5px; color: var(--muted); }
+.axis .ticks { position: relative; height: 14px; }
+.axis .ticks span { position: absolute; transform: translateX(-50%); }
+.axis .ticks span:first-child { transform: none; }
+.axis .ticks span:last-child { transform: translateX(-100%); }
+
+/* AI vs human */
+.split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; }
+@media (max-width: 760px) { .split { grid-template-columns: minmax(0, 1fr); } }
+.split h3 { font-size: 16px; margin: 0 0 10px; display: flex; align-items: center; gap: 8px; }
+.foot { font-size: 12px; color: var(--muted); display: grid; gap: 4px; max-width: 90ch; }
+@media (prefers-reduced-motion: reduce) { svg .edge.on { animation: none; stroke-dasharray: none; } .track .fillbar { transition: none; } }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Claude Code × godot-mcp-toolkit × pixelorama · 2026-10-02 ～ 10-06</div>
+    <h1>失語者 MCP 實驗紀錄<span class="px">LV6 CLEAR</span></h1>
+    <p class="lede">把 Kivy 版的選項式遊戲，用 Claude Code 和兩個 MCP 重做成 Godot 網頁版的橫向捲軸冒險。這一頁整理從階段 1 到 Lv6 每一級用了哪些工具、AI 自己修好什麼、哪些地方一定要人。</p>
+  </header>
+
+  <div class="legend" aria-label="顏色說明">
+    <span><i class="sq" style="background:var(--toolkit)"></i>godot-mcp-toolkit</span>
+    <span><i class="sq" style="background:var(--pixel)"></i>pixelorama</span>
+    <span><i class="sq" style="background:var(--script)"></i>腳本（Python、ImageMagick、headless）</span>
+    <span><i class="sq" style="background:var(--human)"></i>作者</span>
+  </div>
+
+  <section aria-label="專案數字"><div class="board" id="board"></div></section>
+
+  <section class="panel" aria-label="關卡路線">
+    <div class="panel-head">
+      <h2>關卡路線</h2>
+      <p class="caption" id="trackCaption" aria-live="polite"></p>
+    </div>
+    <div class="track-scroll">
+      <div class="track" id="track"><span class="fillbar" id="fillbar"></span></div>
+    </div>
+    <div class="controls">
+      <button class="btn" id="lvPrev" type="button">◀ 上一級</button>
+      <button class="btn primary" id="lvPlay" type="button">▶ 播放</button>
+      <button class="btn" id="lvNext" type="button">下一級 ▶</button>
+      <span class="progress" id="lvProgress"></span>
+    </div>
+    <div class="detail">
+      <div class="col">
+        <div>
+          <div class="eyebrow" id="lvEyebrow"></div>
+          <h3 id="lvTitle"></h3>
+          <p class="result" id="lvResult"></p>
+        </div>
+        <dl class="facts" id="lvFacts"></dl>
+      </div>
+      <div class="col">
+        <div class="tabs" role="tablist" id="tabs"></div>
+        <ul class="list" id="tabBody" role="tabpanel"></ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" aria-label="素材流水線">
+    <div class="panel-head">
+      <h2>素材流水線（Lv6 實際跑過的素材）</h2>
+      <p class="caption" id="pipeCaption" aria-live="polite"></p>
+    </div>
+    <div class="diagram">
+      <svg id="pipe" viewBox="0 0 1000 250" role="img" aria-label="素材流水線：設計、預覽、畫、比對、補像素、換上、截圖、作者確認"></svg>
+    </div>
+    <div class="controls">
+      <button class="btn" id="pPrev" type="button">◀ 上一步</button>
+      <button class="btn primary" id="pPlay" type="button">▶ 播放</button>
+      <button class="btn" id="pNext" type="button">下一步 ▶</button>
+      <button class="btn" id="pReset" type="button">重設</button>
+      <span class="progress" id="pProgress"></span>
+    </div>
+    <div class="chips" id="assetChips" aria-label="切換素材"></div>
+    <div class="asset">
+      <div class="col">
+        <div class="eyebrow" id="aEyebrow"></div>
+        <p class="note" id="aNote"></p>
+      </div>
+      <dl class="facts" id="aFacts"></dl>
+    </div>
+  </section>
+
+  <section class="panel" aria-label="匯入掉像素">
+    <div class="panel-head">
+      <h2>Pixelorama 匯入後掉了幾格</h2>
+      <p class="caption">對數刻度。紫色是一般遺漏，紅色是半透明被變成不透明。</p>
+    </div>
+    <div class="bars" id="lossBars"></div>
+    <div class="axis" aria-hidden="true"><span></span><div class="ticks" id="lossTicks"></div><span></span></div>
+    <p class="caption">另外 14 張（4 組人物、10 張物件）匯入後 0 差異。每一張都把設計圖和匯出圖逐格比對，有差異就用 <code>draw_pixels</code> 補回，最後全部 0 差異。</p>
+  </section>
+
+  <section class="panel" aria-label="AI 與人的分工">
+    <div class="panel-head"><h2>AI 與人的分工</h2></div>
+    <div class="split">
+      <div>
+        <h3><i class="sq" style="background:var(--toolkit)"></i>AI 與 MCP 幫最多的地方</h3>
+        <ul class="list" id="aiList"></ul>
+      </div>
+      <div>
+        <h3><i class="sq" style="background:var(--human)"></i>仍然需要人的地方</h3>
+        <ul class="list" id="humanList"></ul>
+      </div>
+    </div>
+  </section>
+
+  <div class="foot">
+    <p>資料來源：專案的 <code>MCP實驗紀錄.md</code> 與 <code>docs/開發路線圖.md</code>。環境：macOS（Apple M2 Pro）、Godot 4.7.2、Pixelorama 1.1.10。</p>
+    <p>遊玩測試是 headless 載入真正的 <code>Main.tscn</code>，用真正的按鍵玩；在拿掉 MCP 外掛的專案副本上執行，避免覆蓋 runtime 登錄。</p>
+  </div>
+</div>
+
+<script>
+(function () {
+  var C = { toolkit: "var(--toolkit)", pixel: "var(--pixel)", script: "var(--script)", human: "var(--human)", accent: "var(--accent)" };
+
+  /* ---------- project numbers ---------- */
+  var BOARD = [
+    ["完成的級數", "7", "/ 7"], ["可走動區域", "7", "＋3 過場"], ["結局", "6", "含 3 個 Bad End"],
+    ["自動遊玩測試", "77", "項"], ["像素素材", "50", "張／格"], ["MCP", "2", "個"], ["Web 版 index.pck", "47.9", "MB"]
+  ];
+  document.getElementById("board").innerHTML = BOARD.map(function (b) {
+    return '<div class="tile"><span class="k">' + b[0] + '</span><span class="v">' + b[1] + "<small>" + b[2] + "</small></span></div>";
+  }).join("");
+
+  /* ---------- levels ---------- */
+  var LV = [
+    { badge: "S1", name: "階段 1\n視覺小說", date: "10-02", mcps: ["toolkit"],
+      title: "階段 1：視覺小說版", result: "標題、打字機、選項、BGM 交叉淡入、三個結局；7 項完成標準全部達成，作者在瀏覽器實測含聲音。",
+      facts: [["MCP", "Coding-Solo → Toolkit"], ["完成標準", "7 / 7"], ["主程式", "約 370 行"], ["index.pck", "約 48MB"]],
+      tools: [["toolkit", "<code>scene_create_node</code>、<code>control_set_layout</code>、主題覆寫、AudioStream：步驟 4～6 的 UI 全部用 MCP，沒有手改 <code>.tscn</code>"],
+              ["toolkit", "<code>game_start</code>＋<code>input_simulate</code>＋<code>runtime_screenshot</code>：自己點、自己看"],
+              ["script", "headless 跑三條結局路線；<code>export_presets.cfg</code> 與匯出（MCP 沒有匯出工具）"]],
+      fixes: [["toolkit", "舊 MCP 8 件事有 6 件要繞過，而且看不到畫面", "換成 Godot MCP Toolkit"],
+              ["script", "<code>StoryData</code> 找不到", "<code>scripts/</code> 裡多了一份 <code>project.godot</code>，移除後寫進禁止事項"],
+              ["script", "headless 測試後 <code>GAME_NOT_RUNNING</code>", "測試會覆蓋 runtime 登錄 → 改在拿掉外掛的副本上跑"],
+              ["toolkit", "截圖拿到舊畫面", "inline 圖片超過約 1MB → 一律用 disk 模式"]],
+      human: [["click 音效一直響、太單調", "作者聽出來的"], ["「按下沒反應」「故事重複循環」", "體驗問題，截圖抓不到"], ["啟用外掛、安裝匯出模板、在瀏覽器玩", "環境"]],
+      lesson: ["最大的收穫是 MCP 能自己驗證：自己點、自己看、讀狀態。", "最大的坑是 MCP 工具本身的不穩定，不是遊戲程式。", "作者回報的 4 個問題裡有 3 個是體驗或聲音。"] },
+    { badge: "LV1", name: "Lv1\n停車場可走動", date: "10-02", mcps: ["toolkit"],
+      title: "Lv1：停車場可走動", result: "橫向捲軸、替代美術；完成標準 8 項全部達成。作者希望之後整個遊戲都能走動。",
+      facts: [["MCP", "Toolkit"], ["完成標準", "8 / 8"], ["走路速度", "140 px/秒"], ["腳本", "7 個 0 錯誤"]],
+      tools: [["toolkit", "<code>node_manage</code> 把 UI 搬進 CanvasLayer、18 個 unique name"],
+              ["toolkit", "<code>input_map_action</code>、CharacterBody2D＋<code>NewResource</code> 碰撞形狀、Camera2D"],
+              ["toolkit", "<code>input_simulate</code>（action）走路＋<code>execute_code</code> 讀座標：2 秒 = 280.0px"],
+              ["script", "<code>area.gd</code>、<code>player.gd</code>、<code>interact_point.gd</code>；headless 三輪流程"]],
+      fixes: [["toolkit", "建立節點時帶版面屬性，位置被重設成 (0,0)", "MCP 回報成功，讀 <code>.tscn</code> 才發現 → 先建立再設 offset"],
+              ["toolkit", "移動距離異常（2 秒 711px）", "判斷是作者同時在操作遊戲視窗，排除後重測正確"],
+              ["toolkit", "模擬按鍵能不能驅動 <code>is_action_pressed</code>", "讀外掛原始碼確認"]],
+      human: [["從可走動的停車場切回視覺小說「落差很大」", "不是 bug，是體驗；改變了整條路線"], ["走路速度、提示文字是否清楚", "試玩確認"]],
+      lesson: ["MCP 回報成功不代表結果正確，建立或修改後要讀檔確認。", "測試時作者也在操作同一個遊戲視窗，會互相干擾。"] },
+    { badge: "LV2", name: "Lv2\n景深與光影", date: "10-02", mcps: ["toolkit"],
+      title: "Lv2：景深分層與光影", result: "三層視差、黑暗＋手電筒、會閃的紅色警示燈；瀏覽器 60fps 不卡。",
+      facts: [["MCP", "Toolkit"], ["完成標準", "5 / 5"], ["視差", "0.3／0.7／1.3"], ["FPS", "60"]],
+      tools: [["toolkit", "Parallax2D、CanvasModulate、PointLight2D＋巢狀 <code>NewResource</code>（Gradient → GradientTexture2D）"],
+              ["toolkit", "<code>execute_code</code> 執行中直接改數值再截圖，一輪只要幾秒"],
+              ["script", "<code>flicker_light.gd</code>、<code>area.gd</code> 的參數"]],
+      fixes: [["toolkit", "前景柱子擋住出口的主角", "截圖發現 → 移到 2240～2360"],
+              ["toolkit", "紅燈調大還是看不見", "推論「燈色 × 表面顏色」：暗青色反射不出紅色；先驗證再定案"],
+              ["toolkit", "手電筒太弱", "亮度 1.6、大小 1.5"]],
+      human: [["「背景只看到黑黑一片」", "Claude 看到暗，但以為那就是氛圍"], ["亮度 A／B、標題 A／B／C 選一個", "AI 產生候選，人來選"]],
+      lesson: ["「看不到 X」比「調亮一點」好用，AI 能直接找原因。", "主觀的東西：AI 做候選、人來選。"] },
+    { badge: "LV3", name: "Lv3\n像素主角", date: "10-05", mcps: ["pixel", "toolkit"],
+      title: "Lv3：用 Pixelorama 畫主角", result: "32×48、左右各一套共 20 格（待機 4 fps、行走 8 fps）；第一次兩個 MCP 配合。",
+      facts: [["MCP", "Pixelorama＋Toolkit"], ["完成標準", "4 / 4"], ["畫格", "20 格 0 差異"], ["傳送量", "少約 2/3"]],
+      tools: [["pixel", "<code>draw_pixels</code>（一次 497 格）、<code>copy_cel</code>＋只送差異像素、<code>export_gif</code>"],
+              ["pixel", "<code>export_animation</code> 輸出 spritesheet"],
+              ["toolkit", "<code>spriteframes_from_spritesheet</code> 一次切好 4 個動畫"],
+              ["script", "Python 用形狀設計造型、姿勢表算腿；ImageMagick 逐像素比對"]],
+      fixes: [["pixel", "第 1 版沒有駝背、兩腿黏在一起", "文字格線預覽 → 重畫"],
+              ["pixel", "行走後半步步幅比較窄", "兩腿髖部差 2px → 加大後半步偏移"],
+              ["pixel", "在最後一個標籤後面加畫格，標籤自動延伸", "新增畫格後一定檢查標籤"],
+              ["script", "Pixelorama 擴充功能版本不相容（Pack version 4）", "讀紀錄檔與原始碼 → 自己打包成 zip"]],
+      human: [["「沒有走路的移動感、轉向沒有另一方向的像素」", "作者回饋"], ["造型方案、左右分開畫、8 fps", "作者選擇"], ["允許未認證的 App 開啟", "安全設定由作者決定"]],
+      lesson: ["AI 畫像素是「算出來」不是「看著畫」：修改精準、每格都能驗證。", "Pixelorama 只是畫筆，好不好看還是人判斷。"] },
+    { badge: "LV4", name: "Lv4\n多區域與旗標", date: "10-05", mcps: ["toolkit", "pixel"],
+      title: "Lv4：多區域、物品與旗標", result: "停車場 → 街道 → 診所來回走；錄音筆拿到前後事件不同；劇本 v1.5 開始寫入。",
+      facts: [["MCP", "Toolkit＋Pixelorama"], ["完成標準", "5 / 5"], ["遊玩測試", "24 / 24"], ["像素道具", "6 張"]],
+      tools: [["toolkit", "<code>autoload_manage</code> 註冊 GameState"],
+              ["toolkit", "<code>editor_save_scene</code> 另存停車場做新區域，最快"],
+              ["toolkit", "<code>execute_code</code> 在記憶體裡加一個測試區域，不用建檔"],
+              ["pixel", "<code>import_image</code>／<code>draw_pixels</code> 畫 6 個道具"],
+              ["script", "headless 遊玩測試：載入真正的 <code>Main.tscn</code> 跑三輪"]],
+      fixes: [["toolkit", "先看診療椅、拿到錄音筆後，新版本不會出現", "照流程實際走一遍才抓到 → variant 分開記錄"],
+              ["toolkit", "<code>duplicate</code> 的子節點沒存進檔案", "讀 <code>.tscn</code> 發現 → 重建"],
+              ["toolkit", "背景重複拼接有接縫", "遠景只移動 0.3 倍 → 一張圖蓋滿"],
+              ["pixel", "照片、字卡的人臉用了主角的灰青膚色", "改成一般膚色"]],
+      human: [["媽媽改長頭髮、字卡往下、藥櫃也畫成像素圖", "作者回饋 3 次"], ["劇本 v1.5 定稿", "Claude 起草、作者定稿"]],
+      lesson: ["資料驅動的格式撐得住：區域、物品、條件只靠 JSON。", "做場景用 MCP，完整流程用 headless 測試。"] },
+    { badge: "LV5", name: "Lv5\nBad End 與結局", date: "10-06", mcps: ["toolkit"],
+      title: "Lv5：其餘區域、Bad End 與結局", result: "7 個區域＋3 段過場從頭玩到尾；3 個 Bad End 可以從這裡重試；結局依記憶／人性解鎖。",
+      facts: [["MCP", "Toolkit"], ["完成標準", "6 / 6"], ["遊玩測試", "29 / 29"], ["結局", "6 個"]],
+      tools: [["toolkit", "另存前一個區域 → <code>node_manage</code>、<code>scene_delete_node</code>、<code>node_set_property</code>（批次）"],
+              ["toolkit", "<code>execute_code</code> 設定數值、重新產生選項，一次截完三種解鎖情況"],
+              ["script", "劇本檢查加入「窮舉所有路線」"]],
+      fixes: [["script", "結局 A 需要記憶 6，當時最多只到 5", "窮舉路線抓到；每補一個區域重跑，最後全綠"],
+              ["toolkit", "另存後編輯器仍在編輯原檔，牆前的修改被存進 <code>Home.tscn</code>", "git 還原；寫進規則"],
+              ["toolkit", "另存的分頁停在舊內容", "用 <code>scene_get_tree</code> 的 source 確認"],
+              ["script", "暫存區被清空，測試腳本不見", "測試搬進專案的 <code>tests/</code>"]],
+      human: [["場景物件改到 Lv6 畫成像素圖", "作者決定"], ["診所字卡不要漂浮", "作者回饋"], ["Lv5 拆成 Lv5／Lv6", "方向取捨"]],
+      lesson: ["窮舉路線是好用的待辦清單：還沒做的區域會讓結局走不到。", "存檔前先看編輯器裡的場景是不是磁碟上那一個。"] },
+    { badge: "LV6", name: "Lv6\n衝動與像素", date: "10-06", mcps: ["toolkit", "pixel"],
+      title: "Lv6：衝動機制、像素人物與場景物件", result: "只用鍵盤就能玩完；靠近人時畫面泛紅、心跳加快；6 組人物、18 張場景物件換掉色塊。作者：以第一版來說很好。",
+      facts: [["MCP", "Toolkit＋Pixelorama"], ["完成標準", "6 / 6"], ["遊玩測試", "24 / 24"], ["新素材", "24 張"]],
+      tools: [["toolkit", "ImpulseOverlay＋紅色暈影 shader、<code>sound_generate</code> 產生暫用心跳聲"],
+              ["toolkit", "<code>input_simulate</code>（key）測方向鍵＋Enter"],
+              ["pixel", "<code>import_image</code>、<code>draw_pixels</code> 補像素、<code>draw_rect</code> 畫半透明玻璃"],
+              ["toolkit", "<code>node_manage</code> 複製燈光、<code>reorder</code> 決定前後（妻子在圍籬後、窗戶在女兒前）"],
+              ["script", "共用的 <code>pix.py</code>：外框、半透明、字型；逐格比對"]],
+      fixes: [["toolkit", "選項剛出現時按空白鍵直接選到第一個", "0.3 秒內不接受選擇，加進測試"],
+              ["toolkit", "編輯器不在前景時截圖是舊畫面", "先送一個無作用的指令、等 0.5 秒再截"],
+              ["pixel", "<code>import_image</code> 會掉像素（圍籬 471 格）", "每張逐格比對、<code>draw_pixels</code> 補回"],
+              ["pixel", "<code>import_image</code> 把半透明變不透明", "用 <code>draw_rect</code> 以 <code>#RRGGBBAA</code> 重畫"],
+              ["toolkit", "新 PNG 預設有損壓縮", "<code>.import</code> 改成無損"]],
+      human: [["婦人「是參照原本場景圖片的嗎」", "立下規則：原圖有的照原圖畫"], ["警衛要拿槍、感染者是一般人大小、門要用喇叭鎖", "造型只有人能判斷"], ["放大 1.3 倍、畫風一致、燈管慢一點", "一句話就能精準改"], ["回答要用繁體中文", "提醒兩次後寫進記憶"]],
+      lesson: ["「AI 先做、人來挑」是畫素材最有效的節奏。", "工具會出錯，每一步都要能驗證；只看截圖抓不到掉像素。", "下一版：會動的像素、音效、更多場景與互動。"] }
+  ];
+  var TABS = [["tools", "用到的工具"], ["fixes", "自己修好的問題"], ["human", "需要人的地方"], ["lesson", "結論"]];
+  var lv = LV.length - 1, tab = "tools", lvTimer = null;
+
+  var track = document.getElementById("track");
+  LV.forEach(function (l, i) {
+    var b = document.createElement("button");
+    b.type = "button"; b.className = "stop"; b.setAttribute("data-lv", i);
+    b.innerHTML = '<span class="badge">' + l.badge + '</span><span class="name">' + l.name.replace("\n", "<br>") + '</span><span class="date">' + l.date + '</span><span class="mcps">' +
+      l.mcps.map(function (m) { return '<i class="sq" style="background:' + C[m] + '"></i>'; }).join("") + "</span>";
+    track.appendChild(b);
+  });
+  var tabsEl = document.getElementById("tabs");
+  tabsEl.innerHTML = TABS.map(function (t) { return '<button class="tab" type="button" role="tab" data-tab="' + t[0] + '">' + t[1] + "</button>"; }).join("");
+
+  function renderLevel() {
+    var l = LV[lv];
+    track.querySelectorAll(".stop").forEach(function (s, i) {
+      s.classList.toggle("cur", i === lv); s.classList.toggle("past", i < lv);
+      s.setAttribute("aria-current", i === lv ? "step" : "false");
+    });
+    var stops = track.querySelectorAll(".stop");
+    var first = stops[0], cur = stops[lv];
+    var fill = document.getElementById("fillbar");
+    fill.style.width = Math.max(0, cur.offsetLeft + cur.offsetWidth / 2 - first.offsetLeft - first.offsetWidth / 2) + "px";
+    fill.style.left = (first.offsetLeft + first.offsetWidth / 2) + "px";
+    document.getElementById("lvEyebrow").textContent = "2026-" + l.date + " · " + l.mcps.map(function (m) { return m === "toolkit" ? "godot-mcp-toolkit" : "pixelorama"; }).join(" ＋ ");
+    document.getElementById("lvTitle").textContent = l.title;
+    document.getElementById("lvResult").textContent = l.result;
+    document.getElementById("lvFacts").innerHTML = l.facts.map(function (f) { return "<div><dt>" + f[0] + "</dt><dd>" + f[1] + "</dd></div>"; }).join("");
+    document.getElementById("trackCaption").innerHTML = "目前：<b>" + l.title + "</b>";
+    document.getElementById("lvProgress").textContent = "第 " + (lv + 1) + " / " + LV.length + " 站";
+    document.getElementById("lvPrev").disabled = lv === 0;
+    document.getElementById("lvNext").disabled = lv === LV.length - 1;
+    renderTab();
+  }
+  function renderTab() {
+    var l = LV[lv], html = "";
+    tabsEl.querySelectorAll(".tab").forEach(function (t) { t.setAttribute("aria-selected", String(t.getAttribute("data-tab") === tab)); });
+    if (tab === "tools") html = l.tools.map(function (t) { return '<li style="--c:' + C[t[0]] + '"><span>' + t[1] + "</span></li>"; }).join("");
+    if (tab === "fixes") html = l.fixes.map(function (f) { return '<li style="--c:' + C[f[0]] + '"><span><b>' + f[1] + "</b><br>" + f[2] + "</span></li>"; }).join("");
+    if (tab === "human") html = l.human.map(function (h) { return '<li style="--c:' + C.human + '"><span><b>' + h[0] + '</b><span class="who">' + h[1] + "</span></span></li>"; }).join("");
+    if (tab === "lesson") html = l.lesson.map(function (s) { return '<li style="--c:' + C.accent + '"><span>' + s + "</span></li>"; }).join("");
+    document.getElementById("tabBody").innerHTML = html;
+  }
+  function lvStop() { clearInterval(lvTimer); lvTimer = null; document.getElementById("lvPlay").textContent = "▶ 播放"; }
+  document.getElementById("lvPlay").addEventListener("click", function () {
+    if (lvTimer) { lvStop(); return; }
+    if (lv === LV.length - 1) { lv = 0; renderLevel(); }
+    lvTimer = setInterval(function () { if (lv < LV.length - 1) { lv++; renderLevel(); } else lvStop(); }, 1800);
+    document.getElementById("lvPlay").textContent = "❚❚ 暫停";
+  });
+  document.getElementById("lvPrev").addEventListener("click", function () { lvStop(); if (lv > 0) { lv--; renderLevel(); } });
+  document.getElementById("lvNext").addEventListener("click", function () { lvStop(); if (lv < LV.length - 1) { lv++; renderLevel(); } });
+  track.addEventListener("click", function (e) { var b = e.target.closest("[data-lv]"); if (!b) return; lvStop(); lv = +b.getAttribute("data-lv"); renderLevel(); });
+  tabsEl.addEventListener("click", function (e) { var b = e.target.closest("[data-tab]"); if (!b) return; tab = b.getAttribute("data-tab"); renderTab(); });
+  window.addEventListener("resize", renderLevel);
+
+  /* ---------- pipeline ---------- */
+  var NODES = {
+    design: [10, 40, 112, 58, "設計", "Python 格線", "script"],
+    preview: [140, 40, 112, 58, "預覽", "作者看造型", "human"],
+    draw: [270, 40, 112, 58, "畫", "pixelorama", "pixel"],
+    compare: [400, 40, 112, 58, "比對", "逐格 txt diff", "script"],
+    patch: [400, 160, 112, 58, "補像素", "draw_pixels", "pixel"],
+    place: [530, 40, 112, 58, "換上", "Toolkit Sprite2D", "toolkit"],
+    shot: [660, 40, 112, 58, "截圖", "runtime_screenshot", "toolkit"],
+    confirm: [790, 40, 112, 58, "作者確認", "看截圖", "human"]
+  };
+  var EDGES = {
+    "design-preview": "M122,69 H140", "preview-draw": "M252,69 H270", "draw-compare": "M382,69 H400",
+    "compare-place": "M512,69 H530", "compare-patch": "M456,98 V160", "patch-compare": "M488,160 V98",
+    "place-shot": "M642,69 H660", "shot-confirm": "M772,69 H790", "confirm-design": "M846,98 V236 H66 V98"
+  };
+  var NS = "http://www.w3.org/2000/svg";
+  function el(tag, attrs, text) { var n = document.createElementNS(NS, tag); for (var k in attrs) n.setAttribute(k, attrs[k]); if (text != null) n.textContent = text; return n; }
+  var svg = document.getElementById("pipe"), ge = el("g", {}), gn = el("g", {});
+  Object.keys(EDGES).forEach(function (id) { ge.appendChild(el("path", { d: EDGES[id], class: "edge", "data-edge": id })); });
+  ge.appendChild(el("text", { x: 524, y: 140, class: "elabel" }, "有差異"));
+  ge.appendChild(el("text", { x: 300, y: 230, class: "elabel" }, "作者要改 → 回到設計"));
+  Object.keys(NODES).forEach(function (id) {
+    var r = NODES[id], g = el("g", { class: "node", "data-node": id });
+    g.appendChild(el("rect", { class: "box", x: r[0], y: r[1], width: r[2], height: r[3], rx: 3 }));
+    g.appendChild(el("rect", { x: r[0], y: r[1], width: 6, height: r[3], rx: 1, style: "fill:" + C[r[6]] }));
+    g.appendChild(el("text", { x: r[0] + 16, y: r[1] + 25, class: "t1" }, r[4]));
+    g.appendChild(el("text", { x: r[0] + 16, y: r[1] + 43, class: "t2" }, r[5]));
+    gn.appendChild(g);
+  });
+  svg.appendChild(ge); svg.appendChild(gn);
+
+  /* 每個素材實際走過的步驟（2026-10-06） */
+  var ASSETS = [
+    { id: "婦人", where: "停車場 · Lv6-3", ref: "照 scene_02", size: "32×48", loss: "0（draw_pixels 685 格）",
+      steps: ["design", "draw", "compare", "place", "shot", "confirm", "design", "draw", "compare", "place", "shot", "confirm"],
+      say: { confirm: "作者：「是參照原本場景圖片的人物塑造的嗎」→ 照原圖重畫；第二輪：嘴型改回閉著的一格。" },
+      note: "第一版只照劇本文字設計，作者指出後立下規則：原圖有的照原圖畫。第二輪只改 3 格就把嘴改回來。" },
+    { id: "感染者群", where: "廢墟 · Lv6-4", ref: "自己設計", size: "64×36 → 96×44", loss: "14 格",
+      steps: ["design", "preview", "draw", "compare", "place", "shot", "confirm", "design", "preview", "draw", "compare", "patch", "compare", "place", "shot", "confirm"],
+      say: { confirm: "作者：「感染者群還是一般人的尺寸，只是會攻擊人」→ 照主角比例重畫。" },
+      note: "第一版預覽像墓碑，在給作者看之前就改成弓背、大頭。作者要一般人大小後重畫成 96×44；舊版另存 horde_small。" },
+    { id: "停車場的門", where: "停車場 · Lv6-5", ref: "自己設計", size: "48×84 → 48×76", loss: "坡道 26 格、門 3 格",
+      steps: ["design", "draw", "compare", "patch", "compare", "place", "shot", "confirm", "design", "preview", "draw", "compare", "patch", "compare", "place", "shot", "confirm"],
+      say: { confirm: "作者：「做個門把才有門的感覺，用喇叭鎖」，後來又說門不用寫 EXIT。" },
+      note: "坡道出口改成喇叭鎖鐵門；有 EXIT 招牌的版本另存備用。之後換色成診所的木門、做成設施的破損鐵門。" },
+    { id: "燃燒的車體", where: "街道 · Lv6-5", ref: "照 scene_03", size: "92×34 → 120×44", loss: "36 格、49 格",
+      steps: ["design", "preview", "draw", "compare", "patch", "compare", "place", "shot", "confirm", "design", "preview", "draw", "compare", "patch", "compare", "place", "shot", "confirm"],
+      say: { confirm: "作者：「車體大小放大 1.3 倍」。" },
+      note: "不用非整數縮放（像素會大小不一），而是把設計座標乘 1.3 重畫，像素大小和主角一致。" },
+    { id: "鐵絲網圍籬", where: "廢墟 · Lv6-5", ref: "劇本「鐵絲網圍起的避難所」", size: "110×85", loss: "471 格",
+      steps: ["design", "preview", "design", "preview", "draw", "compare", "patch", "compare", "place", "shot", "confirm"],
+      say: { preview: "預覽發現網眼太密、看不到後面的妻子 → 放寬間距、網眼不加外框。" },
+      note: "稀疏的細線最容易被 import_image 弄壞：一次掉 471 格，用一次 draw_pixels 全部補回。" },
+    { id: "舊家的窗戶", where: "舊家 · Lv6-5", ref: "照 scene_14", size: "98×76", loss: "4540 格（半透明）",
+      steps: ["design", "preview", "draw", "compare", "patch", "compare", "place", "shot", "confirm"],
+      say: { compare: "差 4540 格：import_image 把半透明的玻璃變成實心灰藍色。", patch: "改用 draw_rect 以 #8CA0B850 重畫四塊玻璃，再補 35 格反光。" },
+      note: "窗戶畫在女兒前面，女兒是隔著半透明玻璃被看見；直窗櫺避開她的臉。" },
+    { id: "治療室的柱子", where: "診所 · Lv6-5", ref: "照 scene_04", size: "56×160", loss: "0 格",
+      steps: ["design", "preview", "draw", "compare", "place", "shot", "confirm"],
+      say: {},
+      note: "斑駁灰泥、剝落的磚、常春藤，避開中間掛字卡的位置；節點排在字卡前面＝畫在後面。一次通過。" }
+  ];
+  var ai = 0, si = 0, pTimer = null;
+  var chips = document.getElementById("assetChips");
+  chips.innerHTML = ASSETS.map(function (a, i) { return '<button class="chip" type="button" data-a="' + i + '">' + a.id + "</button>"; }).join("");
+
+  var CAP = {
+    design: "用 Python 設計格線、自動加外框", preview: "放大預覽給作者看", draw: "Pixelorama 匯入或 draw_pixels 畫出",
+    compare: "設計圖與匯出圖逐格比對", patch: "draw_pixels 補回差異", place: "Toolkit 把色塊換成 Sprite2D、改無損匯入",
+    shot: "執行遊戲、截圖確認", confirm: "作者看截圖決定"
+  };
+  function renderPipe() {
+    var a = ASSETS[ai], st = a.steps[si], prev = si > 0 ? a.steps[si - 1] : null;
+    var visited = {}; a.steps.slice(0, si + 1).forEach(function (s) { visited[s] = 1; });
+    var finished = si === a.steps.length - 1;
+    svg.querySelectorAll("[data-node]").forEach(function (g) {
+      var id = g.getAttribute("data-node");
+      g.classList.toggle("on", id === st && !finished);
+      g.classList.toggle("done", finished && !!visited[id]);
+      g.classList.toggle("skip", a.steps.indexOf(id) < 0);
+    });
+    var edgeId = prev ? prev + "-" + st : null;
+    svg.querySelectorAll("[data-edge]").forEach(function (p) { p.classList.toggle("on", p.getAttribute("data-edge") === edgeId); });
+    var round = a.steps.slice(0, si + 1).filter(function (s) { return s === "design"; }).length;
+    var extra = a.say[st] || "";
+    if (st === "confirm" && finished) extra = "作者確認，這個素材定案。";
+    if (st === "compare" && prev === "patch") extra = "補完後再比對一次：0 差異。";
+    document.getElementById("pipeCaption").innerHTML = "<b>" + a.id + "</b> · 第 " + round + " 輪 · " + CAP[st];
+    document.getElementById("pProgress").textContent = "步驟 " + (si + 1) + " / " + a.steps.length;
+    document.getElementById("aEyebrow").textContent = a.where;
+    document.getElementById("aNote").textContent = extra ? extra : a.note;
+    document.getElementById("aFacts").innerHTML = [["參考", a.ref], ["尺寸", a.size], ["匯入掉的格數", a.loss], ["回到設計", (a.steps.filter(function (s) { return s === "design"; }).length - 1) + " 次"]]
+      .map(function (f) { return "<div><dt>" + f[0] + "</dt><dd>" + f[1] + "</dd></div>"; }).join("");
+    chips.querySelectorAll(".chip").forEach(function (c, i) { c.setAttribute("aria-current", String(i === ai)); });
+    document.getElementById("pPrev").disabled = si === 0;
+    document.getElementById("pNext").disabled = finished;
+  }
+  function pStop() { clearInterval(pTimer); pTimer = null; document.getElementById("pPlay").textContent = "▶ 播放"; }
+  document.getElementById("pPlay").addEventListener("click", function () {
+    if (pTimer) { pStop(); return; }
+    if (si === ASSETS[ai].steps.length - 1) { si = 0; renderPipe(); }
+    pTimer = setInterval(function () { if (si < ASSETS[ai].steps.length - 1) { si++; renderPipe(); } else pStop(); }, 1100);
+    document.getElementById("pPlay").textContent = "❚❚ 暫停";
+  });
+  document.getElementById("pPrev").addEventListener("click", function () { pStop(); if (si > 0) { si--; renderPipe(); } });
+  document.getElementById("pNext").addEventListener("click", function () { pStop(); if (si < ASSETS[ai].steps.length - 1) { si++; renderPipe(); } });
+  document.getElementById("pReset").addEventListener("click", function () { pStop(); si = 0; renderPipe(); });
+  chips.addEventListener("click", function (e) { var b = e.target.closest("[data-a]"); if (!b) return; pStop(); ai = +b.getAttribute("data-a"); si = ASSETS[ai].steps.length - 1; renderPipe(); });
+
+  /* ---------- import loss (log scale, 1 ～ 10000) ---------- */
+  var LOSS = [["home_window", 4540, 1], ["shelter_fence", 471, 0], ["burnt_car 1.3×", 49, 0], ["lamp", 43, 0], ["home_room_door", 40, 0], ["burnt_car", 36, 0], ["exit_ramp", 26, 0], ["horde", 14, 0], ["debris", 6, 0], ["exit_door", 3, 0]];
+  function lx(v) { return Math.log10(v) / 4 * 100; }
+  document.getElementById("lossBars").innerHTML = LOSS.map(function (r) {
+    return '<div class="bar' + (r[2] ? " alpha" : "") + '"><span class="name">' + r[0] + '</span><span class="lane"><span class="fill" style="width:' + Math.max(1.5, lx(r[1])) + '%"></span></span><span class="val">' + r[1].toLocaleString("en-US") + "</span></div>";
+  }).join("");
+  document.getElementById("lossTicks").innerHTML = [1, 10, 100, 1000, 10000].map(function (t) { return '<span style="left:' + lx(t) + '%">' + t.toLocaleString("en-US") + "</span>"; }).join("");
+
+  /* ---------- AI vs human ---------- */
+  var AI = [
+    ["自己執行、自己看、自己修", "game_start、execute_code、input_simulate、runtime_screenshot、debugger_get_log：很多問題在作者看到前就修好"],
+    ["建場景與節點", "7 個區域、色塊換 Sprite、燈光、shader 疊層，幾乎都用 Toolkit，很少手改 .tscn"],
+    ["精確的像素繪圖", "造型用程式設計、Pixelorama 照格畫、逐格比對，改一個嘴巴只要 3 格"],
+    ["資料格式＋檢查工具", "劇本檢查窮舉所有路線，任何改動都知道結局還走不走得到"],
+    ["自動遊玩測試", "77 項用真正的按鍵玩三條路線、三個 Bad End、鍵盤與衝動機制"],
+    ["把踩過的坑寫成規則", "另存陷阱、舊截圖、有損匯入、掉像素、半透明都寫進 CLAUDE.md"]
+  ];
+  var HUMAN = [
+    ["好不好看、好不好玩", "背景太黑、沒照原圖、女兒站在窗前、感染者太小、門要有門把"],
+    ["聽聲音", "BGM 換曲、click 音效、心跳聲好不好聽"],
+    ["劇本定稿", "Claude 可以起草，定稿一定是作者"],
+    ["方向與取捨", "改走可移動路線、Lv5 拆兩級、背景有字的色塊保留、第一版先到這裡"],
+    ["環境與安全", "安裝 MCP 與外掛、匯出模板、在真正的瀏覽器試玩、關掉 Pixelorama 的連線"],
+    ["提醒 AI 的習慣", "回答語言、參考原圖：提醒一次後寫進記憶"]
+  ];
+  function listHtml(arr, c) { return arr.map(function (r) { return '<li style="--c:' + c + '"><span><b>' + r[0] + "</b><br>" + r[1] + "</span></li>"; }).join(""); }
+  document.getElementById("aiList").innerHTML = listHtml(AI, C.toolkit);
+  document.getElementById("humanList").innerHTML = listHtml(HUMAN, C.human);
+
+  ai = 5; si = ASSETS[ai].steps.length - 1;
+  renderLevel(); renderPipe();
+})();
+</script>
+</body>
+</html>
