@@ -54,6 +54,9 @@ scripts/story_data.gd  劇本讀取（class_name StoryData）
 scripts/main.gd        主畫面邏輯
 scripts/game_state.gd  一輪遊戲的全域狀態（class_name GameStateData；autoload 名稱 GameState，Lv4-1 用 autoload_manage 加入）
 scripts/area_data.gd   區域資料讀取、互動點的文字／條件／variants、區域資料的檢查
+scripts/impulse_fx.gd  衝動機制（Lv6-2）的紅色暈影、心跳、手電筒閃爍；掛在 Main 的 UILayer/ImpulseOverlay，**強度參數都在它的屬性面板**
+shaders/impulse_vignette.gdshader  紅色暈影
+assets/sfx/heartbeat.wav  暫用心跳聲（Toolkit sound_generate 產生，作者準備好再換）
 docs/開發路線圖.md       原規劃（階段 1～4）與新路線（Lv1～5）、決策、進度紀錄
 docs/Lv製作流程.md       Lv1～5 的規格、步驟、驗證與完成標準
 docs/v1.5_劇本調整規劃.md  劇本 1.5 原規劃（視覺小說格式；方向仍有效，格式改成區域 × 事件）
@@ -184,7 +187,7 @@ Main (Control, full rect)
 ### 每完成一個步驟
 
 1. `game_start`（`scene_path: "main"`）執行遊戲。若回傳 `runtime_ready: false`，或之後的 runtime 工具回報 `GAME_NOT_RUNNING`（但 log 顯示遊戲有在跑），先呼叫 `game_start`（`if_running: "return"`, `runtime_poll: true`）再重試；有時要**輪詢兩次**才會連上。實測：`game_start` 之後**等約 3～5 秒**（登錄檔更新後）再呼叫 runtime 工具最穩定。
-2. `runtime_screenshot` 截圖確認畫面（**一律用 `image_response_mode: "disk"`** 再讀取存下的 PNG；inline 模式圖片超過約 1MB 會失敗，且曾回傳舊畫面）；需要互動時用 `input_simulate`（`click` 給座標，或 `click_node` 給節點路徑），再截圖確認結果。座標以 1152×768 為準。
+2. `runtime_screenshot` 截圖確認畫面（**一律用 `image_response_mode: "disk"`** 再讀取存下的 PNG；inline 模式圖片超過約 1MB 會失敗，且曾回傳舊畫面）。**遊戲嵌在編輯器的 Game 分頁裡，編輯器不在前景時畫面只在收到指令時重畫**（Lv6-2）：截圖常是「上一個指令剛執行完」的畫面。做法：改完狀態後等一下，先送一個無作用的 `execute_code`（例如讀一個值），等 0.5 秒再截圖，並核對截圖裡主角位置等是否符合；需要互動時用 `input_simulate`（`click` 給座標，或 `click_node` 給節點路徑），再截圖確認結果。座標以 1152×768 為準。
 3. `debugger_get_log` 讀錯誤與警告（遊戲剛啟動時 log 可能還沒印完，必要時再讀一次）。
 4. 修好之後 `game_stop`。
 

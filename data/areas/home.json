@@ -19,6 +19,7 @@
     },
     "daughter": {
       "type": "choice", "trigger": "approach", "hide_on_done": true, "title": "窗外的女兒",
+      "impulse": { "range": 420 },
       "text": "窗外的街上，一個女孩停下腳步。她長高了，但你認得那雙眼睛。她看著窗內的你，沒有逃。",
       "choices": [
         { "text": "比出手勢",

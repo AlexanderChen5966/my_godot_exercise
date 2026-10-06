@@ -10,6 +10,7 @@
   "points": {
     "scientist": {
       "type": "choice", "trigger": "approach", "hide_on_done": true, "title": "女科學家",
+      "impulse": { "range": 420 },
       "text": "走廊盡頭，那位曾用憐憫眼神看你的女科學家沒有逃。她抱著一本筆記本，慢慢走近，像怕驚動你。\n「這是你這幾個月比過的手勢，和你還說得出的字。」她把筆記本遞向你。「帶著它。別忘了你是誰。」",
       "choices": [
         { "text": "收下筆記本",
@@ -26,6 +27,7 @@
     },
     "guard": {
       "type": "choice", "trigger": "approach", "hide_on_done": true, "title": "警衛",
+      "impulse": { "range": 420 },
       "text": "腳步聲從轉角逼近，手電筒的光掃過牆面。",
       "choices": [
         { "text": "躲進通風管",

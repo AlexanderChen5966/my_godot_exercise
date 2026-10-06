@@ -13,6 +13,7 @@ const BGM_FADE_TIME := 0.8
 const LOCKED_TEXT := "……（你想不起來）"   # 數值不夠時，選項顯示的文字
 const ENDING_LABEL := "— 結局 —"
 const BAD_ENDING_COLOR := Color(0.85, 0.35, 0.3)
+const CHOICE_GUARD_MS := 300  # 選項出現後這段時間內不接受選擇：避免想跳過打字時剛好選到第一個選項
 
 # 節點都設為 unique name（%Name），之後搬動節點層級時不用改這裡。
 @onready var background: TextureRect = %Background
@@ -34,6 +35,7 @@ const BAD_ENDING_COLOR := Color(0.85, 0.35, 0.3)
 @onready var type_sfx: AudioStreamPlayer = %TypeSfx
 @onready var rotate_hint: ColorRect = %RotateHint
 @onready var prompt_label: Label = %PromptLabel
+@onready var impulse_fx: ColorRect = %ImpulseOverlay  # 衝動機制的紅色暈影、心跳、手電筒閃爍（scripts/impulse_fx.gd）
 
 var story := StoryData.new()
 var areas := AreaData.new()
@@ -46,6 +48,8 @@ var _area_choosing := false  # 目前的選項屬於區域的 choice 互動點�
 var _area_choice: Dictionary = {}     # 區域裡選了哪個選項（有 to 時，關閉文字後前往）
 var _pending_choice: Dictionary = {}  # 視覺小說裡選了哪個選項（回應讀完後決定去處）
 var _checkpoint: Dictionary = {}      # Bad End「從這裡重試」回到的位置與狀態
+var _choices_shown_at := 0           # 選項出現的時間（毫秒，給 CHOICE_GUARD_MS 用）
+var _impulse_released := false        # 有 impulse 的事件已經選完（張力開始淡出）
 var _debug_label: Label               # F3 數值顯示（只在 debug 版建立）
 var current_id: int = -1
 var state: State = State.TITLE
@@ -183,6 +187,7 @@ func _instantiate_area(area_id: String, from_area := "") -> Node2D:
 	_area_id = area_id
 	_nearby_point = ""
 	world.add_child(_area)
+	impulse_fx.set_flashlight(_area.get_node_or_null("Player/Flashlight"), _area.flashlight_energy)
 	_area.point_entered.connect(_on_point_entered)
 	_area.point_exited.connect(_on_point_exited)
 	var spawns: Dictionary = area.get("spawns", {})
@@ -201,6 +206,8 @@ func _free_area() -> void:
 	if _area:
 		_area.queue_free()
 		_area = null
+	impulse_fx.set_flashlight(null, 1.0)
+	impulse_fx.reset()
 	_area_id = ""
 	_nearby_point = ""
 	_area_choosing = false
@@ -312,6 +319,7 @@ func _show_area_text(holder: Dictionary, point_id := "") -> void:
 	var resolved := AreaData.text_of(story, holder)
 	_closing_point = point_id
 	_closing_view = holder
+	_impulse_released = false
 	if not point_id.is_empty() and holder.get("type") != "choice":
 		GameState.apply_effects(holder.get("effects", {}), AreaData.done_key(_point_key(point_id), holder))
 	_area.set_can_move(false)
@@ -348,6 +356,7 @@ func _show_area_choices(choices: Array) -> void:
 func _on_area_choice_pressed(choice: Dictionary) -> void:
 	_area_choosing = false
 	_area_choice = choice
+	_impulse_released = true  # 選完了：張力淡出
 	sfx.play()
 	_clear_choices()
 	GameState.apply_effects(choice.get("effects", {}), AreaData.done_key(_point_key(_closing_point), _closing_view))
@@ -531,7 +540,9 @@ func _build_choices(choices: Array) -> void:
 		button.pressed.connect(_on_choice_pressed.bind(i, choice))
 		choices_box.add_child(button)
 	# 鍵盤操作：聚焦第一個能選的選項（方向鍵移動、Enter／空白鍵選擇）。
-	# 打開選項的那次按鍵已經 set_input_as_handled()，不會同時按下這個選項。
+	# 打開選項的那次按鍵已經 set_input_as_handled()，不會同時按下這個選項；
+	# 打字自然結束時剛好按下的鍵，則由 CHOICE_GUARD_MS 擋掉。
+	_choices_shown_at = Time.get_ticks_msec()
 	for button in choices_box.get_children():
 		if not (button as Button).disabled:
 			(button as Button).grab_focus()
@@ -592,7 +603,7 @@ func _finish_typing() -> void:
 
 
 func _on_choice_pressed(index: int, choice: Dictionary) -> void:
-	if state != State.CHOOSING:
+	if state != State.CHOOSING or not choices_ready():
 		return
 	if _area_choosing:
 		_on_area_choice_pressed(choice)
@@ -608,6 +619,11 @@ func _on_choice_pressed(index: int, choice: Dictionary) -> void:
 		_resolve_choice()  # 沒有回應文字（例如 Bad End 的「從這裡重試」）時直接前往
 		return
 	_type_text(choice["response"], _show_continue)
+
+
+## 選項出現超過 CHOICE_GUARD_MS 才能選（測試也用這個判斷什麼時候可以按）
+func choices_ready() -> bool:
+	return Time.get_ticks_msec() - _choices_shown_at >= CHOICE_GUARD_MS
 
 
 ## 視覺小說的選項讀完回應後的去處：action（retry／title）> next_area > 結局回標題 > next_id。
@@ -668,11 +684,36 @@ func _create_debug_label() -> void:
 
 
 func _process(_delta: float) -> void:
+	impulse_fx.target = _impulse_target()
 	if _debug_label and _debug_label.visible:
 		var parts: Array[String] = []
 		for key in GameState.stats:
 			parts.append("%s %d" % [{ "memory": "記憶", "humanity": "人性" }.get(key, key), GameState.stats[key]])
 		_debug_label.text = "【F3】" + "　".join(parts) + ("　物品：" + "、".join(GameState.items.keys()) if not GameState.items.is_empty() else "")
+
+
+## 衝動機制（甲）的目標強度 0～1：有 impulse 的事件文字或選項打開時最強、選完後歸零；
+## 平常依主角與「還沒發生的」有 impulse 的互動點的距離計算，取最近的那個。
+func _impulse_target() -> float:
+	if _area == null or _area_id.is_empty():
+		return 0.0
+	if not _closing_point.is_empty() and _closing_view.has("impulse"):
+		return 0.0 if _impulse_released else 1.0
+	var player_x: float = _area.player.position.x
+	var best := 0.0
+	var points: Dictionary = areas.get_area(_area_id).get("points", {})
+	for point_id in points:
+		if not points[point_id].has("impulse"):
+			continue
+		var point := _area_point(point_id)
+		if not _point_active(point_id, point):
+			continue  # 事件已經發生（人走了），不再有感覺
+		var x: float = _area.point_x(point_id)
+		if is_nan(x):
+			continue
+		var range_px := float(point["impulse"].get("range", impulse_fx.default_range))
+		best = maxf(best, impulse_fx.strength_at(absf(player_x - x), range_px))
+	return best
 
 
 ## 除錯用：回傳目前 FPS（給 MCP 的 execute_code 讀取；execute_code 不能直接存取 Engine）。正式版回傳 -1。

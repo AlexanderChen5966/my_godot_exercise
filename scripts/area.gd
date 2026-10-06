@@ -77,6 +77,14 @@ func set_can_move(value: bool) -> void:
 	player.can_move = value
 
 
+## 互動點在區域裡的 x 座標（衝動機制算距離用）；找不到時回傳 NAN。
+func point_x(point_id: String) -> float:
+	for point in $Points.get_children():
+		if point.get("point_id") == point_id:
+			return (point as Node2D).position.x
+	return NAN
+
+
 func consume_point(point_id: String) -> void:
 	for point in $Points.get_children():
 		if point.get("point_id") == point_id and point.has_method("consume"):

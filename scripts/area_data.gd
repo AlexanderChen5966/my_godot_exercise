@@ -206,6 +206,13 @@ func _validate_shape(story: StoryData, area: Dictionary, shape: Dictionary, ptag
 		return errors
 	if shape.has("trigger") and not TRIGGERS.has(shape["trigger"]):
 		errors.append("%s 的 trigger 不正確：%s" % [ptag, shape["trigger"]])
+	if shape.has("impulse"):
+		# 衝動機制（Lv6）：{ "range": 從多遠開始有感覺（px，可省略）}
+		var impulse = shape["impulse"]
+		if typeof(impulse) != TYPE_DICTIONARY:
+			errors.append("%s 的 impulse 要是物件，例如 { \"range\": 420 }" % ptag)
+		elif impulse.has("range") and (typeof(impulse["range"]) not in [TYPE_INT, TYPE_FLOAT] or float(impulse["range"]) <= 0.0):
+			errors.append("%s 的 impulse.range 要是正數：%s" % [ptag, impulse["range"]])
 	var has_text := not text_of(story, shape).is_empty()
 	if type == "exit":
 		# 出口可以沒有文字（直接換區域），但有寫 from 時引用要有效

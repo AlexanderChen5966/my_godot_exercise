@@ -91,7 +91,7 @@ func wait_choices() -> void:
 	await wait_for(func(): return main.state in [TYPING, CHOOSING], 5.0)
 	if main.state == TYPING:
 		await key("interact")
-	await wait_for(func(): return main.state == CHOOSING, 3.0)
+	await wait_for(func(): return main.state == CHOOSING and main.choices_ready(), 3.0)
 
 
 ## 第 index 個選項是否鎖住（數值不夠：灰色、不能按）

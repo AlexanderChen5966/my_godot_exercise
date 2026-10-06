@@ -1,4 +1,4 @@
-## Lv6-1 自動測試：只用鍵盤操作選項，一次按鍵只處理一件事。
+## Lv6 自動測試：Lv6-1 只用鍵盤操作選項、一次按鍵只處理一件事；Lv6-2 衝動機制（張力隨距離與事件變化）。
 ## 共用操作在 play_base.gd（選選項用方向鍵＋Enter，互動鍵用真正的空白鍵）。執行：zsh tests/run_tests.sh test_lv6
 extends "res://tests/play_base.gd"
 
@@ -9,6 +9,8 @@ func run_tests() -> void:
 	await run_locked_focus()
 	await back_to_title()
 	await run_title_key()
+	await back_to_title()
+	await run_impulse()
 
 
 ## 過場的選項：自動聚焦、方向鍵移動、Enter 選擇後只開始打回應，不會同時跳過
@@ -17,6 +19,10 @@ func run_scene_keys() -> void:
 	await start_game()
 	main.call("_go_to", { "scene": 6 })
 	await to_scene(6)
+	await key("interact")                                       # 跳過打字 → 選項出現
+	await wait_for(func(): return main.state == CHOOSING, 3.0)
+	await press_key(KEY_ENTER)                                  # 選項剛出現就按（想繼續卻按到）
+	ok(main.state == CHOOSING, "選項剛出現 0.3 秒內按 Enter：不會誤選")
 	await wait_choices()
 	ok(focused() == 0, "搜捕隊：選項出現時聚焦第一個")
 	await press_key(KEY_DOWN)
@@ -60,6 +66,46 @@ func run_title_key() -> void:
 	await press_key(KEY_SPACE)
 	await wait_for(func(): return main.state in [TYPING, AREA_TEXT], 5.0)
 	ok(area() == "parking_lot" and main.state in [TYPING, AREA_TEXT], "空白鍵一次：開始遊戲，停車場開場正常顯示")
+
+
+## 衝動機制：離人越近越強，事件選項出現時最強，選完後淡出；人走了之後不再有感覺
+func run_impulse() -> void:
+	print("\n== 衝動機制（停車場的婦人）")
+	await start_game()
+	var fx: ColorRect = main.impulse_fx
+	var light := player().get_node("Flashlight") as PointLight2D
+	var base_energy := light.energy
+	ok(target() == 0.0 and not fx.visible, "起點（離婦人很遠）：沒有感覺")
+	await walk_to(1150)
+	var mid := target()
+	ok(mid > 0.0 and mid < 1.0, "走近到 310px：有一點感覺（%.2f）" % mid)
+	await seconds(1.0)
+	ok(fx.intensity > 0.0 and fx.visible, "紅色暈影慢慢出現")
+	await walk_to(1300)
+	ok(target() > mid, "再走近：更強（%.2f）" % target())
+	await walk_to(1460)
+	await wait_choices()
+	ok(target() == 1.0, "婦人事件的選項出現：最強")
+	await seconds(1.5)
+	ok(fx.intensity > 0.9, "強度跟上（%.2f）" % fx.intensity)
+	await select(0)
+	ok(target() == 0.0, "選完：目標歸零，開始淡出")
+	await read()
+	await seconds(2.0)
+	ok(fx.intensity == 0.0 and not fx.visible, "淡出完畢")
+	ok(is_equal_approx(light.energy, base_energy), "手電筒回到原本的亮度")
+	await walk_to(1460)
+	ok(target() == 0.0, "婦人離開後，回到原地也不再有感覺")
+
+
+func target() -> float:
+	return main.call("_impulse_target")
+
+
+func seconds(t: float) -> void:
+	var until := Time.get_ticks_msec() + int(t * 1000)
+	while Time.get_ticks_msec() < until:
+		await process_frame
 
 
 func focused() -> int:

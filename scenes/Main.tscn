@@ -2,6 +2,16 @@
 
 [ext_resource type="Script" uid="uid://gmxgbey6ihln" path="res://scripts/main.gd" id="1_main"]
 [ext_resource type="AudioStream" uid="uid://d33b4ck8jwvw3" path="res://assets/sfx/click.ogg" id="2_rvslj"]
+[ext_resource type="Shader" uid="uid://3u2dc4fwaw05" path="res://shaders/impulse_vignette.gdshader" id="2_vcsgt"]
+[ext_resource type="Script" uid="uid://dtpcpwu322pb" path="res://scripts/impulse_fx.gd" id="3_c01mt"]
+[ext_resource type="AudioStream" uid="uid://g34bjaxi4fg0" path="res://assets/sfx/heartbeat.wav" id="4_nxtc6"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_jlsqs"]
+shader = ExtResource("2_vcsgt")
+shader_parameter/tint = Color(0.55, 0, 0.02, 1)
+shader_parameter/intensity = 0.0
+shader_parameter/max_alpha = 0.6
+shader_parameter/pulse = 0.0
 
 [node name="Main" type="Control" unique_id=720216089]
 layout_mode = 3
@@ -29,6 +39,20 @@ unique_name_in_owner = true
 
 [node name="UILayer" type="CanvasLayer" parent="." unique_id=665755143]
 layer = 10
+
+[node name="ImpulseOverlay" type="ColorRect" parent="UILayer" unique_id=1770827358]
+unique_name_in_owner = true
+visible = false
+material = SubResource("ShaderMaterial_jlsqs")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+script = ExtResource("3_c01mt")
+
+[node name="Heartbeat" type="AudioStreamPlayer" parent="UILayer/ImpulseOverlay" unique_id=1049451877]
+stream = ExtResource("4_nxtc6")
+max_polyphony = 2
 
 [node name="Fade" type="ColorRect" parent="UILayer" unique_id=1488934852]
 unique_name_in_owner = true
