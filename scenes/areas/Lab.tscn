@@ -5,6 +5,8 @@
 [ext_resource type="Script" uid="uid://u5x8mgenl5y4" path="res://scripts/interact_point.gd" id="3_sxo7y"]
 [ext_resource type="Texture2D" uid="uid://dvc421v0v4a2t" path="res://assets/sprites/characters/scientist.png" id="4_j2lqu"]
 [ext_resource type="Texture2D" uid="uid://de0sq53lgx4ep" path="res://assets/sprites/characters/guard.png" id="5_84mbp"]
+[ext_resource type="Texture2D" uid="uid://bx022qy0jnvsy" path="res://assets/sprites/props/lab_records.png" id="5_fk7ab"]
+[ext_resource type="Texture2D" uid="uid://cuj3hablexw73" path="res://assets/sprites/props/exit_door_broken.png" id="7_6u4t4"]
 [ext_resource type="Script" uid="uid://dkcse5tmlbfke" path="res://scripts/player.gd" id="8_jswt6"]
 [ext_resource type="SpriteFrames" uid="uid://b872yo2d63qvl" path="res://assets/sprites/player_frames.tres" id="9_k7ac4"]
 [ext_resource type="Script" uid="uid://cpx5m37cmu4jq" path="res://scripts/flicker_light.gd" id="10_4ogqb"]
@@ -97,12 +99,11 @@ point_id = "records"
 position = Vector2(0, -96)
 shape = SubResource("RectangleShape2D_2mgj5")
 
-[node name="Marker" type="ColorRect" parent="Points/Records" unique_id=1764822487]
-offset_left = -40.0
-offset_top = -8.0
-offset_right = 40.0
-mouse_filter = 2
-color = Color(0.8, 0.78, 0.7, 1)
+[node name="Prop" type="Sprite2D" parent="Points/Records" unique_id=76882935]
+texture_filter = 1
+position = Vector2(0, -10)
+scale = Vector2(2, 2)
+texture = ExtResource("5_fk7ab")
 
 [node name="Guard" type="Area2D" parent="Points" unique_id=1020138718]
 position = Vector2(1650, 640)
@@ -128,12 +129,11 @@ point_id = "exit"
 position = Vector2(0, -96)
 shape = SubResource("RectangleShape2D_x3vua")
 
-[node name="Marker" type="ColorRect" parent="Points/Exit" unique_id=91825239]
-offset_left = -44.0
-offset_top = -160.0
-offset_right = 44.0
-mouse_filter = 2
-color = Color(0.25, 0.08, 0.06, 0.85)
+[node name="Prop" type="Sprite2D" parent="Points/Exit" unique_id=2100535875]
+texture_filter = 1
+position = Vector2(0, -76)
+scale = Vector2(2, 2)
+texture = ExtResource("7_6u4t4")
 
 [node name="Player" type="CharacterBody2D" parent="." unique_id=1633340741]
 position = Vector2(160, 640)
