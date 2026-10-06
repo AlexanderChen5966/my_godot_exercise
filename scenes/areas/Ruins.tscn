@@ -81,7 +81,7 @@ shape = SubResource("RectangleShape2D_8ukss")
 
 [node name="Figure" type="Sprite2D" parent="Points/Horde" unique_id=1410692483]
 texture_filter = 1
-position = Vector2(95, -36)
+position = Vector2(95, -44)
 scale = Vector2(2, 2)
 texture = ExtResource("4_d8cse")
 

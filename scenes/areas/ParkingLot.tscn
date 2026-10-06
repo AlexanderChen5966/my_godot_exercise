@@ -8,6 +8,9 @@
 [ext_resource type="Script" uid="uid://u5x8mgenl5y4" path="res://scripts/interact_point.gd" id="4_tpq6i"]
 [ext_resource type="Script" uid="uid://cpx5m37cmu4jq" path="res://scripts/flicker_light.gd" id="5_8ukss"]
 [ext_resource type="Texture2D" uid="uid://dy0p8jen3y560" path="res://assets/sprites/characters/woman.png" id="5_ef6w0"]
+[ext_resource type="Texture2D" uid="uid://b0m5iju75hk4e" path="res://assets/sprites/props/lamp.png" id="5_k0cph"]
+[ext_resource type="Texture2D" uid="uid://cmqyrypoe4ri5" path="res://assets/sprites/props/debris.png" id="6_wnkfg"]
+[ext_resource type="Texture2D" uid="uid://k8a0kynwr1p8" path="res://assets/sprites/props/exit_door.png" id="8_k0cph"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_k46jg"]
 size = Vector2(140, 192)
@@ -147,13 +150,11 @@ point_id = "light"
 position = Vector2(0, -96)
 shape = SubResource("RectangleShape2D_8ukss")
 
-[node name="Marker" type="ColorRect" parent="Points/Light" unique_id=1766618398]
-offset_left = -50.0
-offset_top = -420.0
-offset_right = 50.0
-offset_bottom = -412.0
-mouse_filter = 2
-color = Color(0.75, 0.95, 1, 0.85)
+[node name="Prop" type="Sprite2D" parent="Points/Light" unique_id=1553529357]
+texture_filter = 1
+position = Vector2(0, -426)
+scale = Vector2(2, 2)
+texture = ExtResource("5_k0cph")
 
 [node name="Debris" type="Area2D" parent="Points" unique_id=729555111]
 position = Vector2(1000, 640)
@@ -164,12 +165,11 @@ point_id = "debris"
 position = Vector2(0, -96)
 shape = SubResource("RectangleShape2D_2mgj5")
 
-[node name="Marker" type="ColorRect" parent="Points/Debris" unique_id=2143837046]
-offset_left = -36.0
-offset_top = -14.0
-offset_right = 36.0
-mouse_filter = 2
-color = Color(0.42, 0.36, 0.28, 1)
+[node name="Prop" type="Sprite2D" parent="Points/Debris" unique_id=1132469499]
+texture_filter = 1
+position = Vector2(0, -14)
+scale = Vector2(2, 2)
+texture = ExtResource("6_wnkfg")
 
 [node name="Woman" type="Area2D" parent="Points" unique_id=1034065159]
 position = Vector2(1500, 640)
@@ -195,12 +195,11 @@ point_id = "exit"
 position = Vector2(0, -96)
 shape = SubResource("RectangleShape2D_x3vua")
 
-[node name="Marker" type="ColorRect" parent="Points/Exit" unique_id=91825239]
-offset_left = -44.0
-offset_top = -160.0
-offset_right = 44.0
-mouse_filter = 2
-color = Color(0.35, 0.08, 0.06, 0.75)
+[node name="Prop" type="Sprite2D" parent="Points/Exit" unique_id=2124149377]
+texture_filter = 1
+position = Vector2(0, -76)
+scale = Vector2(2, 2)
+texture = ExtResource("8_k0cph")
 
 [node name="Player" type="CharacterBody2D" parent="." unique_id=1633340741]
 position = Vector2(160, 640)
@@ -284,3 +283,14 @@ color = Color(1, 0.12, 0.08, 1)
 texture = SubResource("GradientTexture2D_2mgj5")
 texture_scale = 2.0
 script = ExtResource("5_8ukss")
+
+[node name="LampLight" type="PointLight2D" parent="." unique_id=1805126418]
+position = Vector2(600, 214)
+color = Color(0.7, 0.92, 1, 1)
+texture = SubResource("GradientTexture2D_2mgj5")
+texture_scale = 2.5
+script = ExtResource("5_8ukss")
+base_energy = 1.8
+pulse_speed = 0.0
+min_ratio = 1.0
+dropout_chance = 0.01
