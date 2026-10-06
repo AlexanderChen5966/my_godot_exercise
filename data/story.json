@@ -87,52 +87,17 @@
         {
           "text": "靠近營火",
           "response": "你湊近營火，那聲音令人安心，彷彿來自記憶深處。",
-          "next_id": 17
+          "next_area": "wall"
         },
         {
           "text": "追問故事",
           "response": "老人停頓片刻，看向遠方說：『有些故事，是人留下的證明。』",
-          "next_id": 17
+          "next_area": "wall"
         },
         {
           "text": "模仿手勢",
           "response": "你舉起手，照著故事中動作模仿，那瞬間孩子們屏息。",
-          "next_id": 17
-        }
-      ]
-    },
-    {
-      "id": 17,
-      "title": "最後的動作",
-      "text": "這是你的最後時刻。你記得多少？你曾說過什麼？這些選擇形塑你最後的樣子。",
-      "hint": "請選擇行動：",
-      "extra_hint": "",
-      "bg": "scene_17.webp",
-      "bgm": "bgm_17.ogg",
-      "is_ending": false,
-      "note": "Lv5-1 暫時的過場：Lv5-5 做好牆前（區域）後移除",
-      "choices": [
-        {
-          "text": "面對真相",
-          "response": "你選擇面對全部的真相，哪怕痛苦，也不願遺忘。",
-          "require": {
-            "memory": 6,
-            "humanity": 3
-          },
-          "next_id": 18
-        },
-        {
-          "text": "沉浸幻象",
-          "response": "你選擇活在記憶構築的幻境中，那裡沒有痛苦，只有溫暖。",
-          "require": {
-            "memory": 3
-          },
-          "next_id": 19
-        },
-        {
-          "text": "永遠遊走",
-          "response": "你選擇漫遊在世界邊緣，不尋答案，只留下身影。",
-          "next_id": 20
+          "next_area": "wall"
         }
       ]
     },

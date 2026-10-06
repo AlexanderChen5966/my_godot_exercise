@@ -69,7 +69,8 @@ data/areas/clinic.json  診所區域資料（Lv4-5：錄音筆、診療椅的 va
 data/areas/lab.json     設施走廊區域資料（Lv5-2：女科學家給筆記本、警衛 → BE2）
 data/areas/ruins.json   廢墟與避難所區域資料（Lv5-3：同類、妻子 → BE3）
 data/areas/home.json    舊家區域資料（Lv5-4：牆上的蠟筆字、女兒的房間、窗外的女兒〔有無筆記本用 variants 換文字〕）
-scenes/areas/          可走動區域的場景：ParkingLot.tscn、Street.tscn、Clinic.tscn、Lab.tscn、Ruins.tscn、Home.tscn（之後的都由前一個區域另存後用 Toolkit 修改）
+data/areas/wall.json    牆前區域資料（Lv5-5：最後的動作，結局 A／B 依數值解鎖；沒有出口，用一定能選的「永遠遊走」離開）
+scenes/areas/          可走動區域的場景：ParkingLot.tscn、Street.tscn、Clinic.tscn、Lab.tscn、Ruins.tscn、Home.tscn、Wall.tscn（之後的都由前一個區域另存後用 Toolkit 修改）
 MCP實驗紀錄.md           每一級的 MCP 實驗觀察
 ```
 
@@ -100,7 +101,7 @@ Lv1 之後會新增（依 `docs/Lv製作流程.md`）：`scenes/areas/`、`scrip
 }
 ```
 
-- **v1.5（Lv5-1 起）**：`story.json` 只留過場與結局：6 搜捕隊、7 手術台、15 營火、18～20 結局 A／B／C、21～23 Bad End（`ending_type: bad`）；場景 17「最後的動作」是暫時的，Lv5-5 做好牆前後移除。開始遊戲進入 `start_area`（停車場）。新欄位（`effects`、`require`、`locked_text`、`next_area`、`action`、`ending_label`）見 `docs/Lv製作流程.md` 的 Lv5。1.0 版備份在 `docs/story_v1.0.json`。
+- **v1.5（Lv5-1 起）**：`story.json` 只留過場與結局：6 搜捕隊、7 手術台、15 營火、18～20 結局 A／B／C、21～23 Bad End（`ending_type: bad`）；營火（15）之後進入牆前區域（`next_area: wall`），暫時的場景 17 已在 Lv5-5 移除。開始遊戲進入 `start_area`（停車場）。新欄位（`effects`、`require`、`locked_text`、`next_area`、`action`、`ending_label`）見 `docs/Lv製作流程.md` 的 Lv5。1.0 版備份在 `docs/story_v1.0.json`。
 - 以下是 1.0 的說明（格式相容，舊欄位都還能用）：共 20 個場景、3 個結局（id 18、19、20，`is_ending: true`）。
 - 結局場景只有一個選項「重新開始」，`next_id` 為 1。
 - 有些選項的 `next_id` 等於自己的場景 id（例如「停留不動」），代表留在原場景：顯示回應後重新顯示同一場景的選項即可。
@@ -168,7 +169,7 @@ Main (Control, full rect)
 - 執行時動態產生的節點（例如選項按鈕）寫在腳本裡。
 - **Control 的版面屬性不要在 `scene_create_node` 時一起設定**：建立時帶入的 `position`／`size`，甚至 `offset_*`，位置都可能被重設成 (0, 0)（Lv1-4、Lv1-5 各發生一次）。做法：先建立節點，**再用 `node_set_property` 設定 `offset_left/top/right/bottom`**，存檔後檢查 `.tscn`。
 - **`node_manage` 的 `duplicate` 不會把子節點存進 `.tscn`**（Lv4-5）：複製出來的子節點（Shape、Marker）只存在編輯器裡，存檔後就不見了。要複製互動點時改用 `scene_create_node` 重新建立子節點，存檔後檢查 `.tscn`。
-- 新的可走動區域：用 `editor_save_scene`（帶 `file_path`）把現有區域**另存**，再用 Toolkit 修改（Lv4-4、Lv4-5 的做法）。區域場景裡 **`Points` 要排在 `Player` 前面**，否則高的道具（例如藥櫃）會擋住主角。
+- 新的可走動區域：用 `editor_save_scene`（帶 `file_path`）把現有區域**另存**，再用 Toolkit 修改（Lv4-4、Lv4-5 的做法）。**另存後編輯器仍在編輯原檔**（Lv5-5 因此覆蓋過 `Home.tscn`）：另存後要立刻 `scene_open` 新檔，並用 `scene_get_tree` 確認 `source` 是新檔、內容正確，才開始修改與存檔；新檔的分頁若停在舊內容，`editor_refresh` 也不會重新載入，不要在那個分頁存檔。區域場景裡 **`Points` 要排在 `Player` 前面**，否則高的道具（例如藥櫃）會擋住主角。
 - 遠景背景（FarLayer/Backdrop）用 `stretch_mode = 6`（等比例蓋滿）、寬約 1500，不要重複拼接（會有接縫）。
 - 選項的鍵盤操作要用 `input_simulate` 的 `key` 類型送真正的按鍵（下方向鍵 `keycode 4194322`、Enter `4194309`）；`action` 類型不會移動焦點。用 `execute_code` 瞬移主角後，要等一下物理更新，互動點才會偵測到。
 - 模擬移動用 `input_simulate` 的 `action` 類型（會呼叫 `Input.action_press`）。`key` 類型若要觸發動作，必須帶 `physical_keycode`（本專案的按鍵是用實體按鍵綁定）。

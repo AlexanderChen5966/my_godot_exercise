@@ -167,6 +167,8 @@ func validate(story: StoryData, warnings: Array[String] = []) -> Array[String]:
 				for key in shape.get("effects", {}):
 					stat_keys[key] = ptag
 				for choice in shape.get("choices", []):
+					if choice.has("to") and not choice.has("require"):
+						exits += 1  # 一定能選、會離開區域的選項也算出口（例如牆前的「永遠遊走」）
 					if choice.has("item"):
 						given_items[choice["item"]] = true
 					for flag in choice.get("set_flags", []):
@@ -174,7 +176,7 @@ func validate(story: StoryData, warnings: Array[String] = []) -> Array[String]:
 					for key in choice.get("effects", {}):
 						stat_keys[key] = ptag
 		if exits == 0:
-			errors.append("%s 沒有出口（type: exit）" % tag)
+			errors.append("%s 沒有出口（type: exit，或一定能選、有 to 的選項）" % tag)
 		errors.append_array(_validate_scene_file(area, tag, warnings))
 	for need in needed:
 		if need[1] == "items" and not given_items.has(need[2]):

@@ -1,0 +1,29 @@
+{
+  "id": "wall",
+  "scene": "res://scenes/areas/Wall.tscn",
+  "bgm": "bgm_16.ogg",
+  "intro": {
+    "title": "牆前",
+    "text": "那是間殘破的屋子，牆面寫著四個字：『我還在。』那是他留下的最後一句話，字跡歪斜卻清晰。有人說這是自我找回的證明，有人說那只是未完成的幻象。你佇立在那句話前，意識緩緩裂解。"
+  },
+  "spawns": { "default": 220 },
+  "points": {
+    "wall": {
+      "type": "choice", "label": "牆", "title": "最後的動作",
+      "text": "這是你的最後時刻。你記得多少？你曾說過什麼？這些選擇形塑你最後的樣子。",
+      "choices": [
+        { "text": "面對真相",
+          "response": "你選擇面對全部的真相，哪怕痛苦，也不願遺忘。",
+          "require": { "memory": 6, "humanity": 3 },
+          "to": { "scene": 18 } },
+        { "text": "沉浸幻象",
+          "response": "你選擇活在記憶構築的幻境中，那裡沒有痛苦，只有溫暖。",
+          "require": { "memory": 3 },
+          "to": { "scene": 19 } },
+        { "text": "永遠遊走",
+          "response": "你選擇漫遊在世界邊緣，不尋答案，只留下身影。",
+          "to": { "scene": 20 } }
+      ]
+    }
+  }
+}
