@@ -66,11 +66,25 @@ func read() -> void:
 	await wait_for(func(): return main.state in [EXPLORE, TRANSITION, CHOOSING] or main.current_id >= 3, 3.0)
 
 
-## 等選項出現（打字中先按一次），按第 index 個選項，再讀完回應
+## 等選項出現（打字中先按一次），用方向鍵移到第 index 個選項、按 Enter，再讀完回應
 func choose(index: int) -> void:
 	await wait_choices()
-	(main.choices_box.get_child(index) as Button).pressed.emit()
+	await select(index)
 	await read()
+
+
+## 用真正的按鍵選選項：方向鍵移動焦點，Enter 按下（和玩家一樣）
+func select(index: int) -> void:
+	var target := main.choices_box.get_child(index) as Button
+	for i in main.choices_box.get_child_count():
+		if target.has_focus():
+			break
+		var current := main.get_viewport().gui_get_focus_owner()
+		var down := current == null or current.get_index() < index
+		await press_key(KEY_DOWN if down else KEY_UP)
+	if not target.has_focus():
+		print("    ⚠ 方向鍵移不到第 %d 個選項" % index)
+	await press_key(KEY_ENTER)
 
 
 func wait_choices() -> void:
@@ -117,11 +131,15 @@ func to_scene(scene_id: int) -> void:
 ## 結局／Bad End 的選項（回應是空的，按下去直接重試或回標題）
 func end_choice(index: int) -> void:
 	await wait_choices()
-	(main.choices_box.get_child(index) as Button).pressed.emit()
+	await select(index)
 	await wait_for(func(): return main.state != CHOOSING, 3.0)
 
 
+## 互動鍵用真正的空白鍵（同時符合 interact 與 ui_accept，可以測到按鍵衝突）
 func key(action: String) -> void:
+	if action == "interact":
+		await press_key(KEY_SPACE)
+		return
 	var press := InputEventAction.new()
 	press.action = action
 	press.pressed = true
@@ -181,3 +199,14 @@ func wait_for(cond: Callable, timeout: float) -> void:
 	var until := Time.get_ticks_msec() + int(timeout * 1000)
 	while not cond.call() and Time.get_ticks_msec() < until:
 		await process_frame
+
+
+## 送出一次真正的按鍵（按下＋放開）；keycode 與 physical_keycode 都設定，符合專案用實體按鍵綁定的動作
+func press_key(code: Key) -> void:
+	for pressed in [true, false]:
+		var event := InputEventKey.new()
+		event.keycode = code
+		event.physical_keycode = code
+		event.pressed = pressed
+		Input.parse_input_event(event)
+		await frames(2)

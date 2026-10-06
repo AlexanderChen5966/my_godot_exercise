@@ -343,10 +343,6 @@ func _show_area_choices(choices: Array) -> void:
 	_area_choosing = true
 	_chosen_in_scene.clear()
 	_build_choices(choices)
-	for button in choices_box.get_children():
-		if not (button as Button).disabled:
-			(button as Button).grab_focus()
-			break
 
 
 func _on_area_choice_pressed(choice: Dictionary) -> void:
@@ -531,8 +527,15 @@ func _build_choices(choices: Array) -> void:
 			button.disabled = true
 			button.add_theme_stylebox_override("disabled", _button_styles["disabled"])
 			button.add_theme_color_override("font_disabled_color", Color(0.55, 0.55, 0.55))
+			button.focus_mode = Control.FOCUS_NONE  # 方向鍵移動時跳過鎖住的選項
 		button.pressed.connect(_on_choice_pressed.bind(i, choice))
 		choices_box.add_child(button)
+	# 鍵盤操作：聚焦第一個能選的選項（方向鍵移動、Enter／空白鍵選擇）。
+	# 打開選項的那次按鍵已經 set_input_as_handled()，不會同時按下這個選項。
+	for button in choices_box.get_children():
+		if not (button as Button).disabled:
+			(button as Button).grab_focus()
+			break
 
 
 func _clear_choices() -> void:
