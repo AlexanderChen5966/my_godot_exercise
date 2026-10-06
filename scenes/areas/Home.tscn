@@ -3,10 +3,13 @@
 [ext_resource type="Script" uid="uid://r853iujge1v" path="res://scripts/area.gd" id="1_fdgq5"]
 [ext_resource type="Texture2D" uid="uid://c58fyiq7qddkm" path="res://assets/bg/scene_14.webp" id="2_fdgq5"]
 [ext_resource type="Script" uid="uid://u5x8mgenl5y4" path="res://scripts/interact_point.gd" id="3_osphs"]
+[ext_resource type="Texture2D" uid="uid://du7tc2aobr5wc" path="res://assets/sprites/props/home_room_door.png" id="4_7j7j4"]
 [ext_resource type="Texture2D" uid="uid://7l7qsjylwbho" path="res://assets/sprites/characters/daughter.png" id="4_eatb3"]
 [ext_resource type="Script" uid="uid://dkcse5tmlbfke" path="res://scripts/player.gd" id="4_nt85v"]
 [ext_resource type="SpriteFrames" uid="uid://b872yo2d63qvl" path="res://assets/sprites/player_frames.tres" id="5_7j7j4"]
 [ext_resource type="Script" uid="uid://cpx5m37cmu4jq" path="res://scripts/flicker_light.gd" id="6_35csi"]
+[ext_resource type="Texture2D" uid="uid://ceoeciq3wioet" path="res://assets/sprites/props/home_window.png" id="6_pfqkc"]
+[ext_resource type="Texture2D" uid="uid://ca78m4ji1yh1o" path="res://assets/sprites/props/home_door.png" id="7_e0w58"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_8ukss"]
 size = Vector2(160, 192)
@@ -111,12 +114,11 @@ point_id = "room"
 position = Vector2(0, -96)
 shape = SubResource("RectangleShape2D_eatb3")
 
-[node name="Marker" type="ColorRect" parent="Points/Room" unique_id=785466402]
-offset_left = -44.0
-offset_top = -170.0
-offset_right = 44.0
-mouse_filter = 2
-color = Color(0.16, 0.12, 0.1, 0.85)
+[node name="Prop" type="Sprite2D" parent="Points/Room" unique_id=2020652244]
+texture_filter = 1
+position = Vector2(0, -85)
+scale = Vector2(2, 2)
+texture = ExtResource("4_7j7j4")
 
 [node name="Daughter" type="Area2D" parent="Points" unique_id=1020138718]
 position = Vector2(1650, 640)
@@ -127,14 +129,6 @@ point_id = "daughter"
 position = Vector2(0, -96)
 shape = SubResource("RectangleShape2D_or88c")
 
-[node name="Window" type="ColorRect" parent="Points/Daughter" unique_id=1287519956]
-offset_left = 20.0
-offset_top = -330.0
-offset_right = 200.0
-offset_bottom = -190.0
-mouse_filter = 2
-color = Color(0.55, 0.62, 0.72, 0.35)
-
 [node name="Figure" type="Sprite2D" parent="Points/Daughter" unique_id=1801234148]
 texture_filter = 1
 position = Vector2(110, -212)
@@ -143,13 +137,11 @@ texture = ExtResource("4_eatb3")
 region_enabled = true
 region_rect = Rect2(0, 0, 24, 22)
 
-[node name="Sill" type="ColorRect" parent="Points/Daughter" unique_id=2040553235]
-offset_left = 12.0
-offset_top = -194.0
-offset_right = 208.0
-offset_bottom = -184.0
-mouse_filter = 2
-color = Color(0.24, 0.18, 0.13, 1)
+[node name="Window" type="Sprite2D" parent="Points/Daughter" unique_id=555298002]
+texture_filter = 1
+position = Vector2(110, -252)
+scale = Vector2(2, 2)
+texture = ExtResource("6_pfqkc")
 
 [node name="Exit" type="Area2D" parent="Points" unique_id=1483213795]
 position = Vector2(2150, 640)
@@ -160,12 +152,11 @@ point_id = "exit"
 position = Vector2(0, -96)
 shape = SubResource("RectangleShape2D_x3vua")
 
-[node name="Marker" type="ColorRect" parent="Points/Exit" unique_id=91825239]
-offset_left = -44.0
-offset_top = -160.0
-offset_right = 44.0
-mouse_filter = 2
-color = Color(0.2, 0.2, 0.22, 0.7)
+[node name="Prop" type="Sprite2D" parent="Points/Exit" unique_id=1721307491]
+texture_filter = 1
+position = Vector2(0, -76)
+scale = Vector2(2, 2)
+texture = ExtResource("7_e0w58")
 
 [node name="Player" type="CharacterBody2D" parent="." unique_id=1633340741]
 position = Vector2(160, 640)
