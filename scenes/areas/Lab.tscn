@@ -3,6 +3,8 @@
 [ext_resource type="Script" uid="uid://r853iujge1v" path="res://scripts/area.gd" id="1_fk7ab"]
 [ext_resource type="Texture2D" uid="uid://dgldsn1wrtnin" path="res://assets/bg/scene_13.webp" id="2_b6wgb"]
 [ext_resource type="Script" uid="uid://u5x8mgenl5y4" path="res://scripts/interact_point.gd" id="3_sxo7y"]
+[ext_resource type="Texture2D" uid="uid://dvc421v0v4a2t" path="res://assets/sprites/characters/scientist.png" id="4_j2lqu"]
+[ext_resource type="Texture2D" uid="uid://de0sq53lgx4ep" path="res://assets/sprites/characters/guard.png" id="5_84mbp"]
 [ext_resource type="Script" uid="uid://dkcse5tmlbfke" path="res://scripts/player.gd" id="8_jswt6"]
 [ext_resource type="SpriteFrames" uid="uid://b872yo2d63qvl" path="res://assets/sprites/player_frames.tres" id="9_k7ac4"]
 [ext_resource type="Script" uid="uid://cpx5m37cmu4jq" path="res://scripts/flicker_light.gd" id="10_4ogqb"]
@@ -80,12 +82,11 @@ point_id = "scientist"
 position = Vector2(0, -96)
 shape = SubResource("RectangleShape2D_8ukss")
 
-[node name="Figure" type="ColorRect" parent="Points/Scientist" unique_id=1276178335]
-offset_left = 40.0
-offset_top = -90.0
-offset_right = 68.0
-mouse_filter = 2
-color = Color(0.82, 0.84, 0.82, 1)
+[node name="Figure" type="Sprite2D" parent="Points/Scientist" unique_id=1018069556]
+texture_filter = 1
+position = Vector2(54, -48)
+scale = Vector2(2, 2)
+texture = ExtResource("4_j2lqu")
 
 [node name="Records" type="Area2D" parent="Points" unique_id=729555111]
 position = Vector2(1150, 640)
@@ -112,12 +113,11 @@ point_id = "guard"
 position = Vector2(0, -96)
 shape = SubResource("RectangleShape2D_or88c")
 
-[node name="Figure" type="ColorRect" parent="Points/Guard" unique_id=2141673917]
-offset_left = 40.0
-offset_top = -94.0
-offset_right = 70.0
-mouse_filter = 2
-color = Color(0.18, 0.2, 0.24, 1)
+[node name="Figure" type="Sprite2D" parent="Points/Guard" unique_id=1697475855]
+texture_filter = 1
+position = Vector2(55, -48)
+scale = Vector2(2, 2)
+texture = ExtResource("5_84mbp")
 
 [node name="Exit" type="Area2D" parent="Points" unique_id=1483213795]
 position = Vector2(2150, 640)

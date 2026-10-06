@@ -3,7 +3,9 @@
 [ext_resource type="Script" uid="uid://r853iujge1v" path="res://scripts/area.gd" id="1_pxqrw"]
 [ext_resource type="Texture2D" uid="uid://c1itui8tftjeh" path="res://assets/bg/scene_09.webp" id="2_pxqrw"]
 [ext_resource type="Script" uid="uid://u5x8mgenl5y4" path="res://scripts/interact_point.gd" id="3_d8cse"]
+[ext_resource type="Texture2D" uid="uid://d0whrabgvymqr" path="res://assets/sprites/characters/horde.png" id="4_d8cse"]
 [ext_resource type="Script" uid="uid://dkcse5tmlbfke" path="res://scripts/player.gd" id="4_hnolj"]
+[ext_resource type="Texture2D" uid="uid://d0ryurb452r8m" path="res://assets/sprites/characters/wife.png" id="5_hnolj"]
 [ext_resource type="SpriteFrames" uid="uid://b872yo2d63qvl" path="res://assets/sprites/player_frames.tres" id="5_rbspv"]
 [ext_resource type="Script" uid="uid://cpx5m37cmu4jq" path="res://scripts/flicker_light.gd" id="6_xlq1f"]
 
@@ -77,12 +79,11 @@ point_id = "horde"
 position = Vector2(0, -96)
 shape = SubResource("RectangleShape2D_8ukss")
 
-[node name="Figure" type="ColorRect" parent="Points/Horde" unique_id=1276178335]
-offset_left = 40.0
-offset_top = -80.0
-offset_right = 150.0
-mouse_filter = 2
-color = Color(0.2, 0.25, 0.21, 1)
+[node name="Figure" type="Sprite2D" parent="Points/Horde" unique_id=1410692483]
+texture_filter = 1
+position = Vector2(95, -36)
+scale = Vector2(2, 2)
+texture = ExtResource("4_d8cse")
 
 [node name="Shelter" type="Area2D" parent="Points" unique_id=1020138718]
 position = Vector2(1600, 640)
@@ -93,12 +94,11 @@ point_id = "shelter"
 position = Vector2(0, -96)
 shape = SubResource("RectangleShape2D_or88c")
 
-[node name="Figure" type="ColorRect" parent="Points/Shelter" unique_id=2141673917]
-offset_left = 90.0
-offset_top = -88.0
-offset_right = 116.0
-mouse_filter = 2
-color = Color(0.72, 0.52, 0.46, 1)
+[node name="Figure" type="Sprite2D" parent="Points/Shelter" unique_id=196175814]
+texture_filter = 1
+position = Vector2(103, -48)
+scale = Vector2(2, 2)
+texture = ExtResource("5_hnolj")
 
 [node name="Fence" type="ColorRect" parent="Points/Shelter" unique_id=1287519956]
 offset_left = 40.0
