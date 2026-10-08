@@ -1,4 +1,4 @@
-# 失語者 — Godot 專案（階段 1、Lv1～Lv6 完成）
+# 失語者 — Godot 專案（階段 1、Lv1～Lv6 完成，下一版：A＋）
 
 這份檔案是給 Claude Code 讀的專案說明。每次開新對話都會自動載入。
 
@@ -10,7 +10,12 @@
   - 每一級的規格、步驟、驗證方式、完成標準：`docs/Lv製作流程.md`
   - 作者貼給你的分步指令：`PROMPTS.md` 的「LvN 分步指令」（每一級開始時補上該級的指令）
 - **暫不支援手機**：Lv1 起可走動區域只做鍵盤操作，不要自行加觸控。按鍵衝突（`interact` 與 `ui_accept`）已在 Lv6-1 處理：所有選項自動聚焦第一個能選的選項（鎖住的不能聚焦），一次按鍵只處理一件事（`tests/test_lv6.gd` 檢查）。
-- **Lv1（停車場可走動）、Lv2（景深分層與光影）已完成（2026-10-02）；Lv3（Pixelorama MCP 畫主角）已完成（2026-10-05）**：32×48、放大 2 倍，左右各一套共 20 格（待機 4 fps、行走 8 fps），原始檔 `art/player.pxo`，遊戲用 `assets/sprites/player.png`＋`player_frames.tres`。經過與觀察見 `MCP實驗紀錄.md` 的「Lv3」。**劇本 v1.5 已定稿（2026-10-05）**：`docs/story_v1.5_outline.md`、`docs/story_v1.5_draft.md`，素材需求 `docs/asset_requests.md`。**Lv4（多區域、物品與旗標）已完成（2026-10-05）**：停車場（v1.5）→ 街道 → 診所，格式與步驟見 `docs/Lv製作流程.md` 的「Lv4」，經過見 `MCP實驗紀錄.md` 的「Lv4」。**Lv5（其餘區域、Bad End 與結局）已完成（2026-10-06）**：7 個區域＋3 段過場、6 個結局、Bad End 重試，規格見 `docs/Lv製作流程.md` 的「Lv5」，經過見 `MCP實驗紀錄.md` 的「Lv5」。**Lv6（鍵盤操作、衝動機制、像素人物與場景物件、平衡）已完成（2026-10-06）**：規格見 `docs/Lv製作流程.md` 的「Lv6」，經過與從階段 1 到 Lv6 的整體總結見 `MCP實驗紀錄.md`。**下一版的想法**（會動的像素、音效、場景、互動方式）記在 `docs/開發路線圖.md` 第 6 節，作者還沒決定開始。
+- **Lv1（停車場可走動）、Lv2（景深分層與光影）已完成（2026-10-02）；Lv3（Pixelorama MCP 畫主角）已完成（2026-10-05）**：32×48、放大 2 倍，左右各一套共 20 格（待機 4 fps、行走 8 fps），原始檔 `art/player.pxo`，遊戲用 `assets/sprites/player.png`＋`player_frames.tres`。經過與觀察見 `MCP實驗紀錄.md` 的「Lv3」。**劇本 v1.5 已定稿（2026-10-05）**：`docs/story_v1.5_outline.md`、`docs/story_v1.5_draft.md`，素材需求 `docs/asset_requests.md`。**Lv4（多區域、物品與旗標）已完成（2026-10-05）**：停車場（v1.5）→ 街道 → 診所，格式與步驟見 `docs/Lv製作流程.md` 的「Lv4」，經過見 `MCP實驗紀錄.md` 的「Lv4」。**Lv5（其餘區域、Bad End 與結局）已完成（2026-10-06）**：7 個區域＋3 段過場、6 個結局、Bad End 重試，規格見 `docs/Lv製作流程.md` 的「Lv5」，經過見 `MCP實驗紀錄.md` 的「Lv5」。**Lv6（鍵盤操作、衝動機制、像素人物與場景物件、平衡）已完成（2026-10-06）**：規格見 `docs/Lv製作流程.md` 的「Lv6」，經過與從階段 1 到 Lv6 的整體總結見 `MCP實驗紀錄.md`。**下一版的想法**（會動的像素、音效、場景、互動方式）記在 `docs/開發路線圖.md` 第 6 節。
+- **下一版（2026-10-08 作者決定）：先做 A＋（深化 2.5D，延續本專案、維持網頁版），之後再決定 HD-2D**。
+  - A＋ 的等級 A1～A6、素材分工、驗證與完成標準：`docs/A+方案.md`；外部 AI 素材的提示詞與檔名：`docs/A+素材提示詞.md`；分步指令：`PROMPTS.md` 的「A1 分步指令」（之後每一級開始時補上）。
+  - 聲音素材**免費素材為主、AI 補缺**（作者 2026-10-08）：專案沒有商業用途，非商業授權也可以用，以找到適合的聲音為最優先。作者下載候選、Claude 整理（轉檔、裁切、音量、循環），作者挑選後才放進 `assets/`；每個外部素材記錄在 `docs/素材來源.md`。
+  - 找不到合適的聲音時，才用 **ElevenLabs MCP**（或 Suno）補：**每次呼叫會消耗點數，只在作者同意的範圍內呼叫**。
+  - **不要做 HD-2D 的任何東西**（3D、Forward+、Blender MCP），除非作者決定開始；方案見 `docs/HD-2D方案.md`（桌面版優先、另開專案）。
 - **一次只做一級**：沒有作者的指示，不要開始下一級，也不要提前做後面等級的功能。
 - MCP：**godot-mcp-toolkit**（Godot 編輯器）＋ **pixelorama**（像素繪圖，Lv3 起使用）。
   - pixelorama 註冊在 **user 範圍**（`~/Tools/pixelorama-mcp`），擴充功能用自己從原始碼打包的 `PixMcpBridge.zip`。安裝紀錄與排除問題見 `docs/Lv製作流程.md` 的 Lv3 與 `MCP實驗紀錄.md` 的「Lv3 準備」。
@@ -65,6 +70,10 @@ docs/story_v1.5_draft.md    劇本 v1.5 完整文字（定稿，標示原文／�
 docs/asset_requests.md      v1.5 素材需求與生成提示詞（作者準備背景、BGM、音效）
 docs/story_v1.0.json        1.0 版劇本備份（不放 data/，避免被匯出）
 docs/itch.io上傳步驟.md      網頁版打包成 zip、上傳 itch.io 的步驟與公開前確認
+docs/A+方案.md             下一版 A＋（A1～A6）的內容、素材分工、驗證與完成標準
+docs/A+素材提示詞.md        A＋ 外部素材的提示詞、搜尋關鍵字、檔名與勾選清單
+docs/素材來源.md            每個外部素材的來源與授權（放進專案時加一列）
+docs/HD-2D方案.md          HD-2D 方案（之後再決定，桌面版優先、另開專案；作者決定前不要做）
 art/player.pxo         主角的 Pixelorama 原始檔（含 .gdignore，不匯出）
 assets/sprites/        主角 spritesheet 與 SpriteFrames；props/ 道具、characters/ 人物（Lv6，原始檔在 art/characters/*.pxo）
 data/areas/parking_lot.json  停車場區域資料（Lv4-3 起為 v1.5 格式，文字直接寫在資料裡）

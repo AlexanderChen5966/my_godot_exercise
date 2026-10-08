@@ -38,7 +38,7 @@
 2. 填基本資料：
    - **Title**：失語者
    - **Kind of project**：選 **HTML**
-   - **Pricing**：選 No payments 或 Donations
+   - **Pricing**：選 **No payments**。只有在 `docs/素材來源.md` 裡**沒有任何非商業授權素材**時，才可以選 Donations（贊助可能被當成商業用途）
 3. 在 **Uploads** 上傳 `shiyuzhe_web_itch.zip`，然後勾選 **This file will be played in the browser**。
 4. 設定 **Embed options**：
 
