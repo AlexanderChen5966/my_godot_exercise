@@ -14,6 +14,9 @@ const LOCKED_TEXT := "……（你想不起來）"   # 數值不夠時，選項�
 const ENDING_LABEL := "— 結局 —"
 const BAD_ENDING_COLOR := Color(0.85, 0.35, 0.3)
 const CHOICE_GUARD_MS := 300  # 選項出現後這段時間內不接受選擇：避免想跳過打字時剛好選到第一個選項
+const BASE_SIZE := Vector2(1152, 768)
+const PLAYER_HEIGHT := 96.0  # 主角畫面上的高度（32×48 放大 2 倍）
+const PROMPT_GAP := 8.0  # 提示和頭頂的距離
 
 # 節點都設為 unique name（%Name），之後搬動節點層級時不用改這裡。
 @onready var background: TextureRect = %Background
@@ -294,6 +297,17 @@ func _update_prompt() -> void:
 		return
 	prompt_label.text = "E　%s" % point.get("label", "調查")
 	prompt_label.visible = true
+	_place_prompt()
+
+
+## 互動提示浮在主角頭上（A1.5：主角可以往畫面外側走，固定在畫面下方會擋路）
+func _place_prompt() -> void:
+	if _area == null or not prompt_label.visible:
+		return
+	var feet := (_area.get_node("Player") as Node2D).get_global_transform_with_canvas().origin
+	var pos := feet + Vector2(-prompt_label.size.x / 2.0, -PLAYER_HEIGHT - PROMPT_GAP - prompt_label.size.y)
+	pos.x = clampf(pos.x, 0.0, BASE_SIZE.x - prompt_label.size.x)
+	prompt_label.position = pos
 
 
 func _on_point_entered(point_id: String) -> void:
@@ -685,6 +699,7 @@ func _create_debug_label() -> void:
 
 func _process(_delta: float) -> void:
 	impulse_fx.target = _impulse_target()
+	_place_prompt()
 	if _debug_label and _debug_label.visible:
 		var parts: Array[String] = []
 		for key in GameState.stats:

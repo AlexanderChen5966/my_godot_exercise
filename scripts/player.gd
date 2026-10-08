@@ -1,7 +1,9 @@
-## 主角：只能左右移動（不跳、不受重力）。can_move 為 false 時（對話中）不動。
+## 主角：在縱深帶裡上下左右移動（A1.5，像《小朋友齊打交 2》；不跳、不受重力）。can_move 為 false 時（對話中）不動。
 extends CharacterBody2D
 
 const SPEED := 140.0  # 步履蹣跚，不要太快
+const DEPTH_SPEED_RATIO := 0.6  # 上下（往畫面裡外）走得比左右慢，這類遊戲的慣例
+const SHADOW_TEXTURE := preload("res://assets/sprites/characters/shadow.png")
 # 角色在 32px 畫格裡偏左 1px，左右兩套是互相翻轉的，所以兩個方向的 Sprite 位置不同，轉身時身體中心才不會跳動
 const SPRITE_X_RIGHT := 3.0
 const SPRITE_X_LEFT := -1.0
@@ -9,20 +11,34 @@ const SPRITE_X_LEFT := -1.0
 var can_move := false
 var min_x := 0.0
 var max_x := 2304.0
+var min_y := 650.0  # 縱深帶（腳的 y 範圍），由區域設定
+var max_y := 735.0
 var facing := 1  # 1 = 右，-1 = 左
 
 @onready var sprite: AnimatedSprite2D = $Sprite
 
 
+func _ready() -> void:
+	# 腳下的影子：7 個區域場景各有一份 Player，所以在這裡加，不用逐一改場景
+	var shadow := Sprite2D.new()
+	shadow.name = "Shadow"
+	shadow.texture = SHADOW_TEXTURE
+	shadow.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	shadow.scale = Vector2(2, 2)
+	shadow.position = Vector2(1, -2)
+	add_child(shadow)
+	move_child(shadow, sprite.get_index())  # 畫在角色下面
+
+
 func _physics_process(_delta: float) -> void:
-	var direction := Input.get_axis("move_left", "move_right") if can_move else 0.0
-	var old_x := position.x
-	velocity = Vector2(direction * SPEED, 0.0)
+	var direction := Input.get_vector("move_left", "move_right", "move_up", "move_down") if can_move else Vector2.ZERO
+	var old_position := position
+	velocity = Vector2(direction.x * SPEED, direction.y * SPEED * DEPTH_SPEED_RATIO)
 	move_and_slide()
-	position.x = clampf(position.x, min_x, max_x)
-	if direction != 0.0:
-		facing = 1 if direction > 0.0 else -1
-	_update_animation(not is_equal_approx(position.x, old_x))  # 走到區域邊緣被擋住時改回待機
+	position = Vector2(clampf(position.x, min_x, max_x), clampf(position.y, min_y, max_y))
+	if direction.x != 0.0:
+		facing = 1 if direction.x > 0.0 else -1
+	_update_animation(not position.is_equal_approx(old_position))  # 走到邊緣被擋住時改回待機
 
 
 ## 直接設定面向（換區域時使用），並立刻換成對應的待機動畫。

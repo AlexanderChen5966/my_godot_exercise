@@ -8,6 +8,9 @@ signal point_exited(point_id: String)    # 玩家離開互動點範圍
 @export var area_height := 768.0
 @export var player_start := Vector2(160, 640)
 @export var edge_margin := 16.0  # 主角色塊半寬，避免身體超出區域邊緣
+## 縱深帶（A1.5）：主角的腳可以走的 y 範圍。進入區域時站在中間。
+@export var walk_top := 650.0
+@export var walk_bottom := 735.0
 
 @export_group("景深（視差）")
 ## 各層相對鏡頭的移動倍率：小於 1 越遠、越慢；大於 1 越近、越快。區域裡沒有該層時忽略。
@@ -31,9 +34,11 @@ signal point_exited(point_id: String)    # 玩家離開互動點範圍
 
 
 func _ready() -> void:
-	player.position = player_start
 	player.min_x = edge_margin
 	player.max_x = area_width - edge_margin
+	player.min_y = walk_top
+	player.max_y = walk_bottom
+	player.position = Vector2(player_start.x, (walk_top + walk_bottom) / 2.0)
 	camera.limit_left = 0
 	camera.limit_top = 0
 	camera.limit_right = int(area_width)
