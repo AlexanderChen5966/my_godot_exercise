@@ -3,14 +3,26 @@
 [ext_resource type="Script" uid="uid://r853iujge1v" path="res://scripts/area.gd" id="1_q84vj"]
 [ext_resource type="Texture2D" uid="uid://d4m68tgy57mwv" path="res://assets/bg/scene_01.webp" id="2_tpq6i"]
 [ext_resource type="Script" uid="uid://dkcse5tmlbfke" path="res://scripts/player.gd" id="3_8ukss"]
+[ext_resource type="Texture2D" uid="uid://cmn8l6eksxe2s" path="res://assets/sprites/layers/parking_mid_ceiling.png" id="3_ibclr"]
 [ext_resource type="Texture2D" uid="uid://cclfpnwmh2aoe" path="res://assets/sprites/props/photo.png" id="4_2mgj5"]
+[ext_resource type="Texture2D" uid="uid://dhrj3n6n5ao34" path="res://assets/sprites/layers/parking_mid_pillar.png" id="4_ertkx"]
 [ext_resource type="SpriteFrames" uid="uid://b872yo2d63qvl" path="res://assets/sprites/player_frames.tres" id="4_kipkx"]
 [ext_resource type="Script" uid="uid://u5x8mgenl5y4" path="res://scripts/interact_point.gd" id="4_tpq6i"]
 [ext_resource type="Script" uid="uid://cpx5m37cmu4jq" path="res://scripts/flicker_light.gd" id="5_8ukss"]
 [ext_resource type="Texture2D" uid="uid://dy0p8jen3y560" path="res://assets/sprites/characters/woman.png" id="5_ef6w0"]
 [ext_resource type="Texture2D" uid="uid://b0m5iju75hk4e" path="res://assets/sprites/props/lamp.png" id="5_k0cph"]
+[ext_resource type="Texture2D" uid="uid://bt8nlehkqmu2w" path="res://assets/sprites/layers/parking_mid_pillar_b2.png" id="5_ogvxm"]
+[ext_resource type="Texture2D" uid="uid://dpapetl46x7kn" path="res://assets/sprites/layers/parking_mid_car.png" id="6_g4d3l"]
 [ext_resource type="Texture2D" uid="uid://cmqyrypoe4ri5" path="res://assets/sprites/props/debris.png" id="6_wnkfg"]
+[ext_resource type="Texture2D" uid="uid://d1mexrw0xk6qt" path="res://assets/sprites/layers/parking_ground.png" id="7_2h1l5"]
 [ext_resource type="Texture2D" uid="uid://k8a0kynwr1p8" path="res://assets/sprites/props/exit_door.png" id="8_k0cph"]
+[ext_resource type="Texture2D" uid="uid://djyfvveixpxij" path="res://assets/sprites/props/blood_pool.png" id="9_xl8si"]
+[ext_resource type="Texture2D" uid="uid://bqior3i0taira" path="res://assets/sprites/props/lamp_mount.png" id="11_xl8si"]
+[ext_resource type="Texture2D" uid="uid://cx1ev46h2b22n" path="res://assets/sprites/layers/parking_front_pillar.png" id="17_nx6l4"]
+[ext_resource type="Texture2D" uid="uid://dgcn27mn37xss" path="res://assets/sprites/layers/parking_near_papers.png" id="18_nx6l4"]
+[ext_resource type="Texture2D" uid="uid://dgwrgnpcbrwmr" path="res://assets/sprites/layers/parking_near_glass.png" id="19_67f1b"]
+[ext_resource type="Texture2D" uid="uid://m6cl7dq7a8c4" path="res://assets/sprites/layers/parking_near_rubble.png" id="20_b2y4s"]
+[ext_resource type="Texture2D" uid="uid://crn37tx015w4t" path="res://assets/sprites/layers/parking_near_cone.png" id="21_vjy02"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_k46jg"]
 size = Vector2(140, 192)
@@ -59,62 +71,65 @@ script = ExtResource("1_q84vj")
 scroll_scale = Vector2(0.3, 1)
 
 [node name="Backdrop" type="TextureRect" parent="FarLayer" unique_id=1626762249]
-offset_right = 2304.0
+offset_right = 1500.0
 offset_bottom = 768.0
 mouse_filter = 2
 texture = ExtResource("2_tpq6i")
 expand_mode = 1
-stretch_mode = 1
+stretch_mode = 6
 
 [node name="MidLayer" type="Parallax2D" parent="." unique_id=1583612062]
+texture_filter = 1
 scroll_scale = Vector2(0.7, 1)
 
-[node name="Pillar1" type="ColorRect" parent="MidLayer" unique_id=120234322]
-offset_left = 172.0
-offset_top = 60.0
-offset_right = 228.0
-offset_bottom = 640.0
+[node name="Ceiling" type="TextureRect" parent="MidLayer" unique_id=1782115738]
+texture_filter = 1
+offset_right = 1024.0
+offset_bottom = 28.0
+scale = Vector2(2, 2)
 mouse_filter = 2
-color = Color(0.02, 0.03, 0.035, 0.8)
+texture = ExtResource("3_ibclr")
+stretch_mode = 1
 
-[node name="Pillar2" type="ColorRect" parent="MidLayer" unique_id=274804557]
-offset_left = 622.0
-offset_top = 60.0
-offset_right = 678.0
-offset_bottom = 640.0
-mouse_filter = 2
-color = Color(0.02, 0.03, 0.035, 0.8)
+[node name="Pillar1" type="Sprite2D" parent="MidLayer" unique_id=14484024]
+position = Vector2(200, 320)
+scale = Vector2(2, 2)
+texture = ExtResource("4_ertkx")
 
-[node name="Pillar3" type="ColorRect" parent="MidLayer" unique_id=766058578]
-offset_left = 1072.0
-offset_top = 60.0
-offset_right = 1128.0
-offset_bottom = 640.0
-mouse_filter = 2
-color = Color(0.02, 0.03, 0.035, 0.8)
+[node name="Pillar2" type="Sprite2D" parent="MidLayer" unique_id=852920874]
+position = Vector2(650, 320)
+scale = Vector2(2, 2)
+texture = ExtResource("5_ogvxm")
 
-[node name="Pillar4" type="ColorRect" parent="MidLayer" unique_id=1239842193]
-offset_left = 1522.0
-offset_top = 60.0
-offset_right = 1578.0
-offset_bottom = 640.0
-mouse_filter = 2
-color = Color(0.02, 0.03, 0.035, 0.8)
+[node name="Pillar3" type="Sprite2D" parent="MidLayer" unique_id=620748220]
+position = Vector2(1100, 320)
+scale = Vector2(2, 2)
+texture = ExtResource("4_ertkx")
 
-[node name="Pillar5" type="ColorRect" parent="MidLayer" unique_id=655939893]
-offset_left = 1972.0
-offset_top = 60.0
-offset_right = 2028.0
-offset_bottom = 640.0
-mouse_filter = 2
-color = Color(0.02, 0.03, 0.035, 0.8)
+[node name="Pillar4" type="Sprite2D" parent="MidLayer" unique_id=1978477616]
+position = Vector2(1550, 320)
+scale = Vector2(2, 2)
+texture = ExtResource("5_ogvxm")
 
-[node name="Ground" type="ColorRect" parent="." unique_id=350550260]
+[node name="Pillar5" type="Sprite2D" parent="MidLayer" unique_id=851374778]
+position = Vector2(2000, 320)
+scale = Vector2(2, 2)
+texture = ExtResource("4_ertkx")
+
+[node name="Car" type="Sprite2D" parent="MidLayer" unique_id=2036830401]
+position = Vector2(900, 606)
+scale = Vector2(2, 2)
+texture = ExtResource("6_g4d3l")
+
+[node name="Ground" type="TextureRect" parent="." unique_id=345748998]
+texture_filter = 1
 offset_top = 640.0
-offset_right = 2304.0
-offset_bottom = 768.0
+offset_right = 1152.0
+offset_bottom = 704.0
+scale = Vector2(2, 2)
 mouse_filter = 2
-color = Color(0.07, 0.08, 0.09, 0.92)
+texture = ExtResource("7_2h1l5")
+stretch_mode = 1
 
 [node name="Points" type="Node2D" parent="." unique_id=1353451513]
 
@@ -127,12 +142,11 @@ point_id = "wake"
 position = Vector2(0, -96)
 shape = SubResource("RectangleShape2D_k46jg")
 
-[node name="Marker" type="ColorRect" parent="Points/Wake" unique_id=882885396]
-offset_left = -30.0
-offset_top = -6.0
-offset_right = 30.0
-mouse_filter = 2
-color = Color(0.3, 0.08, 0.07, 0.9)
+[node name="Blood" type="Sprite2D" parent="Points/Wake" unique_id=523898383]
+texture_filter = 1
+position = Vector2(-12, -8)
+scale = Vector2(2, 2)
+texture = ExtResource("9_xl8si")
 
 [node name="Prop" type="Sprite2D" parent="Points/Wake" unique_id=869137178]
 texture_filter = 1
@@ -149,6 +163,12 @@ point_id = "light"
 [node name="Shape" type="CollisionShape2D" parent="Points/Light" unique_id=33630925]
 position = Vector2(0, -96)
 shape = SubResource("RectangleShape2D_8ukss")
+
+[node name="Mount" type="Sprite2D" parent="Points/Light" unique_id=1833894941]
+texture_filter = 1
+position = Vector2(0, -544)
+scale = Vector2(2, 2)
+texture = ExtResource("11_xl8si")
 
 [node name="Prop" type="Sprite2D" parent="Points/Light" unique_id=1553529357]
 texture_filter = 1
@@ -239,40 +259,76 @@ sprite_frames = ExtResource("4_kipkx")
 animation = &"idle_right"
 autoplay = "idle_right"
 
+[node name="Near" type="Node2D" parent="." unique_id=2127918948]
+texture_filter = 1
+
+[node name="Papers1" type="Sprite2D" parent="Near" unique_id=12467922]
+position = Vector2(110, 746)
+scale = Vector2(2, 2)
+texture = ExtResource("18_nx6l4")
+
+[node name="Glass1" type="Sprite2D" parent="Near" unique_id=306060288]
+position = Vector2(262, 753)
+scale = Vector2(2, 2)
+texture = ExtResource("19_67f1b")
+
+[node name="Rubble1" type="Sprite2D" parent="Near" unique_id=1327231060]
+position = Vector2(564, 724)
+scale = Vector2(2, 2)
+texture = ExtResource("20_b2y4s")
+
+[node name="Cone" type="Sprite2D" parent="Near" unique_id=2119574489]
+position = Vector2(784, 712)
+scale = Vector2(2, 2)
+texture = ExtResource("21_vjy02")
+
+[node name="Rubble2" type="Sprite2D" parent="Near" unique_id=126238181]
+position = Vector2(1044, 742)
+scale = Vector2(2, 2)
+texture = ExtResource("20_b2y4s")
+flip_h = true
+
+[node name="Papers2" type="Sprite2D" parent="Near" unique_id=1644522153]
+position = Vector2(1380, 744)
+scale = Vector2(2, 2)
+texture = ExtResource("18_nx6l4")
+flip_h = true
+
+[node name="Rubble3" type="Sprite2D" parent="Near" unique_id=1394164517]
+position = Vector2(1720, 730)
+scale = Vector2(2, 2)
+texture = ExtResource("20_b2y4s")
+
+[node name="Glass2" type="Sprite2D" parent="Near" unique_id=1704243382]
+position = Vector2(1830, 752)
+scale = Vector2(2, 2)
+texture = ExtResource("19_67f1b")
+
 [node name="FrontLayer" type="Parallax2D" parent="." unique_id=1888911907]
+texture_filter = 1
 scroll_scale = Vector2(1.3, 1)
 
-[node name="Pillar1" type="ColorRect" parent="FrontLayer" unique_id=1981379393]
-light_mask = 0
-offset_left = 360.0
-offset_right = 480.0
-offset_bottom = 768.0
-mouse_filter = 2
-color = Color(0.005, 0.006, 0.008, 0.96)
+[node name="Pillar1" type="Sprite2D" parent="FrontLayer" unique_id=753288410]
+position = Vector2(420, 384)
+scale = Vector2(2, 2)
+texture = ExtResource("17_nx6l4")
 
-[node name="Pillar2" type="ColorRect" parent="FrontLayer" unique_id=960153495]
-light_mask = 0
-offset_left = 1190.0
-offset_right = 1310.0
-offset_bottom = 768.0
-mouse_filter = 2
-color = Color(0.005, 0.006, 0.008, 0.96)
+[node name="Pillar2" type="Sprite2D" parent="FrontLayer" unique_id=1181843150]
+position = Vector2(1250, 384)
+scale = Vector2(2, 2)
+texture = ExtResource("17_nx6l4")
+flip_h = true
 
-[node name="Pillar3" type="ColorRect" parent="FrontLayer" unique_id=911530233]
-light_mask = 0
-offset_left = 2020.0
-offset_right = 2140.0
-offset_bottom = 768.0
-mouse_filter = 2
-color = Color(0.005, 0.006, 0.008, 0.96)
+[node name="Pillar3" type="Sprite2D" parent="FrontLayer" unique_id=989162598]
+position = Vector2(2080, 384)
+scale = Vector2(2, 2)
+texture = ExtResource("17_nx6l4")
 
-[node name="Pillar4" type="ColorRect" parent="FrontLayer" unique_id=1301448866]
-light_mask = 0
-offset_left = 2240.0
-offset_right = 2360.0
-offset_bottom = 768.0
-mouse_filter = 2
-color = Color(0.005, 0.006, 0.008, 0.96)
+[node name="Pillar4" type="Sprite2D" parent="FrontLayer" unique_id=1471058299]
+position = Vector2(2300, 384)
+scale = Vector2(2, 2)
+texture = ExtResource("17_nx6l4")
+flip_h = true
 
 [node name="Darkness" type="CanvasModulate" parent="." unique_id=413259386]
 color = Color(0.32, 0.32, 0.3456, 1)
