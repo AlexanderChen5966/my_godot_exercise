@@ -3,16 +3,29 @@
 [ext_resource type="Script" uid="uid://r853iujge1v" path="res://scripts/area.gd" id="1_or88c"]
 [ext_resource type="Texture2D" uid="uid://7wiab8lqf2o8" path="res://assets/bg/scene_04.webp" id="2_or88c"]
 [ext_resource type="Script" uid="uid://dkcse5tmlbfke" path="res://scripts/player.gd" id="3_4wa2n"]
+[ext_resource type="Texture2D" uid="uid://bo72g3dvpsure" path="res://assets/sprites/layers/clinic_mid_benches.png" id="3_jg1fx"]
 [ext_resource type="SpriteFrames" uid="uid://b872yo2d63qvl" path="res://assets/sprites/player_frames.tres" id="4_1g32l"]
 [ext_resource type="Texture2D" uid="uid://bdyn2s3mi2jff" path="res://assets/sprites/props/cabinet.png" id="4_2bfil"]
 [ext_resource type="Texture2D" uid="uid://bwwjgv6vnyfk1" path="res://assets/sprites/props/recorder.png" id="4_lmpgy"]
+[ext_resource type="Texture2D" uid="uid://chn708i2fixmv" path="res://assets/sprites/layers/clinic_mid_curtain.png" id="4_oels4"]
 [ext_resource type="Texture2D" uid="uid://crodufi7o8xm0" path="res://assets/sprites/props/sign_street.png" id="4_oev4m"]
 [ext_resource type="Texture2D" uid="uid://bclnbtearke1q" path="res://assets/sprites/props/cards.png" id="5_2bfil"]
+[ext_resource type="Texture2D" uid="uid://dxo1rihw1p34e" path="res://assets/sprites/layers/clinic_mid_counter.png" id="5_4eewa"]
 [ext_resource type="Script" uid="uid://u5x8mgenl5y4" path="res://scripts/interact_point.gd" id="5_lmpgy"]
 [ext_resource type="Script" uid="uid://cpx5m37cmu4jq" path="res://scripts/flicker_light.gd" id="6_2bfil"]
+[ext_resource type="Texture2D" uid="uid://b5ar16pquif6v" path="res://assets/sprites/layers/clinic_mid_wheelchair.png" id="6_n35jl"]
 [ext_resource type="Texture2D" uid="uid://dgxyaptg1huss" path="res://assets/sprites/props/chair.png" id="6_rqvkt"]
 [ext_resource type="Texture2D" uid="uid://cvykgmj0y4l2q" path="res://assets/sprites/props/clinic_pillar.png" id="7_87sov"]
+[ext_resource type="Texture2D" uid="uid://ptmmstcg1aq3" path="res://assets/sprites/layers/clinic_mid_ivstand.png" id="7_yky72"]
+[ext_resource type="Texture2D" uid="uid://dishxekdxheco" path="res://assets/sprites/layers/clinic_ground.png" id="8_y4lab"]
 [ext_resource type="Texture2D" uid="uid://cbi08dk70gytu" path="res://assets/sprites/props/exit_door_wood.png" id="10_wqg5i"]
+[ext_resource type="Texture2D" uid="uid://c2r8aet3rlr75" path="res://assets/sprites/props/clinic_gurney.png" id="19_t11m8"]
+[ext_resource type="Texture2D" uid="uid://b2pck3gaswt1e" path="res://assets/sprites/layers/clinic_near_pills.png" id="20_qstgr"]
+[ext_resource type="Texture2D" uid="uid://ddi7hvrt2hrr8" path="res://assets/sprites/layers/clinic_near_leaves.png" id="21_i7g0o"]
+[ext_resource type="Texture2D" uid="uid://d24vhekys17va" path="res://assets/sprites/layers/clinic_near_clipboard.png" id="22_gnfw7"]
+[ext_resource type="Texture2D" uid="uid://dgcn27mn37xss" path="res://assets/sprites/layers/parking_near_papers.png" id="23_138m7"]
+[ext_resource type="Texture2D" uid="uid://becjn1qee2g6e" path="res://assets/sprites/layers/clinic_front_curtain.png" id="24_85iiw"]
+[ext_resource type="Texture2D" uid="uid://ct772jo0pooww" path="res://assets/sprites/layers/clinic_front_ivy.png" id="25_v45mq"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_oev4m"]
 size = Vector2(60, 50)
@@ -43,6 +56,9 @@ fill = 1
 fill_from = Vector2(0.5, 0.5)
 fill_to = Vector2(1, 0.5)
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_47j25"]
+size = Vector2(130, 10)
+
 [sub_resource type="Gradient" id="Gradient_kipkx"]
 colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0)
 
@@ -71,14 +87,66 @@ expand_mode = 1
 stretch_mode = 6
 
 [node name="MidLayer" type="Parallax2D" parent="." unique_id=1583612062]
+texture_filter = 1
 scroll_scale = Vector2(0.7, 1)
 
-[node name="Ground" type="ColorRect" parent="." unique_id=350550260]
+[node name="Benches1" type="Sprite2D" parent="MidLayer" unique_id=842293431]
+position = Vector2(260, 600)
+scale = Vector2(2, 2)
+texture = ExtResource("3_jg1fx")
+
+[node name="Curtain1" type="Sprite2D" parent="MidLayer" unique_id=221313076]
+position = Vector2(470, 430)
+scale = Vector2(2, 2)
+texture = ExtResource("4_oels4")
+
+[node name="Counter" type="Sprite2D" parent="MidLayer" unique_id=4935501]
+position = Vector2(760, 584)
+scale = Vector2(2, 2)
+texture = ExtResource("5_4eewa")
+
+[node name="Wheelchair1" type="Sprite2D" parent="MidLayer" unique_id=472816746]
+position = Vector2(980, 604)
+scale = Vector2(2, 2)
+texture = ExtResource("6_n35jl")
+
+[node name="IVStand1" type="Sprite2D" parent="MidLayer" unique_id=754134664]
+position = Vector2(1070, 530)
+scale = Vector2(2, 2)
+texture = ExtResource("7_yky72")
+
+[node name="Curtain2" type="Sprite2D" parent="MidLayer" unique_id=309667032]
+position = Vector2(1250, 430)
+scale = Vector2(2, 2)
+texture = ExtResource("4_oels4")
+flip_h = true
+
+[node name="Benches2" type="Sprite2D" parent="MidLayer" unique_id=658750977]
+position = Vector2(1500, 600)
+scale = Vector2(2, 2)
+texture = ExtResource("3_jg1fx")
+flip_h = true
+
+[node name="IVStand2" type="Sprite2D" parent="MidLayer" unique_id=2122169251]
+position = Vector2(1700, 530)
+scale = Vector2(2, 2)
+texture = ExtResource("7_yky72")
+
+[node name="Wheelchair2" type="Sprite2D" parent="MidLayer" unique_id=1157909035]
+position = Vector2(1860, 604)
+scale = Vector2(2, 2)
+texture = ExtResource("6_n35jl")
+flip_h = true
+
+[node name="Ground" type="TextureRect" parent="." unique_id=744165972]
+texture_filter = 1
 offset_top = 640.0
-offset_right = 2304.0
-offset_bottom = 768.0
+offset_right = 1152.0
+offset_bottom = 704.0
+scale = Vector2(2, 2)
 mouse_filter = 2
-color = Color(0.16, 0.15, 0.13, 0.94)
+texture = ExtResource("8_y4lab")
+stretch_mode = 1
 
 [node name="Points" type="Node2D" parent="." unique_id=1353451513]
 y_sort_enabled = true
@@ -208,9 +276,92 @@ sprite_frames = ExtResource("4_1g32l")
 animation = &"idle_right"
 autoplay = "idle_right"
 
+[node name="Near" type="Node2D" parent="." unique_id=2000749070]
+y_sort_enabled = true
+texture_filter = 1
+
+[node name="Gurney" type="StaticBody2D" parent="Near" unique_id=1397326609]
+position = Vector2(950, 700)
+
+[node name="Sprite" type="Sprite2D" parent="Near/Gurney" unique_id=553316020]
+position = Vector2(0, -36)
+scale = Vector2(2, 2)
+texture = ExtResource("19_t11m8")
+
+[node name="Shape" type="CollisionShape2D" parent="Near/Gurney" unique_id=1229787596]
+position = Vector2(0, -5)
+shape = SubResource("RectangleShape2D_47j25")
+
+[node name="Pills1" type="Sprite2D" parent="Near" unique_id=1704666141]
+position = Vector2(300, 760)
+scale = Vector2(2, 2)
+texture = ExtResource("20_qstgr")
+offset = Vector2(0, -4)
+
+[node name="Leaves1" type="Sprite2D" parent="Near" unique_id=1986859230]
+position = Vector2(640, 762)
+scale = Vector2(2, 2)
+texture = ExtResource("21_i7g0o")
+offset = Vector2(0, -4)
+
+[node name="Clipboard" type="Sprite2D" parent="Near" unique_id=798546453]
+position = Vector2(1100, 760)
+scale = Vector2(2, 2)
+texture = ExtResource("22_gnfw7")
+offset = Vector2(0, -5)
+
+[node name="Papers" type="Sprite2D" parent="Near" unique_id=1718076121]
+position = Vector2(1550, 758)
+scale = Vector2(2, 2)
+texture = ExtResource("23_138m7")
+offset = Vector2(0, -3)
+
+[node name="Leaves2" type="Sprite2D" parent="Near" unique_id=187638993]
+position = Vector2(1900, 762)
+scale = Vector2(2, 2)
+texture = ExtResource("21_i7g0o")
+offset = Vector2(0, -4)
+flip_h = true
+
+[node name="Pills2" type="Sprite2D" parent="Near" unique_id=566965613]
+position = Vector2(2030, 760)
+scale = Vector2(2, 2)
+texture = ExtResource("20_qstgr")
+offset = Vector2(0, -4)
+flip_h = true
+
 [node name="FrontLayer" type="Parallax2D" parent="." unique_id=1888911907]
 z_index = 1
+texture_filter = 1
 scroll_scale = Vector2(1.3, 1)
+
+[node name="Curtain1" type="Sprite2D" parent="FrontLayer" unique_id=493209848]
+position = Vector2(420, 300)
+scale = Vector2(2, 2)
+texture = ExtResource("24_85iiw")
+
+[node name="Ivy1" type="Sprite2D" parent="FrontLayer" unique_id=1556658522]
+position = Vector2(800, 200)
+scale = Vector2(2, 2)
+texture = ExtResource("25_v45mq")
+
+[node name="Ivy2" type="Sprite2D" parent="FrontLayer" unique_id=1470232219]
+position = Vector2(1350, 200)
+scale = Vector2(2, 2)
+texture = ExtResource("25_v45mq")
+flip_h = true
+
+[node name="Curtain2" type="Sprite2D" parent="FrontLayer" unique_id=1917883098]
+position = Vector2(1700, 300)
+scale = Vector2(2, 2)
+texture = ExtResource("24_85iiw")
+flip_h = true
+
+[node name="Ivy3" type="Sprite2D" parent="FrontLayer" unique_id=742012822]
+position = Vector2(2200, 200)
+scale = Vector2(2, 2)
+texture = ExtResource("25_v45mq")
+flip_h = true
 
 [node name="Darkness" type="CanvasModulate" parent="." unique_id=413259386]
 color = Color(0.32, 0.32, 0.3456, 1)
