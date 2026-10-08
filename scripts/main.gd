@@ -196,7 +196,11 @@ func _instantiate_area(area_id: String, from_area := "") -> Node2D:
 	var spawns: Dictionary = area.get("spawns", {})
 	var spawn_key := from_area if spawns.has(from_area) else "default"
 	if spawns.has(spawn_key):
-		_area.place_player(float(spawns[spawn_key]))
+		var spawn = spawns[spawn_key]  # x，或 [x, y]（A1.5）
+		if spawn is Array:
+			_area.place_player(float(spawn[0]), float(spawn[1]))
+		else:
+			_area.place_player(float(spawn))
 	# 已經完成的事件（例如婦人逃走），回到這個區域時不再出現
 	var points: Dictionary = area.get("points", {})
 	for point_id in points:

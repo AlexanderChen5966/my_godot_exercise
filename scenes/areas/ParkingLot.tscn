@@ -24,20 +24,20 @@
 [ext_resource type="Texture2D" uid="uid://m6cl7dq7a8c4" path="res://assets/sprites/layers/parking_near_rubble.png" id="20_b2y4s"]
 [ext_resource type="Texture2D" uid="uid://crn37tx015w4t" path="res://assets/sprites/layers/parking_near_cone.png" id="21_vjy02"]
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_k46jg"]
-size = Vector2(140, 192)
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_xl8si"]
+size = Vector2(100, 50)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_8ukss"]
-size = Vector2(160, 192)
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_nx6l4"]
+size = Vector2(160, 50)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_2mgj5"]
-size = Vector2(160, 192)
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_67f1b"]
+size = Vector2(100, 50)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_ef6w0"]
-size = Vector2(80, 192)
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_b2y4s"]
+size = Vector2(80, 100)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_x3vua"]
-size = Vector2(200, 192)
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_vjy02"]
+size = Vector2(100, 50)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_kipkx"]
 size = Vector2(32, 96)
@@ -65,6 +65,7 @@ fill_from = Vector2(0.5, 0.5)
 fill_to = Vector2(1, 0.5)
 
 [node name="ParkingLot" type="Node2D" unique_id=1154784663]
+y_sort_enabled = true
 script = ExtResource("1_q84vj")
 
 [node name="FarLayer" type="Parallax2D" parent="." unique_id=356163906]
@@ -132,6 +133,7 @@ texture = ExtResource("7_2h1l5")
 stretch_mode = 1
 
 [node name="Points" type="Node2D" parent="." unique_id=1353451513]
+y_sort_enabled = true
 
 [node name="Wake" type="Area2D" parent="Points" unique_id=1226059757]
 position = Vector2(300, 640)
@@ -139,8 +141,8 @@ script = ExtResource("4_tpq6i")
 point_id = "wake"
 
 [node name="Shape" type="CollisionShape2D" parent="Points/Wake" unique_id=236960424]
-position = Vector2(0, -96)
-shape = SubResource("RectangleShape2D_k46jg")
+position = Vector2(0, 25)
+shape = SubResource("RectangleShape2D_xl8si")
 
 [node name="Blood" type="Sprite2D" parent="Points/Wake" unique_id=523898383]
 texture_filter = 1
@@ -161,8 +163,8 @@ script = ExtResource("4_tpq6i")
 point_id = "light"
 
 [node name="Shape" type="CollisionShape2D" parent="Points/Light" unique_id=33630925]
-position = Vector2(0, -96)
-shape = SubResource("RectangleShape2D_8ukss")
+position = Vector2(0, 25)
+shape = SubResource("RectangleShape2D_nx6l4")
 
 [node name="Mount" type="Sprite2D" parent="Points/Light" unique_id=1833894941]
 texture_filter = 1
@@ -182,8 +184,8 @@ script = ExtResource("4_tpq6i")
 point_id = "debris"
 
 [node name="Shape" type="CollisionShape2D" parent="Points/Debris" unique_id=2001987458]
-position = Vector2(0, -96)
-shape = SubResource("RectangleShape2D_2mgj5")
+position = Vector2(0, 25)
+shape = SubResource("RectangleShape2D_67f1b")
 
 [node name="Prop" type="Sprite2D" parent="Points/Debris" unique_id=1132469499]
 texture_filter = 1
@@ -192,13 +194,13 @@ scale = Vector2(2, 2)
 texture = ExtResource("6_wnkfg")
 
 [node name="Woman" type="Area2D" parent="Points" unique_id=1034065159]
-position = Vector2(1500, 640)
+position = Vector2(1500, 692)
 script = ExtResource("4_tpq6i")
 point_id = "woman"
 
 [node name="Shape" type="CollisionShape2D" parent="Points/Woman" unique_id=2093453519]
-position = Vector2(-40, -96)
-shape = SubResource("RectangleShape2D_ef6w0")
+position = Vector2(-40, -2)
+shape = SubResource("RectangleShape2D_b2y4s")
 
 [node name="Figure" type="Sprite2D" parent="Points/Woman" unique_id=1439783069]
 texture_filter = 1
@@ -212,8 +214,8 @@ script = ExtResource("4_tpq6i")
 point_id = "exit"
 
 [node name="Shape" type="CollisionShape2D" parent="Points/Exit" unique_id=860071180]
-position = Vector2(0, -96)
-shape = SubResource("RectangleShape2D_x3vua")
+position = Vector2(0, 25)
+shape = SubResource("RectangleShape2D_vjy02")
 
 [node name="Prop" type="Sprite2D" parent="Points/Exit" unique_id=2124149377]
 texture_filter = 1
@@ -260,51 +262,61 @@ animation = &"idle_right"
 autoplay = "idle_right"
 
 [node name="Near" type="Node2D" parent="." unique_id=2127918948]
+y_sort_enabled = true
 texture_filter = 1
 
 [node name="Papers1" type="Sprite2D" parent="Near" unique_id=12467922]
-position = Vector2(110, 746)
+position = Vector2(110, 752)
 scale = Vector2(2, 2)
 texture = ExtResource("18_nx6l4")
+offset = Vector2(0, -3)
 
 [node name="Glass1" type="Sprite2D" parent="Near" unique_id=306060288]
-position = Vector2(262, 753)
+position = Vector2(262, 758)
 scale = Vector2(2, 2)
 texture = ExtResource("19_67f1b")
+offset = Vector2(0, -2.5)
 
 [node name="Rubble1" type="Sprite2D" parent="Near" unique_id=1327231060]
-position = Vector2(564, 724)
+position = Vector2(564, 736)
 scale = Vector2(2, 2)
 texture = ExtResource("20_b2y4s")
+offset = Vector2(0, -6)
 
 [node name="Cone" type="Sprite2D" parent="Near" unique_id=2119574489]
-position = Vector2(784, 712)
+position = Vector2(784, 724)
 scale = Vector2(2, 2)
 texture = ExtResource("21_vjy02")
+offset = Vector2(0, -6)
 
 [node name="Rubble2" type="Sprite2D" parent="Near" unique_id=126238181]
-position = Vector2(1044, 742)
+position = Vector2(1044, 754)
 scale = Vector2(2, 2)
 texture = ExtResource("20_b2y4s")
+offset = Vector2(0, -6)
 flip_h = true
 
 [node name="Papers2" type="Sprite2D" parent="Near" unique_id=1644522153]
-position = Vector2(1380, 744)
+position = Vector2(1380, 750)
 scale = Vector2(2, 2)
 texture = ExtResource("18_nx6l4")
+offset = Vector2(0, -3)
 flip_h = true
 
 [node name="Rubble3" type="Sprite2D" parent="Near" unique_id=1394164517]
-position = Vector2(1720, 730)
+position = Vector2(1720, 742)
 scale = Vector2(2, 2)
 texture = ExtResource("20_b2y4s")
+offset = Vector2(0, -6)
 
 [node name="Glass2" type="Sprite2D" parent="Near" unique_id=1704243382]
-position = Vector2(1830, 752)
+position = Vector2(1830, 757)
 scale = Vector2(2, 2)
 texture = ExtResource("19_67f1b")
+offset = Vector2(0, -2.5)
 
 [node name="FrontLayer" type="Parallax2D" parent="." unique_id=1888911907]
+z_index = 1
 texture_filter = 1
 scroll_scale = Vector2(1.3, 1)
 

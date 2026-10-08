@@ -12,17 +12,17 @@
 [ext_resource type="Script" uid="uid://cpx5m37cmu4jq" path="res://scripts/flicker_light.gd" id="6_vt6x7"]
 [ext_resource type="Texture2D" uid="uid://dvcuhpomc55ei" path="res://assets/sprites/props/sign_clinic.png" id="7_rt3kv"]
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_k46jg"]
-size = Vector2(140, 192)
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_vt6x7"]
+size = Vector2(60, 50)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_8ukss"]
-size = Vector2(160, 192)
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_rt3kv"]
+size = Vector2(240, 50)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_2mgj5"]
-size = Vector2(160, 192)
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_gqknp"]
+size = Vector2(60, 50)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_x3vua"]
-size = Vector2(200, 192)
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_bni0u"]
+size = Vector2(80, 50)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_kipkx"]
 size = Vector2(32, 96)
@@ -50,6 +50,7 @@ fill_from = Vector2(0.5, 0.5)
 fill_to = Vector2(1, 0.5)
 
 [node name="Street" type="Node2D" unique_id=1154784663]
+y_sort_enabled = true
 script = ExtResource("1_xnahy")
 world_brightness = 0.5
 
@@ -75,6 +76,7 @@ mouse_filter = 2
 color = Color(0.12, 0.1, 0.09, 0.92)
 
 [node name="Points" type="Node2D" parent="." unique_id=1353451513]
+y_sort_enabled = true
 
 [node name="Back" type="Area2D" parent="Points" unique_id=1226059757]
 position = Vector2(70, 640)
@@ -82,8 +84,8 @@ script = ExtResource("5_tm4wu")
 point_id = "back"
 
 [node name="Shape" type="CollisionShape2D" parent="Points/Back" unique_id=236960424]
-position = Vector2(0, -96)
-shape = SubResource("RectangleShape2D_k46jg")
+position = Vector2(0, 25)
+shape = SubResource("RectangleShape2D_vt6x7")
 
 [node name="Prop" type="Sprite2D" parent="Points/Back" unique_id=1996002312]
 texture_filter = 1
@@ -97,8 +99,8 @@ script = ExtResource("5_tm4wu")
 point_id = "car"
 
 [node name="Shape" type="CollisionShape2D" parent="Points/Car" unique_id=33630925]
-position = Vector2(0, -96)
-shape = SubResource("RectangleShape2D_8ukss")
+position = Vector2(0, 25)
+shape = SubResource("RectangleShape2D_rt3kv")
 
 [node name="Prop" type="Sprite2D" parent="Points/Car" unique_id=1718040203]
 texture_filter = 1
@@ -112,8 +114,8 @@ script = ExtResource("5_tm4wu")
 point_id = "poster"
 
 [node name="Shape" type="CollisionShape2D" parent="Points/Poster" unique_id=2001987458]
-position = Vector2(0, -96)
-shape = SubResource("RectangleShape2D_2mgj5")
+position = Vector2(1, 25)
+shape = SubResource("RectangleShape2D_gqknp")
 
 [node name="Pole" type="Sprite2D" parent="Points/Poster" unique_id=403076466]
 texture_filter = 1
@@ -133,8 +135,8 @@ script = ExtResource("5_tm4wu")
 point_id = "exit"
 
 [node name="Shape" type="CollisionShape2D" parent="Points/Exit" unique_id=860071180]
-position = Vector2(0, -96)
-shape = SubResource("RectangleShape2D_x3vua")
+position = Vector2(0, 25)
+shape = SubResource("RectangleShape2D_bni0u")
 
 [node name="Prop" type="Sprite2D" parent="Points/Exit" unique_id=2134399478]
 texture_filter = 1
@@ -181,6 +183,7 @@ animation = &"idle_right"
 autoplay = "idle_right"
 
 [node name="FrontLayer" type="Parallax2D" parent="." unique_id=1888911907]
+z_index = 1
 scroll_scale = Vector2(1.3, 1)
 
 [node name="Darkness" type="CanvasModulate" parent="." unique_id=413259386]

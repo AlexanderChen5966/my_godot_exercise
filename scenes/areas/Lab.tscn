@@ -11,17 +11,17 @@
 [ext_resource type="SpriteFrames" uid="uid://b872yo2d63qvl" path="res://assets/sprites/player_frames.tres" id="9_k7ac4"]
 [ext_resource type="Script" uid="uid://cpx5m37cmu4jq" path="res://scripts/flicker_light.gd" id="10_4ogqb"]
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_8ukss"]
-size = Vector2(160, 192)
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_fk7ab"]
+size = Vector2(160, 100)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_2mgj5"]
-size = Vector2(160, 192)
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_6u4t4"]
+size = Vector2(100, 50)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_or88c"]
-size = Vector2(160, 192)
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_sxo7y"]
+size = Vector2(160, 100)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_x3vua"]
-size = Vector2(200, 192)
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_o5tg5"]
+size = Vector2(100, 50)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_kipkx"]
 size = Vector2(32, 96)
@@ -49,6 +49,7 @@ fill_from = Vector2(0.5, 0.5)
 fill_to = Vector2(1, 0.5)
 
 [node name="Lab" type="Node2D" unique_id=1154784663]
+y_sort_enabled = true
 script = ExtResource("1_fk7ab")
 world_brightness = 0.35
 
@@ -74,15 +75,16 @@ mouse_filter = 2
 color = Color(0.12, 0.12, 0.13, 0.94)
 
 [node name="Points" type="Node2D" parent="." unique_id=1353451513]
+y_sort_enabled = true
 
 [node name="Scientist" type="Area2D" parent="Points" unique_id=405087221]
-position = Vector2(700, 640)
+position = Vector2(700, 692)
 script = ExtResource("3_sxo7y")
 point_id = "scientist"
 
 [node name="Shape" type="CollisionShape2D" parent="Points/Scientist" unique_id=33630925]
-position = Vector2(0, -96)
-shape = SubResource("RectangleShape2D_8ukss")
+position = Vector2(0, -2)
+shape = SubResource("RectangleShape2D_fk7ab")
 
 [node name="Figure" type="Sprite2D" parent="Points/Scientist" unique_id=1018069556]
 texture_filter = 1
@@ -96,8 +98,8 @@ script = ExtResource("3_sxo7y")
 point_id = "records"
 
 [node name="Shape" type="CollisionShape2D" parent="Points/Records" unique_id=2001987458]
-position = Vector2(0, -96)
-shape = SubResource("RectangleShape2D_2mgj5")
+position = Vector2(0, 25)
+shape = SubResource("RectangleShape2D_6u4t4")
 
 [node name="Prop" type="Sprite2D" parent="Points/Records" unique_id=76882935]
 texture_filter = 1
@@ -106,13 +108,13 @@ scale = Vector2(2, 2)
 texture = ExtResource("5_fk7ab")
 
 [node name="Guard" type="Area2D" parent="Points" unique_id=1020138718]
-position = Vector2(1650, 640)
+position = Vector2(1650, 692)
 script = ExtResource("3_sxo7y")
 point_id = "guard"
 
 [node name="Shape" type="CollisionShape2D" parent="Points/Guard" unique_id=1835799782]
-position = Vector2(0, -96)
-shape = SubResource("RectangleShape2D_or88c")
+position = Vector2(0, -2)
+shape = SubResource("RectangleShape2D_sxo7y")
 
 [node name="Figure" type="Sprite2D" parent="Points/Guard" unique_id=1697475855]
 texture_filter = 1
@@ -126,8 +128,8 @@ script = ExtResource("3_sxo7y")
 point_id = "exit"
 
 [node name="Shape" type="CollisionShape2D" parent="Points/Exit" unique_id=860071180]
-position = Vector2(0, -96)
-shape = SubResource("RectangleShape2D_x3vua")
+position = Vector2(0, 25)
+shape = SubResource("RectangleShape2D_o5tg5")
 
 [node name="Prop" type="Sprite2D" parent="Points/Exit" unique_id=2100535875]
 texture_filter = 1
@@ -174,6 +176,7 @@ animation = &"idle_right"
 autoplay = "idle_right"
 
 [node name="FrontLayer" type="Parallax2D" parent="." unique_id=1888911907]
+z_index = 1
 scroll_scale = Vector2(1.3, 1)
 
 [node name="Darkness" type="CanvasModulate" parent="." unique_id=413259386]

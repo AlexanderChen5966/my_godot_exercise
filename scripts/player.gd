@@ -4,6 +4,7 @@ extends CharacterBody2D
 const SPEED := 140.0  # 步履蹣跚，不要太快
 const DEPTH_SPEED_RATIO := 0.6  # 上下（往畫面裡外）走得比左右慢，這類遊戲的慣例
 const SHADOW_TEXTURE := preload("res://assets/sprites/characters/shadow.png")
+const FEET_SIZE := Vector2(24, 12)  # 互動判定的腳底範圍
 # 角色在 32px 畫格裡偏左 1px，左右兩套是互相翻轉的，所以兩個方向的 Sprite 位置不同，轉身時身體中心才不會跳動
 const SPRITE_X_RIGHT := 3.0
 const SPRITE_X_LEFT := -1.0
@@ -28,6 +29,11 @@ func _ready() -> void:
 	shadow.position = Vector2(1, -2)
 	add_child(shadow)
 	move_child(shadow, sprite.get_index())  # 畫在角色下面
+	# 互動判定只用腳底（A1.5）：要走到物件前面的地面才會觸發，不會因為身體高度而在縱深帶外側也觸發
+	var feet := RectangleShape2D.new()
+	feet.size = FEET_SIZE
+	$Shape.shape = feet
+	$Shape.position = Vector2(0, -FEET_SIZE.y / 2.0)
 
 
 func _physics_process(_delta: float) -> void:

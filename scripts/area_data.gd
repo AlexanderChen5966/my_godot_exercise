@@ -139,6 +139,12 @@ func validate(story: StoryData, warnings: Array[String] = []) -> Array[String]:
 		for key in area.get("spawns", {}):
 			if key != "default" and not _areas.has(key):
 				errors.append("%s 的 spawns 指向不存在的區域：%s" % [tag, key])
+			var spawn = area["spawns"][key]  # x，或 [x, y]（A1.5：y 是縱深帶裡的位置）
+			var spawn_ok: bool = spawn is float or spawn is int
+			if spawn is Array:
+				spawn_ok = spawn.size() == 2 and (spawn[0] is float or spawn[0] is int) and (spawn[1] is float or spawn[1] is int)
+			if not spawn_ok:
+				errors.append("%s 的 spawns.%s 格式不對（要寫 x 或 [x, y]）：%s" % [tag, key, str(spawn)])
 		var points: Dictionary = area.get("points", {})
 		var exits := 0
 		for point_id in points:
