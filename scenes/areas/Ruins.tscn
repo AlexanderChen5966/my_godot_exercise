@@ -3,13 +3,25 @@
 [ext_resource type="Script" uid="uid://r853iujge1v" path="res://scripts/area.gd" id="1_pxqrw"]
 [ext_resource type="Texture2D" uid="uid://c1itui8tftjeh" path="res://assets/bg/scene_09.webp" id="2_pxqrw"]
 [ext_resource type="Script" uid="uid://u5x8mgenl5y4" path="res://scripts/interact_point.gd" id="3_d8cse"]
+[ext_resource type="Texture2D" uid="uid://b288gnmgt1jry" path="res://assets/sprites/layers/ruins_mid_ruin_a.png" id="3_dv57a"]
+[ext_resource type="Texture2D" uid="uid://2s034e7ggluc" path="res://assets/sprites/layers/ruins_mid_ruin_b.png" id="4_8cc2f"]
 [ext_resource type="Texture2D" uid="uid://d0whrabgvymqr" path="res://assets/sprites/characters/horde.png" id="4_d8cse"]
 [ext_resource type="Script" uid="uid://dkcse5tmlbfke" path="res://scripts/player.gd" id="4_hnolj"]
 [ext_resource type="Texture2D" uid="uid://d0ryurb452r8m" path="res://assets/sprites/characters/wife.png" id="5_hnolj"]
+[ext_resource type="Texture2D" uid="uid://hfcuqj5e3kjh" path="res://assets/sprites/layers/ruins_mid_barricade.png" id="5_ltopt"]
 [ext_resource type="SpriteFrames" uid="uid://b872yo2d63qvl" path="res://assets/sprites/player_frames.tres" id="5_rbspv"]
 [ext_resource type="Texture2D" uid="uid://bbreeny8ht8rk" path="res://assets/sprites/props/shelter_fence.png" id="6_rbspv"]
 [ext_resource type="Script" uid="uid://cpx5m37cmu4jq" path="res://scripts/flicker_light.gd" id="6_xlq1f"]
+[ext_resource type="Texture2D" uid="uid://dt7h82vigogjy" path="res://assets/sprites/layers/ruins_mid_firebarrel.png" id="6_xls4e"]
+[ext_resource type="Texture2D" uid="uid://m4d1l8kwf4t8" path="res://assets/sprites/layers/ruins_ground.png" id="7_if7y5"]
 [ext_resource type="Texture2D" uid="uid://bef5n6bpw3ky1" path="res://assets/sprites/props/sign_home.png" id="7_xlq1f"]
+[ext_resource type="Texture2D" uid="uid://jo1k2ag3r4i7" path="res://assets/sprites/props/ruins_barrier.png" id="15_4mhys"]
+[ext_resource type="Texture2D" uid="uid://c6lwlpbxflqp8" path="res://assets/sprites/layers/ruins_near_charred.png" id="16_jidu7"]
+[ext_resource type="Texture2D" uid="uid://bsps6rjtomyal" path="res://assets/sprites/layers/ruins_near_sign.png" id="17_1mne6"]
+[ext_resource type="Texture2D" uid="uid://m6cl7dq7a8c4" path="res://assets/sprites/layers/parking_near_rubble.png" id="18_flhsm"]
+[ext_resource type="Texture2D" uid="uid://dl65vr0ennk8x" path="res://assets/sprites/layers/street_near_bricks.png" id="19_7tgqj"]
+[ext_resource type="Texture2D" uid="uid://dss5cx1r7yvss" path="res://assets/sprites/layers/ruins_front_wall.png" id="20_dvfnx"]
+[ext_resource type="Texture2D" uid="uid://byl20iuda05ih" path="res://assets/sprites/layers/ruins_front_rebar.png" id="21_qb8mq"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_rbspv"]
 size = Vector2(160, 100)
@@ -33,6 +45,9 @@ height = 512
 fill = 1
 fill_from = Vector2(0.5, 0.5)
 fill_to = Vector2(1, 0.5)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ibwij"]
+size = Vector2(130, 10)
 
 [sub_resource type="Gradient" id="Gradient_kipkx"]
 colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0)
@@ -62,14 +77,66 @@ expand_mode = 1
 stretch_mode = 6
 
 [node name="MidLayer" type="Parallax2D" parent="." unique_id=1583612062]
+texture_filter = 1
 scroll_scale = Vector2(0.7, 1)
 
-[node name="Ground" type="ColorRect" parent="." unique_id=350550260]
+[node name="Ruin1" type="Sprite2D" parent="MidLayer" unique_id=1709566818]
+position = Vector2(120, 420)
+scale = Vector2(2, 2)
+texture = ExtResource("3_dv57a")
+
+[node name="Ruin2" type="Sprite2D" parent="MidLayer" unique_id=2144319693]
+position = Vector2(560, 420)
+scale = Vector2(2, 2)
+texture = ExtResource("4_8cc2f")
+
+[node name="Ruin3" type="Sprite2D" parent="MidLayer" unique_id=978594843]
+position = Vector2(1000, 420)
+scale = Vector2(2, 2)
+texture = ExtResource("3_dv57a")
+flip_h = true
+
+[node name="Ruin4" type="Sprite2D" parent="MidLayer" unique_id=541259063]
+position = Vector2(1440, 420)
+scale = Vector2(2, 2)
+texture = ExtResource("4_8cc2f")
+flip_h = true
+
+[node name="Ruin5" type="Sprite2D" parent="MidLayer" unique_id=752976391]
+position = Vector2(1880, 420)
+scale = Vector2(2, 2)
+texture = ExtResource("3_dv57a")
+
+[node name="Barricade1" type="Sprite2D" parent="MidLayer" unique_id=288768530]
+position = Vector2(380, 594)
+scale = Vector2(2, 2)
+texture = ExtResource("5_ltopt")
+
+[node name="Barricade2" type="Sprite2D" parent="MidLayer" unique_id=640404408]
+position = Vector2(1350, 594)
+scale = Vector2(2, 2)
+texture = ExtResource("5_ltopt")
+flip_h = true
+
+[node name="FireBarrel1" type="Sprite2D" parent="MidLayer" unique_id=1865510694]
+position = Vector2(300, 606)
+scale = Vector2(2, 2)
+texture = ExtResource("6_xls4e")
+
+[node name="FireBarrel2" type="Sprite2D" parent="MidLayer" unique_id=784795967]
+position = Vector2(1250, 606)
+scale = Vector2(2, 2)
+texture = ExtResource("6_xls4e")
+
+[node name="Ground" type="TextureRect" parent="." unique_id=1232027761]
+texture_filter = 1
 offset_top = 640.0
-offset_right = 2304.0
-offset_bottom = 768.0
+offset_right = 1152.0
+offset_bottom = 704.0
+scale = Vector2(2, 2)
 mouse_filter = 2
-color = Color(0.1, 0.1, 0.11, 0.94)
+texture = ExtResource("7_if7y5")
+stretch_mode = 1
 
 [node name="Points" type="Node2D" parent="." unique_id=1353451513]
 y_sort_enabled = true
@@ -163,9 +230,86 @@ sprite_frames = ExtResource("5_rbspv")
 animation = &"idle_right"
 autoplay = "idle_right"
 
+[node name="Near" type="Node2D" parent="." unique_id=533904423]
+y_sort_enabled = true
+texture_filter = 1
+
+[node name="Barrier" type="StaticBody2D" parent="Near" unique_id=1383352398]
+position = Vector2(1200, 700)
+
+[node name="Sprite" type="Sprite2D" parent="Near/Barrier" unique_id=410481563]
+position = Vector2(0, -34)
+scale = Vector2(2, 2)
+texture = ExtResource("15_4mhys")
+
+[node name="Shape" type="CollisionShape2D" parent="Near/Barrier" unique_id=1176504721]
+position = Vector2(0, -5)
+shape = SubResource("RectangleShape2D_ibwij")
+
+[node name="Charred1" type="Sprite2D" parent="Near" unique_id=339996298]
+position = Vector2(350, 760)
+scale = Vector2(2, 2)
+texture = ExtResource("16_jidu7")
+offset = Vector2(0, -4.5)
+
+[node name="Sign1" type="Sprite2D" parent="Near" unique_id=85843601]
+position = Vector2(620, 762)
+scale = Vector2(2, 2)
+texture = ExtResource("17_1mne6")
+offset = Vector2(0, -5)
+
+[node name="Rubble" type="Sprite2D" parent="Near" unique_id=1275582857]
+position = Vector2(960, 760)
+scale = Vector2(2, 2)
+texture = ExtResource("18_flhsm")
+offset = Vector2(0, -6)
+
+[node name="Bricks" type="Sprite2D" parent="Near" unique_id=1338611104]
+position = Vector2(1500, 760)
+scale = Vector2(2, 2)
+texture = ExtResource("19_7tgqj")
+offset = Vector2(0, -5)
+
+[node name="Charred2" type="Sprite2D" parent="Near" unique_id=1140122337]
+position = Vector2(1820, 760)
+scale = Vector2(2, 2)
+texture = ExtResource("16_jidu7")
+offset = Vector2(0, -4.5)
+flip_h = true
+
+[node name="Sign2" type="Sprite2D" parent="Near" unique_id=1009080066]
+position = Vector2(2040, 762)
+scale = Vector2(2, 2)
+texture = ExtResource("17_1mne6")
+offset = Vector2(0, -5)
+flip_h = true
+
 [node name="FrontLayer" type="Parallax2D" parent="." unique_id=1888911907]
 z_index = 1
+texture_filter = 1
 scroll_scale = Vector2(1.3, 1)
+
+[node name="Wall1" type="Sprite2D" parent="FrontLayer" unique_id=885207812]
+position = Vector2(420, 384)
+scale = Vector2(2, 2)
+texture = ExtResource("20_dvfnx")
+
+[node name="Rebar1" type="Sprite2D" parent="FrontLayer" unique_id=499949844]
+position = Vector2(1000, 668)
+scale = Vector2(2, 2)
+texture = ExtResource("21_qb8mq")
+
+[node name="Wall2" type="Sprite2D" parent="FrontLayer" unique_id=1437425789]
+position = Vector2(1450, 384)
+scale = Vector2(2, 2)
+texture = ExtResource("20_dvfnx")
+flip_h = true
+
+[node name="Rebar2" type="Sprite2D" parent="FrontLayer" unique_id=780068501]
+position = Vector2(2100, 668)
+scale = Vector2(2, 2)
+texture = ExtResource("21_qb8mq")
+flip_h = true
 
 [node name="Darkness" type="CanvasModulate" parent="." unique_id=413259386]
 color = Color(0.32, 0.32, 0.3456, 1)
