@@ -64,6 +64,7 @@ docs/story_v1.5_outline.md  劇本 v1.5 大綱（定稿：區域、事件、數�
 docs/story_v1.5_draft.md    劇本 v1.5 完整文字（定稿，標示原文／改／新）
 docs/asset_requests.md      v1.5 素材需求與生成提示詞（作者準備背景、BGM、音效）
 docs/story_v1.0.json        1.0 版劇本備份（不放 data/，避免被匯出）
+docs/itch.io上傳步驟.md      網頁版打包成 zip、上傳 itch.io 的步驟與公開前確認
 art/player.pxo         主角的 Pixelorama 原始檔（含 .gdignore，不匯出）
 assets/sprites/        主角 spritesheet 與 SpriteFrames；props/ 道具、characters/ 人物（Lv6，原始檔在 art/characters/*.pxo）
 data/areas/parking_lot.json  停車場區域資料（Lv4-3 起為 v1.5 格式，文字直接寫在資料裡）
