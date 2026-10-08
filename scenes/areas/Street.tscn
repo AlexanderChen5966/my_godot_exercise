@@ -2,21 +2,37 @@
 
 [ext_resource type="Script" uid="uid://r853iujge1v" path="res://scripts/area.gd" id="1_xnahy"]
 [ext_resource type="Texture2D" uid="uid://dq5aqm8ig820u" path="res://assets/bg/scene_03.webp" id="2_xnahy"]
+[ext_resource type="Texture2D" uid="uid://cx2c4cbhbqe3i" path="res://assets/sprites/layers/street_mid_shop_a.png" id="3_i22ve"]
 [ext_resource type="Script" uid="uid://dkcse5tmlbfke" path="res://scripts/player.gd" id="3_u8h1q"]
+[ext_resource type="Texture2D" uid="uid://c5wh24x7k4rgg" path="res://assets/sprites/layers/street_mid_busstop.png" id="4_imh8n"]
 [ext_resource type="Texture2D" uid="uid://br0q8npjdbh8e" path="res://assets/sprites/props/poster.png" id="4_qxykw"]
 [ext_resource type="SpriteFrames" uid="uid://b872yo2d63qvl" path="res://assets/sprites/player_frames.tres" id="4_rhh64"]
 [ext_resource type="Texture2D" uid="uid://dms1rs08cswdt" path="res://assets/sprites/props/sign_parking.png" id="4_tm4wu"]
+[ext_resource type="Texture2D" uid="uid://c34oofybcxvfq" path="res://assets/sprites/layers/street_mid_pole.png" id="5_fg85u"]
 [ext_resource type="Script" uid="uid://u5x8mgenl5y4" path="res://scripts/interact_point.gd" id="5_tm4wu"]
 [ext_resource type="Texture2D" uid="uid://gc2x3xnf5fft" path="res://assets/sprites/props/burnt_car.png" id="5_vt6x7"]
+[ext_resource type="Texture2D" uid="uid://ckv7jo4apw80i" path="res://assets/sprites/layers/street_mid_shop_b.png" id="6_nx30v"]
 [ext_resource type="Texture2D" uid="uid://emrgr4wmtg26" path="res://assets/sprites/props/utility_pole.png" id="6_rt3kv"]
 [ext_resource type="Script" uid="uid://cpx5m37cmu4jq" path="res://scripts/flicker_light.gd" id="6_vt6x7"]
+[ext_resource type="Texture2D" uid="uid://7l40l7wkaopc" path="res://assets/sprites/layers/street_mid_car.png" id="7_26s36"]
 [ext_resource type="Texture2D" uid="uid://dvcuhpomc55ei" path="res://assets/sprites/props/sign_clinic.png" id="7_rt3kv"]
+[ext_resource type="Texture2D" uid="uid://cks5xyigw3q8x" path="res://assets/sprites/layers/street_ground.png" id="8_p0hkv"]
+[ext_resource type="Texture2D" uid="uid://dl65vr0ennk8x" path="res://assets/sprites/layers/street_near_bricks.png" id="17_lso3b"]
+[ext_resource type="Texture2D" uid="uid://cqvycco5lh5gb" path="res://assets/sprites/layers/street_near_tire.png" id="18_hg0wx"]
+[ext_resource type="Texture2D" uid="uid://bfilvd8y4yo40" path="res://assets/sprites/layers/street_near_plank.png" id="19_w71ip"]
+[ext_resource type="Texture2D" uid="uid://dgwrgnpcbrwmr" path="res://assets/sprites/layers/parking_near_glass.png" id="20_5llat"]
+[ext_resource type="Texture2D" uid="uid://dgcn27mn37xss" path="res://assets/sprites/layers/parking_near_papers.png" id="21_2au76"]
+[ext_resource type="Texture2D" uid="uid://bhw10a6gr3dtw" path="res://assets/sprites/layers/street_front_lamp.png" id="22_xojim"]
+[ext_resource type="Texture2D" uid="uid://dmuh1hn7e6rgj" path="res://assets/sprites/layers/street_front_rubble.png" id="23_7iigv"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_vt6x7"]
 size = Vector2(60, 50)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_rt3kv"]
-size = Vector2(240, 50)
+size = Vector2(280, 96)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_a4evs"]
+size = Vector2(200, 10)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_gqknp"]
 size = Vector2(60, 50)
@@ -66,14 +82,73 @@ expand_mode = 1
 stretch_mode = 6
 
 [node name="MidLayer" type="Parallax2D" parent="." unique_id=1583612062]
+texture_filter = 1
 scroll_scale = Vector2(0.7, 1)
 
-[node name="Ground" type="ColorRect" parent="." unique_id=350550260]
+[node name="ShopA1" type="Sprite2D" parent="MidLayer" unique_id=668175570]
+position = Vector2(112, 440)
+scale = Vector2(2, 2)
+texture = ExtResource("3_i22ve")
+
+[node name="BusStop1" type="Sprite2D" parent="MidLayer" unique_id=414963905]
+position = Vector2(330, 580)
+scale = Vector2(2, 2)
+texture = ExtResource("4_imh8n")
+
+[node name="Pole1" type="Sprite2D" parent="MidLayer" unique_id=453807506]
+position = Vector2(470, 410)
+scale = Vector2(2, 2)
+texture = ExtResource("5_fg85u")
+
+[node name="ShopB1" type="Sprite2D" parent="MidLayer" unique_id=2116049618]
+position = Vector2(740, 440)
+scale = Vector2(2, 2)
+texture = ExtResource("6_nx30v")
+
+[node name="Car1" type="Sprite2D" parent="MidLayer" unique_id=2126596278]
+position = Vector2(960, 606)
+scale = Vector2(2, 2)
+texture = ExtResource("7_26s36")
+
+[node name="ShopA2" type="Sprite2D" parent="MidLayer" unique_id=2012487241]
+position = Vector2(1180, 440)
+scale = Vector2(2, 2)
+texture = ExtResource("3_i22ve")
+flip_h = true
+
+[node name="Pole2" type="Sprite2D" parent="MidLayer" unique_id=535392679]
+position = Vector2(1400, 410)
+scale = Vector2(2, 2)
+texture = ExtResource("5_fg85u")
+flip_h = true
+
+[node name="ShopB2" type="Sprite2D" parent="MidLayer" unique_id=697032184]
+position = Vector2(1620, 440)
+scale = Vector2(2, 2)
+texture = ExtResource("6_nx30v")
+flip_h = true
+
+[node name="BusStop2" type="Sprite2D" parent="MidLayer" unique_id=2098565431]
+position = Vector2(1860, 580)
+scale = Vector2(2, 2)
+texture = ExtResource("4_imh8n")
+flip_h = true
+
+[node name="Car2" type="Sprite2D" parent="MidLayer" unique_id=956886897]
+position = Vector2(2010, 606)
+scale = Vector2(2, 2)
+texture = ExtResource("7_26s36")
+flip_h = true
+
+[node name="Ground" type="TextureRect" parent="." unique_id=1874000491]
+texture_filter = 1
 offset_top = 640.0
-offset_right = 2304.0
-offset_bottom = 768.0
+offset_right = 1152.0
+offset_bottom = 704.0
+scale = Vector2(2, 2)
 mouse_filter = 2
-color = Color(0.12, 0.1, 0.09, 0.92)
+texture = ExtResource("8_p0hkv")
+stretch_mode = 1
 
 [node name="Points" type="Node2D" parent="." unique_id=1353451513]
 y_sort_enabled = true
@@ -94,12 +169,12 @@ scale = Vector2(2, 2)
 texture = ExtResource("4_tm4wu")
 
 [node name="Car" type="Area2D" parent="Points" unique_id=405087221]
-position = Vector2(850, 640)
+position = Vector2(850, 695)
 script = ExtResource("5_tm4wu")
 point_id = "car"
 
 [node name="Shape" type="CollisionShape2D" parent="Points/Car" unique_id=33630925]
-position = Vector2(0, 25)
+position = Vector2(0, -3)
 shape = SubResource("RectangleShape2D_rt3kv")
 
 [node name="Prop" type="Sprite2D" parent="Points/Car" unique_id=1718040203]
@@ -107,6 +182,12 @@ texture_filter = 1
 position = Vector2(0, -44)
 scale = Vector2(2, 2)
 texture = ExtResource("5_vt6x7")
+
+[node name="Block" type="StaticBody2D" parent="Points/Car" unique_id=2090247463]
+
+[node name="Shape" type="CollisionShape2D" parent="Points/Car/Block" unique_id=1838023024]
+position = Vector2(0, -5)
+shape = SubResource("RectangleShape2D_a4evs")
 
 [node name="Poster" type="Area2D" parent="Points" unique_id=729555111]
 position = Vector2(1450, 640)
@@ -182,15 +263,79 @@ sprite_frames = ExtResource("4_rhh64")
 animation = &"idle_right"
 autoplay = "idle_right"
 
+[node name="Near" type="Node2D" parent="." unique_id=980388863]
+y_sort_enabled = true
+texture_filter = 1
+
+[node name="Bricks1" type="Sprite2D" parent="Near" unique_id=894381785]
+position = Vector2(300, 760)
+scale = Vector2(2, 2)
+texture = ExtResource("17_lso3b")
+offset = Vector2(0, -5)
+
+[node name="Tire" type="Sprite2D" parent="Near" unique_id=1768294962]
+position = Vector2(560, 762)
+scale = Vector2(2, 2)
+texture = ExtResource("18_hg0wx")
+offset = Vector2(0, -6)
+
+[node name="Plank" type="Sprite2D" parent="Near" unique_id=822767477]
+position = Vector2(1020, 764)
+scale = Vector2(2, 2)
+texture = ExtResource("19_w71ip")
+offset = Vector2(0, -3.5)
+
+[node name="Glass" type="Sprite2D" parent="Near" unique_id=1497861901]
+position = Vector2(1240, 760)
+scale = Vector2(2, 2)
+texture = ExtResource("20_5llat")
+offset = Vector2(0, -2.5)
+
+[node name="Papers" type="Sprite2D" parent="Near" unique_id=1523791960]
+position = Vector2(1700, 758)
+scale = Vector2(2, 2)
+texture = ExtResource("21_2au76")
+offset = Vector2(0, -3)
+
+[node name="Bricks2" type="Sprite2D" parent="Near" unique_id=1790722558]
+position = Vector2(1900, 760)
+scale = Vector2(2, 2)
+texture = ExtResource("17_lso3b")
+offset = Vector2(0, -5)
+flip_h = true
+
 [node name="FrontLayer" type="Parallax2D" parent="." unique_id=1888911907]
 z_index = 1
+texture_filter = 1
 scroll_scale = Vector2(1.3, 1)
+
+[node name="Lamp1" type="Sprite2D" parent="FrontLayer" unique_id=1337995272]
+position = Vector2(420, 384)
+scale = Vector2(2, 2)
+texture = ExtResource("22_xojim")
+
+[node name="Rubble1" type="Sprite2D" parent="FrontLayer" unique_id=868565876]
+position = Vector2(1350, 708)
+scale = Vector2(2, 2)
+texture = ExtResource("23_7iigv")
+
+[node name="Lamp2" type="Sprite2D" parent="FrontLayer" unique_id=466088056]
+position = Vector2(1950, 384)
+scale = Vector2(2, 2)
+texture = ExtResource("22_xojim")
+flip_h = true
+
+[node name="Rubble2" type="Sprite2D" parent="FrontLayer" unique_id=1073728540]
+position = Vector2(2250, 708)
+scale = Vector2(2, 2)
+texture = ExtResource("23_7iigv")
+flip_h = true
 
 [node name="Darkness" type="CanvasModulate" parent="." unique_id=413259386]
 color = Color(0.32, 0.32, 0.3456, 1)
 
 [node name="FireLight" type="PointLight2D" parent="." unique_id=105667896]
-position = Vector2(850, 560)
+position = Vector2(850, 615)
 color = Color(1, 0.55, 0.2, 1)
 texture = SubResource("GradientTexture2D_2mgj5")
 texture_scale = 2.5
