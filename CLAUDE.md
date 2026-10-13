@@ -75,6 +75,7 @@ docs/A+素材提示詞.md        A＋ 外部素材的提示詞、搜尋關鍵字
 docs/素材來源.md            每個外部素材的來源與授權（放進專案時加一列）
 docs/HD-2D方案.md          HD-2D 方案（之後再決定，桌面版優先、另開專案；作者決定前不要做）
 art/player.pxo         主角的 Pixelorama 原始檔（含 .gdignore，不匯出）
+art/tools/             像素素材的共用工具（A1-6 起放這裡，暫存區會被清空）：pix.py 畫布、verify.sh 逐像素比對、patch.py 算出要補的像素、dump_points.py 列出互動點
 assets/sprites/        主角 spritesheet 與 SpriteFrames；props/ 道具、characters/ 人物（Lv6，原始檔在 art/characters/*.pxo）
 data/areas/parking_lot.json  停車場區域資料（Lv4-3 起為 v1.5 格式，文字直接寫在資料裡）
 data/areas/street.json  街道區域資料（Lv4-4）
