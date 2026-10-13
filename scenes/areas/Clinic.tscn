@@ -27,6 +27,18 @@
 [ext_resource type="Texture2D" uid="uid://becjn1qee2g6e" path="res://assets/sprites/layers/clinic_front_curtain.png" id="24_85iiw"]
 [ext_resource type="Texture2D" uid="uid://ct772jo0pooww" path="res://assets/sprites/layers/clinic_front_ivy.png" id="25_v45mq"]
 
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_jg1fx"]
+polygon = PackedVector2Array(-18, 13, -16, 2, -12, -2, 6, -16, 10, -16, 16, 3, 16, 10, 14, 14, 12, 16, 8, 18, -16, 18, -18, 16)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_oels4"]
+polygon = PackedVector2Array(9, -49, 2, -41, 2, 47, 9, 55, -8, 55, 0, 47, 0, -33, -9, -41, -8, -49)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_4eewa"]
+polygon = PackedVector2Array(-48, 3, -44, -16, 15, -16, 45, 0, 45, 15, 39, 20, -44, 20, -48, 6)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_n35jl"]
+polygon = PackedVector2Array(9, -49, 2, -41, 2, 47, 9, 55, -8, 55, 0, 47, 0, -33, -9, -41, -8, -49)
+
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_oev4m"]
 size = Vector2(60, 50)
 
@@ -38,6 +50,9 @@ size = Vector2(110, 50)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_p2aks"]
 size = Vector2(70, 50)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_yky72"]
+polygon = PackedVector2Array(-14, -0.5, -12, -2.5, 7, -15.5, 12, -15.5, 13, -14.5, 13, -5.5, 10, 15.5, -13, 15.5, -14, 2.5)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_h6ey8"]
 size = Vector2(100, 50)
@@ -56,6 +71,9 @@ fill = 1
 fill_from = Vector2(0.5, 0.5)
 fill_to = Vector2(1, 0.5)
 
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_y4lab"]
+polygon = PackedVector2Array(-37, -6, -35, -12, -34, -13, 30, -17, 34, -17, 35, -16, 37, -6, 37, -3, 34, 15, 31, 18, -30, 18, -33, 15, -37, -3)
+
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_47j25"]
 size = Vector2(130, 10)
 
@@ -69,6 +87,10 @@ height = 512
 fill = 1
 fill_from = Vector2(0.5, 0.5)
 fill_to = Vector2(1, 0.5)
+
+[sub_resource type="Gradient" id="Gradient_jg1fx"]
+offsets = PackedFloat32Array(0, 0.2, 0.8, 1)
+colors = PackedColorArray(1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0)
 
 [node name="Clinic" type="Node2D" unique_id=1154784663]
 y_sort_enabled = true
@@ -110,10 +132,16 @@ position = Vector2(980, 604)
 scale = Vector2(2, 2)
 texture = ExtResource("6_n35jl")
 
+[node name="Occluder" type="LightOccluder2D" parent="MidLayer/Wheelchair1" unique_id=558862474]
+occluder = SubResource("OccluderPolygon2D_jg1fx")
+
 [node name="IVStand1" type="Sprite2D" parent="MidLayer" unique_id=754134664]
 position = Vector2(1070, 530)
 scale = Vector2(2, 2)
 texture = ExtResource("7_yky72")
+
+[node name="Occluder" type="LightOccluder2D" parent="MidLayer/IVStand1" unique_id=1651590605]
+occluder = SubResource("OccluderPolygon2D_oels4")
 
 [node name="Curtain2" type="Sprite2D" parent="MidLayer" unique_id=309667032]
 position = Vector2(1250, 430)
@@ -127,10 +155,16 @@ scale = Vector2(2, 2)
 texture = ExtResource("3_jg1fx")
 flip_h = true
 
+[node name="Occluder" type="LightOccluder2D" parent="MidLayer/Benches2" unique_id=249062701]
+occluder = SubResource("OccluderPolygon2D_4eewa")
+
 [node name="IVStand2" type="Sprite2D" parent="MidLayer" unique_id=2122169251]
 position = Vector2(1700, 530)
 scale = Vector2(2, 2)
 texture = ExtResource("7_yky72")
+
+[node name="Occluder" type="LightOccluder2D" parent="MidLayer/IVStand2" unique_id=1477016785]
+occluder = SubResource("OccluderPolygon2D_n35jl")
 
 [node name="Wheelchair2" type="Sprite2D" parent="MidLayer" unique_id=1157909035]
 position = Vector2(1860, 604)
@@ -223,6 +257,9 @@ position = Vector2(0, -31)
 scale = Vector2(2, 2)
 texture = ExtResource("6_rqvkt")
 
+[node name="Occluder" type="LightOccluder2D" parent="Points/Chair/Prop" unique_id=1017128475]
+occluder = SubResource("OccluderPolygon2D_yky72")
+
 [node name="Exit" type="Area2D" parent="Points" unique_id=1483213795]
 position = Vector2(2150, 640)
 script = ExtResource("5_lmpgy")
@@ -287,6 +324,9 @@ position = Vector2(950, 700)
 position = Vector2(0, -36)
 scale = Vector2(2, 2)
 texture = ExtResource("19_t11m8")
+
+[node name="Occluder" type="LightOccluder2D" parent="Near/Gurney/Sprite" unique_id=1675844790]
+occluder = SubResource("OccluderPolygon2D_y4lab")
 
 [node name="Shape" type="CollisionShape2D" parent="Near/Gurney" unique_id=1229787596]
 position = Vector2(0, -5)
@@ -369,10 +409,32 @@ color = Color(0.32, 0.32, 0.3456, 1)
 [node name="WindowLight" type="PointLight2D" parent="." unique_id=105667896]
 position = Vector2(1300, 300)
 color = Color(1, 0.9, 0.7, 1)
+shadow_enabled = true
+shadow_filter = 1
+shadow_filter_smooth = 2.0
 texture = SubResource("GradientTexture2D_2mgj5")
 texture_scale = 3.0
+height = 60.0
 script = ExtResource("6_2bfil")
 base_energy = 1.2
 pulse_speed = 0.3
 min_ratio = 0.9
 dropout_chance = 0.0
+
+[node name="Dust" type="CPUParticles2D" parent="." unique_id=1664866349]
+z_index = 1
+texture_filter = 1
+position = Vector2(1300, 420)
+amount = 70
+lifetime = 8.0
+preprocess = 8.0
+emission_shape = 3
+emission_rect_extents = Vector2(260, 240)
+spread = 180.0
+gravity = Vector2(0, 2)
+initial_velocity_min = 3.0
+initial_velocity_max = 9.0
+scale_amount_min = 2.0
+scale_amount_max = 4.0
+color = Color(1, 0.95, 0.85, 0.9)
+color_ramp = SubResource("Gradient_jg1fx")

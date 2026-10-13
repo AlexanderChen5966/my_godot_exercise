@@ -82,6 +82,10 @@ fill = 1
 fill_from = Vector2(0.5, 0.5)
 fill_to = Vector2(1, 0.5)
 
+[sub_resource type="Gradient" id="Gradient_xl8si"]
+offsets = PackedFloat32Array(0, 0.2, 0.8, 1)
+colors = PackedColorArray(1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0)
+
 [node name="ParkingLot" type="Node2D" unique_id=1154784663]
 y_sort_enabled = true
 script = ExtResource("1_q84vj")
@@ -407,3 +411,21 @@ base_energy = 1.8
 pulse_speed = 0.0
 min_ratio = 1.0
 dropout_chance = 0.01
+
+[node name="Dust" type="CPUParticles2D" parent="." unique_id=1818496813]
+z_index = 1
+texture_filter = 1
+position = Vector2(1152, 450)
+amount = 150
+lifetime = 8.0
+preprocess = 8.0
+emission_shape = 3
+emission_rect_extents = Vector2(1152, 230)
+spread = 180.0
+gravity = Vector2(0, 2)
+initial_velocity_min = 3.0
+initial_velocity_max = 9.0
+scale_amount_min = 2.0
+scale_amount_max = 4.0
+color = Color(1, 0.95, 0.85, 0.9)
+color_ramp = SubResource("Gradient_xl8si")

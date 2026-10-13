@@ -14,6 +14,9 @@
 [ext_resource type="Texture2D" uid="uid://bye128l41ipjt" path="res://assets/sprites/layers/wall_near_charcoal.png" id="11_dtw7u"]
 [ext_resource type="Texture2D" uid="uid://chu38qiquoa2n" path="res://assets/sprites/layers/wall_front_edge.png" id="12_i1s5o"]
 
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_l56ic"]
+polygon = PackedVector2Array(-18, 13, -16, 3, 8, -13, 12, -13, 17, 14, 17, 15, -18, 15)
+
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_o84nu"]
 size = Vector2(160, 50)
 
@@ -30,6 +33,9 @@ height = 512
 fill = 1
 fill_from = Vector2(0.5, 0.5)
 fill_to = Vector2(1, 0.5)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_8wb8w"]
+polygon = PackedVector2Array(-8, -3, -7, -4, 6, -4, 8, -3, 8, 0, -7, 0, -8, -1)
 
 [sub_resource type="Gradient" id="Gradient_kipkx"]
 colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0)
@@ -71,6 +77,9 @@ texture = ExtResource("3_l56ic")
 position = Vector2(700, 610)
 scale = Vector2(2, 2)
 texture = ExtResource("4_8wb8w")
+
+[node name="Occluder" type="LightOccluder2D" parent="MidLayer/Chair" unique_id=70778418]
+occluder = SubResource("OccluderPolygon2D_l56ic")
 
 [node name="Doorway2" type="Sprite2D" parent="MidLayer" unique_id=1131537532]
 position = Vector2(1800, 460)
@@ -173,6 +182,9 @@ scale = Vector2(2, 2)
 texture = ExtResource("11_dtw7u")
 offset = Vector2(0, -2.5)
 
+[node name="Occluder" type="LightOccluder2D" parent="Near/Charcoal" unique_id=1117366016]
+occluder = SubResource("OccluderPolygon2D_8wb8w")
+
 [node name="Plaster2" type="Sprite2D" parent="Near" unique_id=331919924]
 position = Vector2(1900, 760)
 scale = Vector2(2, 2)
@@ -202,8 +214,12 @@ color = Color(0.32, 0.32, 0.3456, 1)
 [node name="WallLight" type="PointLight2D" parent="." unique_id=105667896]
 position = Vector2(1500, 380)
 color = Color(0.8, 0.86, 1, 1)
+shadow_enabled = true
+shadow_filter = 1
+shadow_filter_smooth = 2.0
 texture = SubResource("GradientTexture2D_2mgj5")
 texture_scale = 3.0
+height = 60.0
 script = ExtResource("6_v45yl")
 base_energy = 0.8
 pulse_speed = 0.2

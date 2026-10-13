@@ -23,6 +23,12 @@
 [ext_resource type="Texture2D" uid="uid://dss5cx1r7yvss" path="res://assets/sprites/layers/ruins_front_wall.png" id="20_dvfnx"]
 [ext_resource type="Texture2D" uid="uid://byl20iuda05ih" path="res://assets/sprites/layers/ruins_front_rebar.png" id="21_qb8mq"]
 
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_dv57a"]
+polygon = PackedVector2Array(-49, 16, -42, 7, -39, 4, -28, -5, -26, -6, 14, -22, 43, -22, 44, -21, 44, 19, 41, 22, 39, 23, -44, 23, -46, 22, -49, 19)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_8cc2f"]
+polygon = PackedVector2Array(-9, -5, -1, -15, 0, -16, 2, -16, 7, -11, 9, -5, 9, 17, -9, 17)
+
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_rbspv"]
 size = Vector2(160, 100)
 
@@ -46,6 +52,9 @@ fill = 1
 fill_from = Vector2(0.5, 0.5)
 fill_to = Vector2(1, 0.5)
 
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_ltopt"]
+polygon = PackedVector2Array(-39, -8, -37, -13, -36, -14, 38, -14, 39, -13, 39, 16, 38, 17, -36, 17, -37, 16, -38, 8, -39, -7)
+
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ibwij"]
 size = Vector2(130, 10)
 
@@ -59,6 +68,13 @@ height = 512
 fill = 1
 fill_from = Vector2(0.5, 0.5)
 fill_to = Vector2(1, 0.5)
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_dv57a"]
+light_mode = 1
+
+[sub_resource type="Gradient" id="Gradient_dv57a"]
+offsets = PackedFloat32Array(0, 0.15, 0.85, 1)
+colors = PackedColorArray(1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0)
 
 [node name="Ruins" type="Node2D" unique_id=1154784663]
 y_sort_enabled = true
@@ -118,6 +134,9 @@ scale = Vector2(2, 2)
 texture = ExtResource("5_ltopt")
 flip_h = true
 
+[node name="Occluder" type="LightOccluder2D" parent="MidLayer/Barricade2" unique_id=1331100468]
+occluder = SubResource("OccluderPolygon2D_dv57a")
+
 [node name="FireBarrel1" type="Sprite2D" parent="MidLayer" unique_id=1865510694]
 position = Vector2(300, 606)
 scale = Vector2(2, 2)
@@ -127,6 +146,9 @@ texture = ExtResource("6_xls4e")
 position = Vector2(1250, 606)
 scale = Vector2(2, 2)
 texture = ExtResource("6_xls4e")
+
+[node name="Occluder" type="LightOccluder2D" parent="MidLayer/FireBarrel2" unique_id=851873366]
+occluder = SubResource("OccluderPolygon2D_8cc2f")
 
 [node name="Ground" type="TextureRect" parent="." unique_id=1232027761]
 texture_filter = 1
@@ -242,6 +264,9 @@ position = Vector2(0, -34)
 scale = Vector2(2, 2)
 texture = ExtResource("15_4mhys")
 
+[node name="Occluder" type="LightOccluder2D" parent="Near/Barrier/Sprite" unique_id=258948900]
+occluder = SubResource("OccluderPolygon2D_ltopt")
+
 [node name="Shape" type="CollisionShape2D" parent="Near/Barrier" unique_id=1176504721]
 position = Vector2(0, -5)
 shape = SubResource("RectangleShape2D_ibwij")
@@ -317,10 +342,36 @@ color = Color(0.32, 0.32, 0.3456, 1)
 [node name="ShelterLight" type="PointLight2D" parent="." unique_id=105667896]
 position = Vector2(1700, 480)
 color = Color(1, 0.75, 0.45, 1)
+shadow_enabled = true
+shadow_filter = 1
+shadow_filter_smooth = 2.0
 texture = SubResource("GradientTexture2D_2mgj5")
 texture_scale = 3.0
+height = 60.0
 script = ExtResource("6_xlq1f")
 base_energy = 2.0
 pulse_speed = 0.4
 min_ratio = 0.85
 dropout_chance = 0.0
+
+[node name="Ash" type="CPUParticles2D" parent="." unique_id=1793519739]
+z_index = 1
+texture_filter = 1
+material = SubResource("CanvasItemMaterial_dv57a")
+position = Vector2(1152, 300)
+amount = 140
+lifetime = 10.0
+preprocess = 10.0
+emission_shape = 3
+emission_rect_extents = Vector2(1300, 320)
+direction = Vector2(0, 1)
+spread = 40.0
+gravity = Vector2(6, 10)
+initial_velocity_min = 5.0
+initial_velocity_max = 15.0
+damping_min = 4.0
+damping_max = 6.0
+scale_amount_min = 2.0
+scale_amount_max = 4.0
+color = Color(0.72, 0.69, 0.65, 0.75)
+color_ramp = SubResource("Gradient_dv57a")

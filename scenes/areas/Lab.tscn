@@ -24,6 +24,18 @@
 [ext_resource type="Texture2D" uid="uid://koyy3fj4ig1y" path="res://assets/sprites/layers/lab_front_door.png" id="21_q3xl1"]
 [ext_resource type="Texture2D" uid="uid://c6u6u46v7dnsl" path="res://assets/sprites/layers/lab_front_cables.png" id="22_eg6yc"]
 
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_cllvt"]
+polygon = PackedVector2Array(-35, -50, 35, -50, 35, 50, -35, 50)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_ulrxu"]
+polygon = PackedVector2Array(-35, -50, 35, -50, 35, 50, -35, 50)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_fgirw"]
+polygon = PackedVector2Array(-35, -50, 35, -50, 35, 50, -35, 50)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_00esb"]
+polygon = PackedVector2Array(-35, -50, 35, -50, 35, 50, -35, 50)
+
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_fk7ab"]
 size = Vector2(160, 100)
 
@@ -50,8 +62,27 @@ fill = 1
 fill_from = Vector2(0.5, 0.5)
 fill_to = Vector2(1, 0.5)
 
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_w0vuw"]
+polygon = PackedVector2Array(-39, -13, -33, -19, 30, -19, 38, -14, 39, -13, 39, 15, 38, 16, 18, 19, -12, 19, -38, 16, -39, 15)
+
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_nrx40"]
 size = Vector2(140, 10)
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_cllvt"]
+blend_mode = 1
+light_mode = 1
+
+[sub_resource type="Gradient" id="Gradient_ulrxu"]
+offsets = PackedFloat32Array(0, 0.3, 1)
+colors = PackedColorArray(1, 1, 0.8, 1, 1, 0.75, 0.3, 1, 0.9, 0.3, 0.05, 0)
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_fgirw"]
+blend_mode = 1
+light_mode = 1
+
+[sub_resource type="Gradient" id="Gradient_00esb"]
+offsets = PackedFloat32Array(0, 0.3, 1)
+colors = PackedColorArray(1, 1, 0.8, 1, 1, 0.75, 0.3, 1, 0.9, 0.3, 0.05, 0)
 
 [sub_resource type="Gradient" id="Gradient_kipkx"]
 colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0)
@@ -102,6 +133,9 @@ position = Vector2(330, 540)
 scale = Vector2(2, 2)
 texture = ExtResource("5_fgirw")
 
+[node name="Occluder" type="LightOccluder2D" parent="MidLayer/Rack1" unique_id=1774537111]
+occluder = SubResource("OccluderPolygon2D_cllvt")
+
 [node name="Window2" type="Sprite2D" parent="MidLayer" unique_id=271483469]
 position = Vector2(540, 490)
 scale = Vector2(2, 2)
@@ -114,6 +148,9 @@ scale = Vector2(2, 2)
 texture = ExtResource("5_fgirw")
 flip_h = true
 
+[node name="Occluder" type="LightOccluder2D" parent="MidLayer/Rack2" unique_id=39453830]
+occluder = SubResource("OccluderPolygon2D_ulrxu")
+
 [node name="Window3" type="Sprite2D" parent="MidLayer" unique_id=64630293]
 position = Vector2(960, 490)
 scale = Vector2(2, 2)
@@ -123,6 +160,9 @@ texture = ExtResource("4_ulrxu")
 position = Vector2(1170, 540)
 scale = Vector2(2, 2)
 texture = ExtResource("5_fgirw")
+
+[node name="Occluder" type="LightOccluder2D" parent="MidLayer/Rack3" unique_id=1280107804]
+occluder = SubResource("OccluderPolygon2D_fgirw")
 
 [node name="Window4" type="Sprite2D" parent="MidLayer" unique_id=1684400425]
 position = Vector2(1380, 490)
@@ -135,6 +175,9 @@ position = Vector2(1590, 540)
 scale = Vector2(2, 2)
 texture = ExtResource("5_fgirw")
 flip_h = true
+
+[node name="Occluder" type="LightOccluder2D" parent="MidLayer/Rack4" unique_id=1854409683]
+occluder = SubResource("OccluderPolygon2D_00esb")
 
 [node name="Window5" type="Sprite2D" parent="MidLayer" unique_id=1981204798]
 position = Vector2(1800, 490)
@@ -279,6 +322,9 @@ position = Vector2(0, -38)
 scale = Vector2(2, 2)
 texture = ExtResource("15_wnh6g")
 
+[node name="Occluder" type="LightOccluder2D" parent="Near/Cart/Sprite" unique_id=618348339]
+occluder = SubResource("OccluderPolygon2D_w0vuw")
+
 [node name="Shape" type="CollisionShape2D" parent="Near/Cart" unique_id=1507298937]
 position = Vector2(0, -5)
 shape = SubResource("RectangleShape2D_nrx40")
@@ -353,14 +399,54 @@ position = Vector2(2350, 384)
 scale = Vector2(2, 2)
 texture = ExtResource("21_q3xl1")
 
+[node name="Sparks1" type="CPUParticles2D" parent="FrontLayer" unique_id=2078822226]
+texture_filter = 1
+material = SubResource("CanvasItemMaterial_cllvt")
+position = Vector2(909, 516)
+amount = 14
+lifetime = 1.8
+explosiveness = 0.9
+lifetime_randomness = 0.7
+local_coords = true
+direction = Vector2(0, -1)
+spread = 75.0
+gravity = Vector2(0, 450)
+initial_velocity_min = 60.0
+initial_velocity_max = 150.0
+scale_amount_min = 2.0
+scale_amount_max = 4.0
+color_ramp = SubResource("Gradient_ulrxu")
+
+[node name="Sparks2" type="CPUParticles2D" parent="FrontLayer" unique_id=910349587]
+texture_filter = 1
+material = SubResource("CanvasItemMaterial_fgirw")
+position = Vector2(1991, 516)
+amount = 14
+lifetime = 2.6
+explosiveness = 0.9
+lifetime_randomness = 0.75
+local_coords = true
+direction = Vector2(0, -1)
+spread = 75.0
+gravity = Vector2(0, 450)
+initial_velocity_min = 60.0
+initial_velocity_max = 150.0
+scale_amount_min = 2.0
+scale_amount_max = 4.0
+color_ramp = SubResource("Gradient_00esb")
+
 [node name="Darkness" type="CanvasModulate" parent="." unique_id=413259386]
 color = Color(0.32, 0.32, 0.3456, 1)
 
 [node name="AlarmLight" type="PointLight2D" parent="." unique_id=105667896]
 position = Vector2(1150, 200)
 color = Color(1, 0.15, 0.1, 1)
+shadow_enabled = true
+shadow_filter = 1
+shadow_filter_smooth = 2.0
 texture = SubResource("GradientTexture2D_2mgj5")
 texture_scale = 4.0
+height = 60.0
 script = ExtResource("10_4ogqb")
 base_energy = 3.0
 pulse_speed = 5.0
