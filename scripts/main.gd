@@ -409,7 +409,7 @@ func _close_area_text() -> void:
 	for flag in point.get("set_flags", []):
 		GameState.set_flag(flag)
 	if _hides_when_done(point):
-		_area.consume_point(point_id)  # 例如婦人逃走後消失
+		_area.consume_point(point_id, _area.player.global_position.x)  # 例如婦人尖叫、逃走後消失
 	var chosen := _area_choice
 	_area_choice = {}
 	if chosen.has("to"):

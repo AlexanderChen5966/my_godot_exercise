@@ -23,7 +23,14 @@ func run_a() -> void:
 	await walk_to(1460)                       # 婦人：走近自動觸發
 	await choose(0)                           # 強行壓制自己
 	ok(gs().stats["humanity"] == 4, "婦人選「強行壓制自己」：人性 +1")
-	ok(not figure_visible("Woman"), "婦人事件後消失")
+	var woman: AnimatedSprite2D = main.get("_area").get_node("Points/Woman/Figure")
+	var start_x := woman.position.x
+	ok(woman.visible and woman.animation == "scream", "婦人事件後先尖叫（A3），還沒消失")
+	await wait_for(func(): return woman.animation == "run", 2.0)
+	await physics(10)
+	ok(woman.flip_h and woman.position.x > start_x, "婦人往遠離主角的方向（右）跑")
+	await wait_for(func(): return not woman.visible, 6.0)
+	ok(not figure_visible("Woman"), "婦人跑出畫面後消失")
 	await go_exit(2150, "street")
 	ok(player().position.x == 220, "進街道出現在 x=220")
 	await walk_to(1450); await interact(); await read()
