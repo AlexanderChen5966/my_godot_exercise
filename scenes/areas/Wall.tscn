@@ -13,6 +13,8 @@
 [ext_resource type="Texture2D" uid="uid://dkgqbb7dpljdj" path="res://assets/sprites/layers/wall_near_plaster.png" id="10_f1t00"]
 [ext_resource type="Texture2D" uid="uid://bye128l41ipjt" path="res://assets/sprites/layers/wall_near_charcoal.png" id="11_dtw7u"]
 [ext_resource type="Texture2D" uid="uid://chu38qiquoa2n" path="res://assets/sprites/layers/wall_front_edge.png" id="12_i1s5o"]
+[ext_resource type="Shader" uid="uid://ckw7d75gxw0q0" path="res://shaders/light_beam.gdshader" id="14_j6x2l"]
+[ext_resource type="Texture2D" uid="uid://daxysg6hfisqp" path="res://assets/fx/fog_noise.tres" id="15_coo6a"]
 
 [sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_l56ic"]
 polygon = PackedVector2Array(-18, 13, -16, 3, 8, -13, 12, -13, 17, 14, 17, 15, -18, 15)
@@ -47,6 +49,20 @@ height = 512
 fill = 1
 fill_from = Vector2(0.5, 0.5)
 fill_to = Vector2(1, 0.5)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_f1t00"]
+shader = ExtResource("14_j6x2l")
+shader_parameter/noise_tex = ExtResource("15_coo6a")
+shader_parameter/beam_color = Color(1, 0.95, 0.85, 1)
+shader_parameter/intensity = 0.35
+shader_parameter/top_width = 0.35
+shader_parameter/bottom_width = 0.9
+shader_parameter/edge_soft = 0.3
+shader_parameter/start_fade = 0.2
+shader_parameter/length_fade = 0.5
+shader_parameter/shimmer = 0.6
+shader_parameter/rect_size = Vector2(320, 670)
+shader_parameter/pixel_size = 4.0
 
 [node name="Wall" type="Node2D" unique_id=1154784663]
 y_sort_enabled = true
@@ -225,3 +241,14 @@ base_energy = 0.8
 pulse_speed = 0.2
 min_ratio = 0.8
 dropout_chance = 0.0
+
+[node name="Beam" type="ColorRect" parent="." unique_id=1611682723]
+z_index = 1
+material = SubResource("ShaderMaterial_f1t00")
+offset_left = 1260.0
+offset_top = -20.0
+offset_right = 1580.0
+offset_bottom = 650.0
+rotation = -0.15
+pivot_offset = Vector2(160, 0)
+mouse_filter = 2

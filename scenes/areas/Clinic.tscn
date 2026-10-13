@@ -2,11 +2,13 @@
 
 [ext_resource type="Script" uid="uid://r853iujge1v" path="res://scripts/area.gd" id="1_or88c"]
 [ext_resource type="Texture2D" uid="uid://7wiab8lqf2o8" path="res://assets/bg/scene_04.webp" id="2_or88c"]
+[ext_resource type="Shader" uid="uid://ckw7d75gxw0q0" path="res://shaders/light_beam.gdshader" id="3_4eewa"]
 [ext_resource type="Script" uid="uid://dkcse5tmlbfke" path="res://scripts/player.gd" id="3_4wa2n"]
 [ext_resource type="Texture2D" uid="uid://bo72g3dvpsure" path="res://assets/sprites/layers/clinic_mid_benches.png" id="3_jg1fx"]
 [ext_resource type="SpriteFrames" uid="uid://b872yo2d63qvl" path="res://assets/sprites/player_frames.tres" id="4_1g32l"]
 [ext_resource type="Texture2D" uid="uid://bdyn2s3mi2jff" path="res://assets/sprites/props/cabinet.png" id="4_2bfil"]
 [ext_resource type="Texture2D" uid="uid://bwwjgv6vnyfk1" path="res://assets/sprites/props/recorder.png" id="4_lmpgy"]
+[ext_resource type="Texture2D" uid="uid://daxysg6hfisqp" path="res://assets/fx/fog_noise.tres" id="4_n35jl"]
 [ext_resource type="Texture2D" uid="uid://chn708i2fixmv" path="res://assets/sprites/layers/clinic_mid_curtain.png" id="4_oels4"]
 [ext_resource type="Texture2D" uid="uid://crodufi7o8xm0" path="res://assets/sprites/props/sign_street.png" id="4_oev4m"]
 [ext_resource type="Texture2D" uid="uid://bclnbtearke1q" path="res://assets/sprites/props/cards.png" id="5_2bfil"]
@@ -26,6 +28,19 @@
 [ext_resource type="Texture2D" uid="uid://dgcn27mn37xss" path="res://assets/sprites/layers/parking_near_papers.png" id="23_138m7"]
 [ext_resource type="Texture2D" uid="uid://becjn1qee2g6e" path="res://assets/sprites/layers/clinic_front_curtain.png" id="24_85iiw"]
 [ext_resource type="Texture2D" uid="uid://ct772jo0pooww" path="res://assets/sprites/layers/clinic_front_ivy.png" id="25_v45mq"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_yky72"]
+shader = ExtResource("3_4eewa")
+shader_parameter/noise_tex = ExtResource("4_n35jl")
+shader_parameter/beam_color = Color(1, 0.9, 0.7, 1)
+shader_parameter/intensity = 0.35
+shader_parameter/top_width = 0.6
+shader_parameter/bottom_width = 1.0
+shader_parameter/edge_soft = 0.3
+shader_parameter/length_fade = 0.5
+shader_parameter/shimmer = 0.6
+shader_parameter/rect_size = Vector2(300, 650)
+shader_parameter/pixel_size = 4.0
 
 [sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_jg1fx"]
 polygon = PackedVector2Array(-18, 13, -16, 2, -12, -2, 6, -16, 10, -16, 16, 3, 16, 10, 14, 14, 12, 16, 8, 18, -16, 18, -18, 16)
@@ -107,6 +122,16 @@ mouse_filter = 2
 texture = ExtResource("2_or88c")
 expand_mode = 1
 stretch_mode = 6
+
+[node name="Beam" type="ColorRect" parent="FarLayer" unique_id=948685077]
+material = SubResource("ShaderMaterial_yky72")
+offset_left = 927.0
+offset_top = 150.0
+offset_right = 1227.0
+offset_bottom = 800.0
+rotation = 0.5
+pivot_offset = Vector2(150, 0)
+mouse_filter = 2
 
 [node name="MidLayer" type="Parallax2D" parent="." unique_id=1583612062]
 texture_filter = 1

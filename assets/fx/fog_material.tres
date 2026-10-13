@@ -1,0 +1,16 @@
+[gd_resource type="ShaderMaterial" load_steps=3 format=3]
+
+[ext_resource type="Shader" uid="uid://b41ew545j6bgq" path="res://shaders/fog.gdshader" id="1_fog"]
+[ext_resource type="Texture2D" uid="uid://daxysg6hfisqp" path="res://assets/fx/fog_noise.tres" id="2_noise"]
+
+[resource]
+shader = ExtResource("1_fog")
+shader_parameter/noise_tex = ExtResource("2_noise")
+shader_parameter/fog_color = Color(0.75, 0.75, 0.8, 1)
+shader_parameter/density = 0.3
+shader_parameter/speed = Vector2(0.006, 0.0015)
+shader_parameter/noise_scale = Vector2(2, 1)
+shader_parameter/top_fade = 0.45
+shader_parameter/bottom_fade = 0.15
+shader_parameter/rect_size = Vector2(2304, 380)
+shader_parameter/pixel_size = 4.0

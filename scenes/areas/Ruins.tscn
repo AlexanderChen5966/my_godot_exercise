@@ -22,6 +22,7 @@
 [ext_resource type="Texture2D" uid="uid://dl65vr0ennk8x" path="res://assets/sprites/layers/street_near_bricks.png" id="19_7tgqj"]
 [ext_resource type="Texture2D" uid="uid://dss5cx1r7yvss" path="res://assets/sprites/layers/ruins_front_wall.png" id="20_dvfnx"]
 [ext_resource type="Texture2D" uid="uid://byl20iuda05ih" path="res://assets/sprites/layers/ruins_front_rebar.png" id="21_qb8mq"]
+[ext_resource type="Material" path="res://assets/fx/fog_material.tres" id="23_8cc2f"]
 
 [sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_dv57a"]
 polygon = PackedVector2Array(-49, 16, -42, 7, -39, 4, -28, -5, -26, -6, 14, -22, 43, -22, 44, -21, 44, 19, 41, 22, 39, 23, -44, 23, -46, 22, -49, 19)
@@ -375,3 +376,13 @@ scale_amount_min = 2.0
 scale_amount_max = 4.0
 color = Color(0.72, 0.69, 0.65, 0.75)
 color_ramp = SubResource("Gradient_dv57a")
+
+[node name="FogLayer" type="Parallax2D" parent="." unique_id=1572929251]
+scroll_scale = Vector2(0.85, 1)
+
+[node name="Fog" type="ColorRect" parent="FogLayer" unique_id=987520488]
+material = ExtResource("23_8cc2f")
+offset_top = 270.0
+offset_right = 2304.0
+offset_bottom = 650.0
+mouse_filter = 2

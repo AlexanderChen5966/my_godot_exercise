@@ -24,6 +24,7 @@
 [ext_resource type="Texture2D" uid="uid://dgcn27mn37xss" path="res://assets/sprites/layers/parking_near_papers.png" id="21_2au76"]
 [ext_resource type="Texture2D" uid="uid://bhw10a6gr3dtw" path="res://assets/sprites/layers/street_front_lamp.png" id="22_xojim"]
 [ext_resource type="Texture2D" uid="uid://dmuh1hn7e6rgj" path="res://assets/sprites/layers/street_front_rubble.png" id="23_7iigv"]
+[ext_resource type="Material" path="res://assets/fx/fog_material.tres" id="25_imh8n"]
 
 [sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_i22ve"]
 polygon = PackedVector2Array(-40, -30, 16, -30, 40, -26, 40, -25, 39, 30, -38, 30, -40, -25)
@@ -398,3 +399,13 @@ base_energy = 2.5
 pulse_speed = 4.0
 min_ratio = 0.6
 dropout_chance = 0.0
+
+[node name="FogLayer" type="Parallax2D" parent="." unique_id=1688432825]
+scroll_scale = Vector2(0.85, 1)
+
+[node name="Fog" type="ColorRect" parent="FogLayer" unique_id=1856187699]
+material = ExtResource("25_imh8n")
+offset_top = 270.0
+offset_right = 2304.0
+offset_bottom = 650.0
+mouse_filter = 2
