@@ -5,6 +5,7 @@
 [ext_resource type="Shader" uid="uid://3u2dc4fwaw05" path="res://shaders/impulse_vignette.gdshader" id="2_vcsgt"]
 [ext_resource type="Script" uid="uid://dtpcpwu322pb" path="res://scripts/impulse_fx.gd" id="3_c01mt"]
 [ext_resource type="AudioStream" uid="uid://g34bjaxi4fg0" path="res://assets/sfx/heartbeat.wav" id="4_nxtc6"]
+[ext_resource type="Script" uid="uid://cy2x0hd27hova" path="res://scripts/camera_fx.gd" id="6_c01mt"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_jlsqs"]
 shader = ExtResource("2_vcsgt")
@@ -224,3 +225,7 @@ unique_name_in_owner = true
 stream = ExtResource("2_rvslj")
 volume_db = -8.0
 max_polyphony = 4
+
+[node name="CameraFx" type="Node" parent="." unique_id=262416122]
+unique_name_in_owner = true
+script = ExtResource("6_c01mt")

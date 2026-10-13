@@ -39,6 +39,7 @@ const PROMPT_GAP := 8.0  # 提示和頭頂的距離
 @onready var rotate_hint: ColorRect = %RotateHint
 @onready var prompt_label: Label = %PromptLabel
 @onready var impulse_fx: ColorRect = %ImpulseOverlay  # 衝動機制的紅色暈影、心跳、手電筒閃爍（scripts/impulse_fx.gd）
+@onready var camera_fx: Node = %CameraFx  # A2-4 鏡頭的推近、震動、晃動（scripts/camera_fx.gd）
 
 var story := StoryData.new()
 var areas := AreaData.new()
@@ -76,6 +77,7 @@ var _start_blink: Tween
 
 func _ready() -> void:
 	_type_base_db = type_sfx.volume_db
+	camera_fx.set_background(background)
 	_setup_style()
 	get_window().size_changed.connect(_on_window_resized)
 	_on_window_resized()
@@ -191,6 +193,7 @@ func _instantiate_area(area_id: String, from_area := "") -> Node2D:
 	_nearby_point = ""
 	world.add_child(_area)
 	impulse_fx.set_flashlight(_area.get_node_or_null("Player/Flashlight"), _area.flashlight_energy)
+	camera_fx.set_camera(_area.camera)
 	_area.point_entered.connect(_on_point_entered)
 	_area.point_exited.connect(_on_point_exited)
 	var spawns: Dictionary = area.get("spawns", {})
@@ -215,6 +218,7 @@ func _free_area() -> void:
 		_area = null
 	impulse_fx.set_flashlight(null, 1.0)
 	impulse_fx.reset()
+	camera_fx.set_camera(null)
 	_area_id = ""
 	_nearby_point = ""
 	_area_choosing = false
@@ -338,6 +342,8 @@ func _show_area_text(holder: Dictionary, point_id := "") -> void:
 	_closing_point = point_id
 	_closing_view = holder
 	_impulse_released = false
+	if not point_id.is_empty() and AreaData.trigger_of(holder) == "approach":
+		camera_fx.push_in()  # 遇到人：鏡頭輕微推近，關閉文字時退回
 	if not point_id.is_empty() and holder.get("type") != "choice":
 		GameState.apply_effects(holder.get("effects", {}), AreaData.done_key(_point_key(point_id), holder))
 	_area.set_can_move(false)
@@ -376,6 +382,7 @@ func _on_area_choice_pressed(choice: Dictionary) -> void:
 	_area_choice = choice
 	_impulse_released = true  # 選完了：張力淡出
 	sfx.play()
+	_camera_cue(choice)
 	_clear_choices()
 	GameState.apply_effects(choice.get("effects", {}), AreaData.done_key(_point_key(_closing_point), _closing_view))
 	for flag in choice.get("set_flags", []):
@@ -388,6 +395,7 @@ func _on_area_choice_pressed(choice: Dictionary) -> void:
 func _close_area_text() -> void:
 	var point_id := _closing_point
 	var point := _closing_view
+	camera_fx.release()
 	_closing_point = ""
 	_closing_view = {}
 	hint.visible = false
@@ -517,8 +525,15 @@ func show_scene(id: int, fade_out := true) -> void:
 	)
 	tween.tween_property(fade, "color:a", 0.0, FADE_HALF_TIME)
 	tween.tween_callback(func() -> void:
+		_camera_cue(scene)  # 例如 Bad End「槍聲」：淡入後畫面震動
 		_type_text(scene["text"], _show_choices.bind(scene))
 	)
+
+
+## 資料裡的鏡頭提示（A2-4）：選項或場景寫 "camera": "shake" 時畫面震動（撲上去、槍聲）。
+func _camera_cue(holder: Dictionary) -> void:
+	if holder.get("camera", "") == "shake":
+		camera_fx.shake()
 
 
 func _show_choices(scene: Dictionary) -> void:
@@ -628,6 +643,7 @@ func _on_choice_pressed(index: int, choice: Dictionary) -> void:
 		return
 	_chosen_in_scene[index] = true
 	sfx.play()
+	_camera_cue(choice)
 	_clear_choices()
 	hint.visible = false
 	_pending_choice = choice
@@ -703,6 +719,7 @@ func _create_debug_label() -> void:
 
 func _process(_delta: float) -> void:
 	impulse_fx.target = _impulse_target()
+	camera_fx.sway = impulse_fx.intensity
 	_place_prompt()
 	if _debug_label and _debug_label.visible:
 		var parts: Array[String] = []

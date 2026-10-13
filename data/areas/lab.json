@@ -16,7 +16,7 @@
         { "text": "收下筆記本",
           "response": "你接過筆記本，指尖碰到她的手。她沒有退縮。你們對看了一眼，她轉身跑進濃煙裡。",
           "effects": { "memory": 1 }, "item": "notebook", "item_name": "筆記本" },
-        { "text": "撲向她",
+        { "text": "撲向她", "camera": "shake",
           "response": "飢餓比你更快。你撲上去，她跌倒，筆記本散落一地。你在最後一刻停住，她爬起來逃走了。",
           "effects": { "humanity": -2 } }
       ]
@@ -32,7 +32,7 @@
       "choices": [
         { "text": "躲進通風管",
           "response": "你擠進狹窄的通風管，屏住呼吸。腳步聲停了一下，又走遠了。" },
-        { "text": "撲向警衛",
+        { "text": "撲向警衛", "camera": "shake",
           "response": "你從暗處撲出，撞倒警衛，他的槍滑過地面。你強迫自己鬆口，跌跌撞撞地跑開。",
           "effects": { "humanity": -1 } },
         { "text": "停下不動",

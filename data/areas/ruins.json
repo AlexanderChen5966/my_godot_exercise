@@ -33,7 +33,7 @@
         { "text": "轉身離開",
           "response": "你轉身離開。你知道，她現在最需要的，是你不要出現。",
           "effects": { "humanity": 1 } },
-        { "text": "撲向她",
+        { "text": "撲向她", "camera": "shake",
           "response": "你撞上圍籬，鐵絲割進手臂。她看見了你，發出尖叫——",
           "to": { "scene": 23 } }
       ]
