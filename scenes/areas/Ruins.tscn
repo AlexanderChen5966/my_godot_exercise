@@ -8,9 +8,9 @@
 [ext_resource type="Script" uid="uid://dkcse5tmlbfke" path="res://scripts/player.gd" id="4_hnolj"]
 [ext_resource type="Texture2D" uid="uid://hfcuqj5e3kjh" path="res://assets/sprites/layers/ruins_mid_barricade.png" id="5_ltopt"]
 [ext_resource type="SpriteFrames" uid="uid://b872yo2d63qvl" path="res://assets/sprites/player_frames.tres" id="5_rbspv"]
+[ext_resource type="SpriteFrames" uid="uid://ctljdy3gw4qw6" path="res://assets/sprites/layers/ruins_mid_firebarrel_frames.tres" id="6_8cc2f"]
 [ext_resource type="Texture2D" uid="uid://bbreeny8ht8rk" path="res://assets/sprites/props/shelter_fence.png" id="6_rbspv"]
 [ext_resource type="Script" uid="uid://cpx5m37cmu4jq" path="res://scripts/flicker_light.gd" id="6_xlq1f"]
-[ext_resource type="Texture2D" uid="uid://dt7h82vigogjy" path="res://assets/sprites/layers/ruins_mid_firebarrel.png" id="6_xls4e"]
 [ext_resource type="Texture2D" uid="uid://m4d1l8kwf4t8" path="res://assets/sprites/layers/ruins_ground.png" id="7_if7y5"]
 [ext_resource type="Texture2D" uid="uid://bef5n6bpw3ky1" path="res://assets/sprites/props/sign_home.png" id="7_xlq1f"]
 [ext_resource type="Texture2D" path="res://assets/sprites/characters/horde_canvas.tres" id="9_dv57a"]
@@ -138,15 +138,21 @@ flip_h = true
 [node name="Occluder" type="LightOccluder2D" parent="MidLayer/Barricade2" unique_id=1331100468]
 occluder = SubResource("OccluderPolygon2D_dv57a")
 
-[node name="FireBarrel1" type="Sprite2D" parent="MidLayer" unique_id=1865510694]
+[node name="FireBarrel1" type="AnimatedSprite2D" parent="MidLayer" unique_id=1111299584]
 position = Vector2(300, 606)
 scale = Vector2(2, 2)
-texture = ExtResource("6_xls4e")
+sprite_frames = ExtResource("6_8cc2f")
+animation = &"burn"
+autoplay = "burn"
 
-[node name="FireBarrel2" type="Sprite2D" parent="MidLayer" unique_id=784795967]
+[node name="FireBarrel2" type="AnimatedSprite2D" parent="MidLayer" unique_id=370962542]
 position = Vector2(1250, 606)
 scale = Vector2(2, 2)
-texture = ExtResource("6_xls4e")
+sprite_frames = ExtResource("6_8cc2f")
+animation = &"burn"
+autoplay = "burn"
+frame = 2
+speed_scale = 0.9
 
 [node name="Occluder" type="LightOccluder2D" parent="MidLayer/FireBarrel2" unique_id=851873366]
 occluder = SubResource("OccluderPolygon2D_8cc2f")

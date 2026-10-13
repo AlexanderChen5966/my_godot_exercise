@@ -1,0 +1,39 @@
+[gd_resource type="SpriteFrames" format=3 uid="uid://ctljdy3gw4qw6"]
+
+[ext_resource type="Texture2D" uid="uid://c5qea3bvewe5w" path="res://assets/sprites/layers/ruins_mid_firebarrel_anim.png" id="1_u3oqp"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ukkhq"]
+atlas = ExtResource("1_u3oqp")
+region = Rect2(0, 0, 22, 34)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_pcw5v"]
+atlas = ExtResource("1_u3oqp")
+region = Rect2(22, 0, 22, 34)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_bvqfc"]
+atlas = ExtResource("1_u3oqp")
+region = Rect2(44, 0, 22, 34)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_penwq"]
+atlas = ExtResource("1_u3oqp")
+region = Rect2(66, 0, 22, 34)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ukkhq")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_pcw5v")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_bvqfc")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_penwq")
+}],
+"loop": 1,
+"name": &"burn",
+"speed": 8.0
+}]

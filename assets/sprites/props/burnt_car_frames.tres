@@ -1,0 +1,39 @@
+[gd_resource type="SpriteFrames" format=3 uid="uid://signsaj6lvqj"]
+
+[ext_resource type="Texture2D" uid="uid://bcn45dioa022k" path="res://assets/sprites/props/burnt_car_anim.png" id="1_b511u"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0tq1y"]
+atlas = ExtResource("1_b511u")
+region = Rect2(0, 0, 120, 44)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_yxmbu"]
+atlas = ExtResource("1_b511u")
+region = Rect2(120, 0, 120, 44)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6j7lq"]
+atlas = ExtResource("1_b511u")
+region = Rect2(240, 0, 120, 44)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_wpm87"]
+atlas = ExtResource("1_b511u")
+region = Rect2(360, 0, 120, 44)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0tq1y")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_yxmbu")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_6j7lq")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_wpm87")
+}],
+"loop": 1,
+"name": &"burn",
+"speed": 8.0
+}]
