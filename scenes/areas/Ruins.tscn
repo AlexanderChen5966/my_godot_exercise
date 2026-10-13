@@ -5,9 +5,7 @@
 [ext_resource type="Script" uid="uid://u5x8mgenl5y4" path="res://scripts/interact_point.gd" id="3_d8cse"]
 [ext_resource type="Texture2D" uid="uid://b288gnmgt1jry" path="res://assets/sprites/layers/ruins_mid_ruin_a.png" id="3_dv57a"]
 [ext_resource type="Texture2D" uid="uid://2s034e7ggluc" path="res://assets/sprites/layers/ruins_mid_ruin_b.png" id="4_8cc2f"]
-[ext_resource type="Texture2D" uid="uid://d0whrabgvymqr" path="res://assets/sprites/characters/horde.png" id="4_d8cse"]
 [ext_resource type="Script" uid="uid://dkcse5tmlbfke" path="res://scripts/player.gd" id="4_hnolj"]
-[ext_resource type="Texture2D" uid="uid://d0ryurb452r8m" path="res://assets/sprites/characters/wife.png" id="5_hnolj"]
 [ext_resource type="Texture2D" uid="uid://hfcuqj5e3kjh" path="res://assets/sprites/layers/ruins_mid_barricade.png" id="5_ltopt"]
 [ext_resource type="SpriteFrames" uid="uid://b872yo2d63qvl" path="res://assets/sprites/player_frames.tres" id="5_rbspv"]
 [ext_resource type="Texture2D" uid="uid://bbreeny8ht8rk" path="res://assets/sprites/props/shelter_fence.png" id="6_rbspv"]
@@ -15,6 +13,8 @@
 [ext_resource type="Texture2D" uid="uid://dt7h82vigogjy" path="res://assets/sprites/layers/ruins_mid_firebarrel.png" id="6_xls4e"]
 [ext_resource type="Texture2D" uid="uid://m4d1l8kwf4t8" path="res://assets/sprites/layers/ruins_ground.png" id="7_if7y5"]
 [ext_resource type="Texture2D" uid="uid://bef5n6bpw3ky1" path="res://assets/sprites/props/sign_home.png" id="7_xlq1f"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/horde_canvas.tres" id="9_dv57a"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/wife_canvas.tres" id="10_8cc2f"]
 [ext_resource type="Texture2D" uid="uid://jo1k2ag3r4i7" path="res://assets/sprites/props/ruins_barrier.png" id="15_4mhys"]
 [ext_resource type="Texture2D" uid="uid://c6lwlpbxflqp8" path="res://assets/sprites/layers/ruins_near_charred.png" id="16_jidu7"]
 [ext_resource type="Texture2D" uid="uid://bsps6rjtomyal" path="res://assets/sprites/layers/ruins_near_sign.png" id="17_1mne6"]
@@ -154,7 +154,7 @@ shape = SubResource("RectangleShape2D_rbspv")
 texture_filter = 1
 position = Vector2(95, -44)
 scale = Vector2(2, 2)
-texture = ExtResource("4_d8cse")
+texture = ExtResource("9_dv57a")
 
 [node name="Shelter" type="Area2D" parent="Points" unique_id=1020138718]
 position = Vector2(1600, 640)
@@ -169,7 +169,7 @@ shape = SubResource("RectangleShape2D_xlq1f")
 texture_filter = 1
 position = Vector2(103, -48)
 scale = Vector2(2, 2)
-texture = ExtResource("5_hnolj")
+texture = ExtResource("10_8cc2f")
 
 [node name="Fence" type="Sprite2D" parent="Points/Shelter" unique_id=675990430]
 texture_filter = 1

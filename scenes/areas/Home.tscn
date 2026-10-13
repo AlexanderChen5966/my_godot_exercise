@@ -5,7 +5,6 @@
 [ext_resource type="Script" uid="uid://u5x8mgenl5y4" path="res://scripts/interact_point.gd" id="3_osphs"]
 [ext_resource type="Texture2D" uid="uid://8msnu88scejm" path="res://assets/sprites/layers/home_mid_shelf.png" id="3_pic44"]
 [ext_resource type="Texture2D" uid="uid://du7tc2aobr5wc" path="res://assets/sprites/props/home_room_door.png" id="4_7j7j4"]
-[ext_resource type="Texture2D" uid="uid://7l7qsjylwbho" path="res://assets/sprites/characters/daughter.png" id="4_eatb3"]
 [ext_resource type="Texture2D" uid="uid://bhaxahs38byyy" path="res://assets/sprites/layers/home_mid_photos.png" id="4_gn0ya"]
 [ext_resource type="Script" uid="uid://dkcse5tmlbfke" path="res://scripts/player.gd" id="4_nt85v"]
 [ext_resource type="SpriteFrames" uid="uid://b872yo2d63qvl" path="res://assets/sprites/player_frames.tres" id="5_7j7j4"]
@@ -16,6 +15,7 @@
 [ext_resource type="Texture2D" uid="uid://ca78m4ji1yh1o" path="res://assets/sprites/props/home_door.png" id="7_e0w58"]
 [ext_resource type="Texture2D" uid="uid://begvnnm64el5u" path="res://assets/sprites/layers/home_mid_table.png" id="7_xvxyi"]
 [ext_resource type="Texture2D" uid="uid://dtkto7q2unpco" path="res://assets/sprites/layers/home_ground.png" id="8_ab1nn"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/daughter_canvas.tres" id="11_pic44"]
 [ext_resource type="Texture2D" uid="uid://c6qll1c10e5ej" path="res://assets/sprites/props/home_wardrobe.png" id="16_olrpw"]
 [ext_resource type="Texture2D" uid="uid://cxg0rce38g2qd" path="res://assets/sprites/layers/home_near_crayons.png" id="17_oxte5"]
 [ext_resource type="Texture2D" uid="uid://ck0wyqxn23qfc" path="res://assets/sprites/layers/home_near_bear.png" id="18_mjd4p"]
@@ -210,7 +210,7 @@ shape = SubResource("RectangleShape2D_pfqkc")
 texture_filter = 1
 position = Vector2(110, -212)
 scale = Vector2(2, 2)
-texture = ExtResource("4_eatb3")
+texture = ExtResource("11_pic44")
 region_enabled = true
 region_rect = Rect2(0, 0, 24, 22)
 

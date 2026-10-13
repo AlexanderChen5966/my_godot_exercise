@@ -4,17 +4,17 @@
 [ext_resource type="Texture2D" uid="uid://dgldsn1wrtnin" path="res://assets/bg/scene_13.webp" id="2_b6wgb"]
 [ext_resource type="Texture2D" uid="uid://bfrkla4mh6nk0" path="res://assets/sprites/layers/lab_mid_pipes.png" id="3_cllvt"]
 [ext_resource type="Script" uid="uid://u5x8mgenl5y4" path="res://scripts/interact_point.gd" id="3_sxo7y"]
-[ext_resource type="Texture2D" uid="uid://dvc421v0v4a2t" path="res://assets/sprites/characters/scientist.png" id="4_j2lqu"]
 [ext_resource type="Texture2D" uid="uid://bjjki4tm2c6iw" path="res://assets/sprites/layers/lab_mid_window.png" id="4_ulrxu"]
-[ext_resource type="Texture2D" uid="uid://de0sq53lgx4ep" path="res://assets/sprites/characters/guard.png" id="5_84mbp"]
 [ext_resource type="Texture2D" uid="uid://cuf14lgwcbc4v" path="res://assets/sprites/layers/lab_mid_rack.png" id="5_fgirw"]
 [ext_resource type="Texture2D" uid="uid://bx022qy0jnvsy" path="res://assets/sprites/props/lab_records.png" id="5_fk7ab"]
 [ext_resource type="Texture2D" uid="uid://fnfmhf8vvcr1" path="res://assets/sprites/layers/lab_mid_alarm.png" id="6_00esb"]
 [ext_resource type="Texture2D" uid="uid://cuj3hablexw73" path="res://assets/sprites/props/exit_door_broken.png" id="7_6u4t4"]
 [ext_resource type="Texture2D" uid="uid://dxb1yujau8ite" path="res://assets/sprites/layers/lab_ground.png" id="7_w0vuw"]
 [ext_resource type="Script" uid="uid://dkcse5tmlbfke" path="res://scripts/player.gd" id="8_jswt6"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/scientist_canvas.tres" id="9_cllvt"]
 [ext_resource type="SpriteFrames" uid="uid://b872yo2d63qvl" path="res://assets/sprites/player_frames.tres" id="9_k7ac4"]
 [ext_resource type="Script" uid="uid://cpx5m37cmu4jq" path="res://scripts/flicker_light.gd" id="10_4ogqb"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/guard_canvas.tres" id="11_ulrxu"]
 [ext_resource type="Texture2D" uid="uid://b1m8jx8sq2mvf" path="res://assets/sprites/props/lab_cart.png" id="15_wnh6g"]
 [ext_resource type="Texture2D" uid="uid://xlv8apiyf5yj" path="res://assets/sprites/layers/lab_near_vials.png" id="16_hsw77"]
 [ext_resource type="Texture2D" uid="uid://y0xjkcweiw4u" path="res://assets/sprites/layers/lab_near_cable.png" id="17_0cawk"]
@@ -182,7 +182,7 @@ shape = SubResource("RectangleShape2D_fk7ab")
 texture_filter = 1
 position = Vector2(54, -48)
 scale = Vector2(2, 2)
-texture = ExtResource("4_j2lqu")
+texture = ExtResource("9_cllvt")
 
 [node name="Records" type="Area2D" parent="Points" unique_id=729555111]
 position = Vector2(1150, 640)
@@ -212,7 +212,7 @@ shape = SubResource("RectangleShape2D_sxo7y")
 texture_filter = 1
 position = Vector2(55, -48)
 scale = Vector2(2, 2)
-texture = ExtResource("5_84mbp")
+texture = ExtResource("11_ulrxu")
 
 [node name="Exit" type="Area2D" parent="Points" unique_id=1483213795]
 position = Vector2(2150, 640)

@@ -1,0 +1,9 @@
+[gd_resource type="CanvasTexture" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/daughter.png" id="1_diff"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/daughter_normal.png" id="2_norm"]
+
+[resource]
+diffuse_texture = ExtResource("1_diff")
+normal_texture = ExtResource("2_norm")
+texture_filter = 1
