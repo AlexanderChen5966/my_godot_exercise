@@ -11,7 +11,7 @@
   - 作者貼給你的分步指令：`PROMPTS.md` 的「LvN 分步指令」（每一級開始時補上該級的指令）
 - **暫不支援手機**：Lv1 起可走動區域只做鍵盤操作，不要自行加觸控。按鍵衝突（`interact` 與 `ui_accept`）已在 Lv6-1 處理：所有選項自動聚焦第一個能選的選項（鎖住的不能聚焦），一次按鍵只處理一件事（`tests/test_lv6.gd` 檢查）。
 - **Lv1（停車場可走動）、Lv2（景深分層與光影）已完成（2026-10-02）；Lv3（Pixelorama MCP 畫主角）已完成（2026-10-05）**：32×48、放大 2 倍，左右各一套共 20 格（待機 4 fps、行走 8 fps），原始檔 `art/player.pxo`，遊戲用 `assets/sprites/player.png`＋`player_frames.tres`。經過與觀察見 `MCP實驗紀錄.md` 的「Lv3」。**劇本 v1.5 已定稿（2026-10-05）**：`docs/story_v1.5_outline.md`、`docs/story_v1.5_draft.md`，素材需求 `docs/asset_requests.md`。**Lv4（多區域、物品與旗標）已完成（2026-10-05）**：停車場（v1.5）→ 街道 → 診所，格式與步驟見 `docs/Lv製作流程.md` 的「Lv4」，經過見 `MCP實驗紀錄.md` 的「Lv4」。**Lv5（其餘區域、Bad End 與結局）已完成（2026-10-06）**：7 個區域＋3 段過場、6 個結局、Bad End 重試，規格見 `docs/Lv製作流程.md` 的「Lv5」，經過見 `MCP實驗紀錄.md` 的「Lv5」。**Lv6（鍵盤操作、衝動機制、像素人物與場景物件、平衡）已完成（2026-10-06）**：規格見 `docs/Lv製作流程.md` 的「Lv6」，經過與從階段 1 到 Lv6 的整體總結見 `MCP實驗紀錄.md`。**下一版的想法**（會動的像素、音效、場景、互動方式）記在 `docs/開發路線圖.md` 第 6 節。
-- **下一版（2026-10-08 作者決定）：先做 A＋（深化 2.5D，延續本專案、維持網頁版），之後再決定 HD-2D**。**A1（7 區分層背景）、A1.5（上下左右移動）已完成（2026-10-13）**，經過見 `MCP實驗紀錄.md` 的「A＋ A1」「A＋ A1.5」。**A2（光影與空氣感）已完成（2026-10-13）**，經過見 `MCP實驗紀錄.md` 的「A＋ A2」：A2-1 陰影、法線貼圖完成（7 區都有陰影，主角與 6 個人物有法線貼圖），A2-2 粒子、A2-3 霧與光束、A2-4 鏡頭完成（霧與光束的 shader 在 `shaders/`，霧的共用材質 `assets/fx/fog_material.tres`；鏡頭的推近、震動、晃動在 `scripts/camera_fx.gd`〔Main 的 `CameraFx`〕，資料用 `"camera": "shake"` 指定震動）。下一級 A3（分步指令已在 `PROMPTS.md`，作者指示後才開始）；每一步記在 `docs/開發路線圖.md` 的「進度紀錄」，分步指令在 `PROMPTS.md`。
+- **下一版（2026-10-08 作者決定）：先做 A＋（深化 2.5D，延續本專案、維持網頁版），之後再決定 HD-2D**。**A1（7 區分層背景）、A1.5（上下左右移動）已完成（2026-10-13）**，經過見 `MCP實驗紀錄.md` 的「A＋ A1」「A＋ A1.5」。**A2（光影與空氣感）已完成（2026-10-13）**，經過見 `MCP實驗紀錄.md` 的「A＋ A2」：A2-1 陰影、法線貼圖完成（7 區都有陰影，主角與 6 個人物有法線貼圖），A2-2 粒子、A2-3 霧與光束、A2-4 鏡頭完成（霧與光束的 shader 在 `shaders/`，霧的共用材質 `assets/fx/fog_material.tres`；鏡頭的推近、震動、晃動在 `scripts/camera_fx.gd`〔Main 的 `CameraFx`〕，資料用 `"camera": "shake"` 指定震動）。**A3（會動的像素）進行中**：火焰（車、火桶）、停車場燈管、婦人（尖叫＋逃跑）、感染者群（啃食＋轉頭）完成，下一組女科學家；設計檔在 `art/design/a3/`，待機偶爾換動作用 `scripts/idle_variation.gd`；每一步記在 `docs/開發路線圖.md` 的「進度紀錄」，分步指令在 `PROMPTS.md`。
   - A＋ 的等級 A1～A6、素材分工、驗證與完成標準：`docs/A+方案.md`；外部 AI 素材的提示詞與檔名：`docs/A+素材提示詞.md`；分步指令：`PROMPTS.md` 的「A1 分步指令」（之後每一級開始時補上）。
   - 聲音素材**免費素材為主、AI 補缺**（作者 2026-10-08）：專案沒有商業用途，非商業授權也可以用，以找到適合的聲音為最優先。作者下載候選、Claude 整理（轉檔、裁切、音量、循環），作者挑選後才放進 `assets/`；每個外部素材記錄在 `docs/素材來源.md`。
   - 找不到合適的聲音時，才用 **ElevenLabs MCP**（或 Suno）補：**每次呼叫會消耗點數，只在作者同意的範圍內呼叫**。
@@ -75,6 +75,7 @@ docs/A+素材提示詞.md        A＋ 外部素材的提示詞、搜尋關鍵字
 docs/素材來源.md            每個外部素材的來源與授權（放進專案時加一列）
 docs/HD-2D方案.md          HD-2D 方案（之後再決定，桌面版優先、另開專案；作者決定前不要做）
 art/player.pxo         主角的 Pixelorama 原始檔（含 .gdignore，不匯出）
+art/design/            A＋ 的設計腳本、每一格的設計圖（.txt）、GIF 預覽與 A／B 比較圖（暫存區會被清空，A3 起搬來這裡；說明見 art/design/README.md）
 art/tools/             像素素材的共用工具（A1-6 起放這裡，暫存區會被清空）：pix.py 畫布、verify.sh 逐像素比對、patch.py 算出要補的像素、dump_points.py 列出互動點、normal_map.py 由 sprite 產生法線貼圖、occluder_poly.py 由貼圖算出遮光多邊形
 assets/sprites/        主角 spritesheet 與 SpriteFrames；props/ 道具、characters/ 人物（Lv6，原始檔在 art/characters/*.pxo）
 data/areas/parking_lot.json  停車場區域資料（Lv4-3 起為 v1.5 格式，文字直接寫在資料裡）
