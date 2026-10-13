@@ -9,7 +9,6 @@
 [ext_resource type="SpriteFrames" uid="uid://b872yo2d63qvl" path="res://assets/sprites/player_frames.tres" id="4_kipkx"]
 [ext_resource type="Script" uid="uid://u5x8mgenl5y4" path="res://scripts/interact_point.gd" id="4_tpq6i"]
 [ext_resource type="Script" uid="uid://cpx5m37cmu4jq" path="res://scripts/flicker_light.gd" id="5_8ukss"]
-[ext_resource type="Texture2D" uid="uid://b0m5iju75hk4e" path="res://assets/sprites/props/lamp.png" id="5_k0cph"]
 [ext_resource type="Texture2D" uid="uid://bt8nlehkqmu2w" path="res://assets/sprites/layers/parking_mid_pillar_b2.png" id="5_ogvxm"]
 [ext_resource type="Texture2D" uid="uid://dpapetl46x7kn" path="res://assets/sprites/layers/parking_mid_car.png" id="6_g4d3l"]
 [ext_resource type="Texture2D" uid="uid://cmqyrypoe4ri5" path="res://assets/sprites/props/debris.png" id="6_wnkfg"]
@@ -17,6 +16,7 @@
 [ext_resource type="Texture2D" uid="uid://k8a0kynwr1p8" path="res://assets/sprites/props/exit_door.png" id="8_k0cph"]
 [ext_resource type="Texture2D" uid="uid://djyfvveixpxij" path="res://assets/sprites/props/blood_pool.png" id="9_xl8si"]
 [ext_resource type="Texture2D" uid="uid://bqior3i0taira" path="res://assets/sprites/props/lamp_mount.png" id="11_xl8si"]
+[ext_resource type="Texture2D" uid="uid://brk0cd80wmvh8" path="res://assets/sprites/props/lamp_anim.png" id="12_nx6l4"]
 [ext_resource type="Texture2D" path="res://assets/sprites/characters/woman_canvas.tres" id="14_xl8si"]
 [ext_resource type="Texture2D" uid="uid://cx1ev46h2b22n" path="res://assets/sprites/layers/parking_front_pillar.png" id="17_nx6l4"]
 [ext_resource type="Texture2D" uid="uid://dgcn27mn37xss" path="res://assets/sprites/layers/parking_near_papers.png" id="18_nx6l4"]
@@ -45,6 +45,9 @@ size = Vector2(100, 50)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_nx6l4"]
 size = Vector2(160, 50)
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_nx6l4"]
+light_mode = 1
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_67f1b"]
 size = Vector2(100, 50)
@@ -212,9 +215,11 @@ texture = ExtResource("11_xl8si")
 
 [node name="Prop" type="Sprite2D" parent="Points/Light" unique_id=1553529357]
 texture_filter = 1
+material = SubResource("CanvasItemMaterial_nx6l4")
 position = Vector2(0, -426)
 scale = Vector2(2, 2)
-texture = ExtResource("5_k0cph")
+texture = ExtResource("12_nx6l4")
+hframes = 2
 
 [node name="Debris" type="Area2D" parent="Points" unique_id=729555111]
 position = Vector2(1000, 640)
@@ -411,7 +416,9 @@ script = ExtResource("5_8ukss")
 base_energy = 1.8
 pulse_speed = 0.0
 min_ratio = 1.0
-dropout_chance = 0.01
+dropout_chance = 0.003
+dropout_ratio = 1.0
+off_sprite = NodePath("../Points/Light/Prop")
 
 [node name="Dust" type="CPUParticles2D" parent="." unique_id=1818496813]
 z_index = 1
