@@ -11,8 +11,8 @@
 [ext_resource type="Texture2D" uid="uid://cuj3hablexw73" path="res://assets/sprites/props/exit_door_broken.png" id="7_6u4t4"]
 [ext_resource type="Texture2D" uid="uid://dxb1yujau8ite" path="res://assets/sprites/layers/lab_ground.png" id="7_w0vuw"]
 [ext_resource type="Script" uid="uid://dkcse5tmlbfke" path="res://scripts/player.gd" id="8_jswt6"]
-[ext_resource type="Texture2D" path="res://assets/sprites/characters/scientist_canvas.tres" id="9_cllvt"]
 [ext_resource type="SpriteFrames" uid="uid://b872yo2d63qvl" path="res://assets/sprites/player_frames.tres" id="9_k7ac4"]
+[ext_resource type="SpriteFrames" uid="uid://dhhotxbwmr3l2" path="res://assets/sprites/characters/scientist_frames.tres" id="9_ulrxu"]
 [ext_resource type="Script" uid="uid://cpx5m37cmu4jq" path="res://scripts/flicker_light.gd" id="10_4ogqb"]
 [ext_resource type="Texture2D" path="res://assets/sprites/characters/guard_canvas.tres" id="11_ulrxu"]
 [ext_resource type="Texture2D" uid="uid://b1m8jx8sq2mvf" path="res://assets/sprites/props/lab_cart.png" id="15_wnh6g"]
@@ -222,11 +222,13 @@ point_id = "scientist"
 position = Vector2(0, -2)
 shape = SubResource("RectangleShape2D_fk7ab")
 
-[node name="Figure" type="Sprite2D" parent="Points/Scientist" unique_id=1018069556]
+[node name="Figure" type="AnimatedSprite2D" parent="Points/Scientist" unique_id=801807048]
 texture_filter = 1
 position = Vector2(54, -48)
 scale = Vector2(2, 2)
-texture = ExtResource("9_cllvt")
+sprite_frames = ExtResource("9_ulrxu")
+animation = &"idle"
+autoplay = "idle"
 
 [node name="Records" type="Area2D" parent="Points" unique_id=729555111]
 position = Vector2(1150, 640)

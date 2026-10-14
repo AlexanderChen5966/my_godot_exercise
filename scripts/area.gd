@@ -95,6 +95,16 @@ func point_x(point_id: String) -> float:
 	return NAN
 
 
+## 事件開始／結束時通知互動點（人物換成 event／idle 動畫，A3）
+func point_event(point_id: String, started: bool) -> void:
+	for point in $Points.get_children():
+		if point.get("point_id") == point_id and point.has_method("on_event_start"):
+			if started:
+				point.on_event_start()
+			else:
+				point.on_event_end()
+
+
 ## flee_from_x：事件剛結束時傳主角的 x，人物會先逃跑再消失（A3）；不傳時直接隱藏。
 func consume_point(point_id: String, flee_from_x := NAN) -> void:
 	for point in $Points.get_children():

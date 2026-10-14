@@ -66,7 +66,12 @@ func run_normal() -> void:
 	await exit_to_scene(2150, 6)
 	await choose(1); await to_scene(7)                          # 拼命掙脫
 	await choose(2); await enter("lab")                         # 拼命掙扎
-	await walk_to(700); await choose(1)                         # 撲向科學家 人性 −2
+	await walk_to(700)
+	var sci: AnimatedSprite2D = main.get("_area").get_node("Points/Scientist/Figure")
+	ok(sci.animation == "event", "女科學家：事件開始時遞出筆記本（A3 event 動畫）")
+	await choose(1)                                             # 撲向科學家 人性 −2
+	await physics(2)
+	ok(sci.animation == "run" and sci.visible, "撲向科學家後她直接逃跑（沒有尖叫），還沒消失")
 	ok(not gs().has_item("notebook"), "撲向科學家：沒有筆記本")
 	await walk_to(1650); await choose(1)                        # 撲向警衛 人性 −1
 	await go_exit(2150, "ruins")

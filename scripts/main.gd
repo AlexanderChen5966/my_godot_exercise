@@ -344,6 +344,8 @@ func _show_area_text(holder: Dictionary, point_id := "") -> void:
 	_impulse_released = false
 	if not point_id.is_empty() and AreaData.trigger_of(holder) == "approach":
 		camera_fx.push_in()  # 遇到人：鏡頭輕微推近，關閉文字時退回
+	if not point_id.is_empty():
+		_area.point_event(point_id, true)
 	if not point_id.is_empty() and holder.get("type") != "choice":
 		GameState.apply_effects(holder.get("effects", {}), AreaData.done_key(_point_key(point_id), holder))
 	_area.set_can_move(false)
@@ -403,6 +405,7 @@ func _close_area_text() -> void:
 		_begin_explore()
 		return
 	_mark_done(point_id)
+	_area.point_event(point_id, false)
 	GameState.set_flag(AreaData.done_key(_point_key(point_id), point))  # variant 自己的完成紀錄
 	if point.get("type") == "item" and point.has("item"):
 		GameState.add_item(point["item"])

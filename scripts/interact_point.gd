@@ -35,13 +35,29 @@ func consume(flee_from_x := NAN) -> void:
 	_flee(sprite, flee_from_x)
 
 
-## 圖是面向左畫的：尖叫時面向主角，逃跑時背對主角
+## A3：事件文字打開時，人物有 event 動畫就播（例如女科學家遞出筆記本）；事件結束、人物沒有要消失時回到 idle
+func on_event_start() -> void:
+	_play_if_has("event")
+
+
+func on_event_end() -> void:
+	_play_if_has("idle")
+
+
+func _play_if_has(anim: StringName) -> void:
+	var sprite := get_node_or_null("Figure") as AnimatedSprite2D
+	if sprite and sprite.sprite_frames.has_animation(anim):
+		sprite.play(anim)
+
+
+## 圖是面向左畫的：尖叫時面向主角，逃跑時背對主角；沒有 scream 動畫的人物直接跑（例如女科學家）
 func _flee(sprite: AnimatedSprite2D, from_x: float) -> void:
 	var dir := 1.0 if global_position.x >= from_x else -1.0
-	sprite.flip_h = dir < 0.0
-	sprite.play("scream")
 	var tween := create_tween()
-	tween.tween_interval(SCREAM_TIME)
+	if sprite.sprite_frames.has_animation("scream"):
+		sprite.flip_h = dir < 0.0
+		sprite.play("scream")
+		tween.tween_interval(SCREAM_TIME)
 	tween.tween_callback(func() -> void:
 		sprite.flip_h = dir > 0.0
 		sprite.play("run"))
