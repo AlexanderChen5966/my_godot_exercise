@@ -14,8 +14,8 @@
 [ext_resource type="Texture2D" uid="uid://m4d1l8kwf4t8" path="res://assets/sprites/layers/ruins_ground.png" id="7_if7y5"]
 [ext_resource type="Texture2D" uid="uid://bef5n6bpw3ky1" path="res://assets/sprites/props/sign_home.png" id="7_xlq1f"]
 [ext_resource type="SpriteFrames" uid="uid://c318ef1ckxlk8" path="res://assets/sprites/characters/horde_frames.tres" id="9_ltopt"]
-[ext_resource type="Texture2D" path="res://assets/sprites/characters/wife_canvas.tres" id="10_8cc2f"]
 [ext_resource type="Script" uid="uid://bfmktami4g01u" path="res://scripts/idle_variation.gd" id="10_xls4e"]
+[ext_resource type="SpriteFrames" uid="uid://wabdyoybe4r3" path="res://assets/sprites/characters/wife_frames.tres" id="11_ltopt"]
 [ext_resource type="Texture2D" uid="uid://jo1k2ag3r4i7" path="res://assets/sprites/props/ruins_barrier.png" id="15_4mhys"]
 [ext_resource type="Texture2D" uid="uid://c6lwlpbxflqp8" path="res://assets/sprites/layers/ruins_near_charred.png" id="16_jidu7"]
 [ext_resource type="Texture2D" uid="uid://bsps6rjtomyal" path="res://assets/sprites/layers/ruins_near_sign.png" id="17_1mne6"]
@@ -197,11 +197,13 @@ point_id = "shelter"
 position = Vector2(0, 50)
 shape = SubResource("RectangleShape2D_xlq1f")
 
-[node name="Figure" type="Sprite2D" parent="Points/Shelter" unique_id=196175814]
+[node name="Figure" type="AnimatedSprite2D" parent="Points/Shelter" unique_id=1210208905]
 texture_filter = 1
 position = Vector2(103, -48)
 scale = Vector2(2, 2)
-texture = ExtResource("10_8cc2f")
+sprite_frames = ExtResource("11_ltopt")
+animation = &"idle"
+autoplay = "idle"
 
 [node name="Fence" type="Sprite2D" parent="Points/Shelter" unique_id=675990430]
 texture_filter = 1

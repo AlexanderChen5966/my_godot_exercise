@@ -19,6 +19,7 @@ func _ready() -> void:
 const SCREAM_TIME := 0.5     # 逃跑前尖叫幾秒
 const FLEE_SPEED := 240.0    # 逃跑速度（px/秒，約主角的 1.7 倍）
 const FLEE_DISTANCE := 760.0  # 跑多遠才消失（跑出畫面）
+const LEAVE_FADE := 0.8       # 沒有 run、有 leave 動畫的人物：轉身後淡出幾秒（例如窗外的女兒）
 
 
 ## 事件結束後讓替代美術消失（例如婦人逃走）。
@@ -29,10 +30,17 @@ func consume(flee_from_x := NAN) -> void:
 		return
 	var figure := $Figure as CanvasItem
 	var sprite := figure as AnimatedSprite2D
-	if is_nan(flee_from_x) or sprite == null or not sprite.sprite_frames.has_animation("run"):
+	if is_nan(flee_from_x) or sprite == null:
 		figure.visible = false
-		return
-	_flee(sprite, flee_from_x)
+	elif sprite.sprite_frames.has_animation("run"):
+		_flee(sprite, flee_from_x)
+	elif sprite.sprite_frames.has_animation("leave"):
+		sprite.play("leave")
+		var tween := create_tween()
+		tween.tween_property(sprite, "modulate:a", 0.0, LEAVE_FADE)
+		tween.tween_callback(func() -> void: sprite.visible = false)
+	else:
+		figure.visible = false
 
 
 ## A3：事件文字打開時，人物有 event 動畫就播（例如女科學家遞出筆記本）；事件結束、人物沒有要消失時回到 idle
@@ -42,6 +50,11 @@ func on_event_start() -> void:
 
 func on_event_end() -> void:
 	_play_if_has("idle")
+
+
+## 選項指定的人物動畫（資料的 "figure"，例如女兒舉手比手勢 "wave"）
+func play_figure(anim: StringName) -> void:
+	_play_if_has(anim)
 
 
 func _play_if_has(anim: StringName) -> void:

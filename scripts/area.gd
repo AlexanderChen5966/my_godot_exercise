@@ -105,6 +105,13 @@ func point_event(point_id: String, started: bool) -> void:
 				point.on_event_end()
 
 
+## 選項指定的人物動畫（資料的 "figure"）
+func point_play(point_id: String, anim: String) -> void:
+	for point in $Points.get_children():
+		if point.get("point_id") == point_id and point.has_method("play_figure"):
+			point.play_figure(anim)
+
+
 ## flee_from_x：事件剛結束時傳主角的 x，人物會先逃跑再消失（A3）；不傳時直接隱藏。
 func consume_point(point_id: String, flee_from_x := NAN) -> void:
 	for point in $Points.get_children():

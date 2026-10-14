@@ -22,7 +22,7 @@
       "impulse": { "range": 420 },
       "text": "窗外的街上，一個女孩停下腳步。她長高了，但你認得那雙眼睛。她看著窗內的你，沒有逃。",
       "choices": [
-        { "text": "比出手勢",
+        { "text": "比出手勢", "figure": "wave",
           "response": "你想起從前教她的手勢，笨拙地比給她看：「我——在——這——裡。」女孩愣住了。然後，她舉起小手，比出同樣的手勢。",
           "effects": { "memory": 1, "humanity": 1 } },
         { "text": "靠近她",
@@ -35,7 +35,7 @@
         {
           "require": { "items": ["notebook"] },
           "choices": [
-            { "text": "比出手勢",
+            { "text": "比出手勢", "figure": "wave",
               "response": "你翻開筆記本，照著上面的圖，慢慢比出手勢：「我——在——這——裡。」女孩愣住了。然後，她舉起小手，比出同樣的手勢。",
               "effects": { "memory": 1, "humanity": 1 } },
             { "text": "靠近她",

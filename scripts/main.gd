@@ -385,6 +385,8 @@ func _on_area_choice_pressed(choice: Dictionary) -> void:
 	_impulse_released = true  # 選完了：張力淡出
 	sfx.play()
 	_camera_cue(choice)
+	if choice.has("figure"):
+		_area.point_play(_closing_point, choice["figure"])  # 例如女兒舉手比出同樣的手勢
 	_clear_choices()
 	GameState.apply_effects(choice.get("effects", {}), AreaData.done_key(_point_key(_closing_point), _closing_view))
 	for flag in choice.get("set_flags", []):

@@ -17,7 +17,8 @@
 [ext_resource type="Texture2D" uid="uid://ca78m4ji1yh1o" path="res://assets/sprites/props/home_door.png" id="7_e0w58"]
 [ext_resource type="Texture2D" uid="uid://begvnnm64el5u" path="res://assets/sprites/layers/home_mid_table.png" id="7_xvxyi"]
 [ext_resource type="Texture2D" uid="uid://dtkto7q2unpco" path="res://assets/sprites/layers/home_ground.png" id="8_ab1nn"]
-[ext_resource type="Texture2D" path="res://assets/sprites/characters/daughter_canvas.tres" id="11_pic44"]
+[ext_resource type="SpriteFrames" uid="uid://bm1w20ypql38i" path="res://assets/sprites/characters/daughter_frames.tres" id="13_83aej"]
+[ext_resource type="Script" uid="uid://bfmktami4g01u" path="res://scripts/idle_variation.gd" id="14_xvxyi"]
 [ext_resource type="Texture2D" uid="uid://c6qll1c10e5ej" path="res://assets/sprites/props/home_wardrobe.png" id="16_olrpw"]
 [ext_resource type="Texture2D" uid="uid://cxg0rce38g2qd" path="res://assets/sprites/layers/home_near_crayons.png" id="17_oxte5"]
 [ext_resource type="Texture2D" uid="uid://ck0wyqxn23qfc" path="res://assets/sprites/layers/home_near_bear.png" id="18_mjd4p"]
@@ -253,13 +254,17 @@ point_id = "daughter"
 position = Vector2(0, 50)
 shape = SubResource("RectangleShape2D_pfqkc")
 
-[node name="Figure" type="Sprite2D" parent="Points/Daughter" unique_id=1801234148]
+[node name="Figure" type="AnimatedSprite2D" parent="Points/Daughter" unique_id=1521492684]
 texture_filter = 1
 position = Vector2(110, -212)
 scale = Vector2(2, 2)
-texture = ExtResource("11_pic44")
-region_enabled = true
-region_rect = Rect2(0, 0, 24, 22)
+sprite_frames = ExtResource("13_83aej")
+animation = &"idle"
+script = ExtResource("14_xvxyi")
+base_animation = "idle"
+variant_animation = "blink"
+interval_min = 2.0
+interval_max = 5.0
 
 [node name="Window" type="Sprite2D" parent="Points/Daughter" unique_id=555298002]
 texture_filter = 1

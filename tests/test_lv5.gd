@@ -43,7 +43,14 @@ func run_best() -> void:
 	await go_exit(2150, "home")
 	ok(gs().stats == { "memory": 7, "humanity": 7 }, "設施走廊～廢墟：記憶 7、人性 7")
 	await walk_to(600); await interact(); await read()          # 牆上的蠟筆字 記憶 +1
-	await walk_to(1650); await choose(0)                        # 比出手勢 記憶 +1、人性 +1
+	await walk_to(1650)
+	var girl: AnimatedSprite2D = main.get("_area").get_node("Points/Daughter/Figure")
+	await wait_choices(); await select(0)                       # 比出手勢 記憶 +1、人性 +1
+	ok(girl.animation == "wave", "比出手勢：女兒舉起小手比出同樣的手勢（A3）")
+	await read()
+	ok(girl.animation == "leave" and girl.visible, "事件結束：女兒轉身背對窗戶（還沒消失）")
+	await wait_for(func(): return not girl.visible, 3.0)
+	ok(not girl.visible, "女兒淡出後消失")
 	ok(gs().has_flag("home.daughter#0"), "有筆記本：女兒用的是筆記本版本")
 	await exit_to_scene(2150, 15)
 	await choose(0); await enter("wall")                        # 營火 → 牆前
