@@ -13,6 +13,8 @@ func run_tests() -> void:
 	await back_to_title()
 	await run_sorting_and_spawn()
 	await back_to_title()
+	await run_actions()
+	await back_to_title()
 	run_spawn_validation()
 
 
@@ -76,6 +78,28 @@ func run_sorting_and_spawn() -> void:
 	ok(is_equal_approx(player().position.y, BOTTOM), "place_player 的 y 超出縱深帶：限制在邊緣")
 	a.call("place_player", 600.0)
 	ok(is_equal_approx(player().position.y, BOTTOM) and is_equal_approx(player().position.x, 600.0), "place_player 只給 x：y 不變")
+
+
+## A3：調查時轉向物件並伸手、文字關掉後恢復；衝動強度高時站著前傾
+func run_actions() -> void:
+	print("\n== 主角的新動作（A3）")
+	await start_game()
+	var sprite: AnimatedSprite2D = player().get_node("Sprite")
+	await walk_xy(1060, 660)
+	player().face(1)                                   # 先背對地面殘骸（殘骸在左邊 x 1000）
+	await interact()
+	ok(sprite.animation == "reach_left" and player().get("acting"), "調查地面殘骸：主角轉向殘骸並伸手（%s）" % sprite.animation)
+	await read()
+	await physics(2)
+	ok(not player().get("acting") and sprite.animation.begins_with("idle_"), "文字關掉後手放下、回到待機")
+	await walk_xy(1300, 700)                           # 婦人在 1500：衝動漸強，還不會觸發事件
+	await wait_for(func(): return main.impulse_fx.intensity >= 0.5, 3.0)
+	await physics(2)
+	ok(sprite.animation == "lean_right", "衝動強度高、站著不動：主角朝婦人（右邊）前傾（%s）" % sprite.animation)
+	await walk_xy(400, 700)
+	await wait_for(func(): return main.impulse_fx.intensity < 0.5, 3.0)
+	await physics(2)
+	ok(sprite.animation.begins_with("idle_"), "離開後衝動降低：恢復待機")
 
 
 ## 劇本檢查認得 spawns 的 [x, y]，故意寫錯會報錯

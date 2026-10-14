@@ -87,6 +87,11 @@ func set_can_move(value: bool) -> void:
 	player.can_move = value
 
 
+## A3：調查互動點時，主角轉向它並伸手
+func player_reach(point_id: String) -> void:
+	player.reach_toward(point_x(point_id))
+
+
 ## 互動點在區域裡的 x 座標（衝動機制算距離用）；找不到時回傳 NAN。
 func point_x(point_id: String) -> float:
 	for point in $Points.get_children():

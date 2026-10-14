@@ -17,6 +17,7 @@ const CHOICE_GUARD_MS := 300  # 選項出現後這段時間內不接受選擇：
 const BASE_SIZE := Vector2(1152, 768)
 const PLAYER_HEIGHT := 96.0  # 主角畫面上的高度（32×48 放大 2 倍）
 const PROMPT_GAP := 8.0  # 提示和頭頂的距離
+const LEAN_FROM := 0.5   # A3：衝動強度到這裡，主角站著時改成前傾
 
 # 節點都設為 unique name（%Name），之後搬動節點層級時不用改這裡。
 @onready var background: TextureRect = %Background
@@ -54,6 +55,7 @@ var _pending_choice: Dictionary = {}  # 視覺小說裡選了哪個選項（回�
 var _checkpoint: Dictionary = {}      # Bad End「從這裡重試」回到的位置與狀態
 var _choices_shown_at := 0           # 選項出現的時間（毫秒，給 CHOICE_GUARD_MS 用）
 var _impulse_released := false        # 有 impulse 的事件已經選完（張力開始淡出）
+var _impulse_x := NAN                 # A3：衝動最強的那個人的 x（主角前傾時轉向他）
 var _debug_label: Label               # F3 數值顯示（只在 debug 版建立）
 var current_id: int = -1
 var state: State = State.TITLE
@@ -295,6 +297,7 @@ func _begin_explore() -> void:
 	dialog_panel.visible = false
 	continue_label.visible = false
 	_area.set_can_move(true)
+	_area.player.end_action()  # 調查完：手放下
 	_update_prompt()
 
 
@@ -725,6 +728,9 @@ func _create_debug_label() -> void:
 func _process(_delta: float) -> void:
 	impulse_fx.target = _impulse_target()
 	camera_fx.sway = impulse_fx.intensity
+	if _area:
+		_area.player.lean = impulse_fx.intensity >= LEAN_FROM
+		_area.player.lean_toward = _impulse_x
 	_place_prompt()
 	if _debug_label and _debug_label.visible:
 		var parts: Array[String] = []
@@ -736,9 +742,11 @@ func _process(_delta: float) -> void:
 ## 衝動機制（甲）的目標強度 0～1：有 impulse 的事件文字或選項打開時最強、選完後歸零；
 ## 平常依主角與「還沒發生的」有 impulse 的互動點的距離計算，取最近的那個。
 func _impulse_target() -> float:
+	_impulse_x = NAN
 	if _area == null or _area_id.is_empty():
 		return 0.0
 	if not _closing_point.is_empty() and _closing_view.has("impulse"):
+		_impulse_x = _area.point_x(_closing_point)
 		return 0.0 if _impulse_released else 1.0
 	var player_x: float = _area.player.position.x
 	var best := 0.0
@@ -753,7 +761,10 @@ func _impulse_target() -> float:
 		if is_nan(x):
 			continue
 		var range_px := float(point["impulse"].get("range", impulse_fx.default_range))
-		best = maxf(best, impulse_fx.strength_at(absf(player_x - x), range_px))
+		var strength: float = impulse_fx.strength_at(absf(player_x - x), range_px)
+		if strength > best:
+			best = strength
+			_impulse_x = x
 	return best
 
 
@@ -791,6 +802,8 @@ func _input(event: InputEvent) -> void:
 				_mark_done(_nearby_point)
 				_go_through_exit(point)  # 沒有文字的出口（例如「回到停車場」）直接換區域
 			else:
+				if point.get("type") != "exit":
+					_area.player_reach(_nearby_point)  # A3：轉向物件、伸手調查
 				_show_area_text(point, _nearby_point)
 		return
 	if state != State.TITLE and state != State.TYPING and state != State.RESPONSE \

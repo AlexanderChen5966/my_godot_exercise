@@ -15,6 +15,9 @@ var max_x := 2304.0
 var min_y := 650.0  # 縱深帶（腳的 y 範圍），由區域設定
 var max_y := 735.0
 var facing := 1  # 1 = 右，-1 = 左
+var acting := false  # A3：正在做動作（調查時伸手），這段時間不切換待機／行走
+var lean := false    # A3：衝動強度高，站著不動時改成前傾（由 Main 每個畫面設定）
+var lean_toward := NAN  # 前傾時轉向的 x（衝動最強的那個人）
 
 @onready var sprite: AnimatedSprite2D = $Sprite
 
@@ -53,10 +56,27 @@ func face(direction: int) -> void:
 	_update_animation(false)
 
 
-## 左右各一套動畫（不用 flip_h），依「是否移動 × 面向」選擇
+## A3：調查時轉向物件（x）並伸手，停在最後一格，直到 end_action()
+func reach_toward(x: float) -> void:
+	if not is_nan(x) and absf(x - position.x) > 4.0:
+		facing = 1 if x > position.x else -1
+	acting = true
+	sprite.play("reach_right" if facing > 0 else "reach_left")
+	sprite.position.x = SPRITE_X_RIGHT if facing > 0 else SPRITE_X_LEFT
+
+
+func end_action() -> void:
+	acting = false
+
+
+## 左右各一套動畫（不用 flip_h），依「是否移動 × 面向」選擇；站著時衝動強度高就前傾
 func _update_animation(moving: bool) -> void:
+	if acting:
+		return
+	if lean and not moving and not is_nan(lean_toward) and absf(lean_toward - position.x) > 4.0:
+		facing = 1 if lean_toward > position.x else -1  # 被人吸引：朝著那個人前傾
 	var side := "right" if facing > 0 else "left"
-	var anim := ("walk_" if moving else "idle_") + side
+	var anim := ("walk_" if moving else ("lean_" if lean else "idle_")) + side
 	if sprite.animation != anim:
 		sprite.play(anim)
 	sprite.position.x = SPRITE_X_RIGHT if facing > 0 else SPRITE_X_LEFT
