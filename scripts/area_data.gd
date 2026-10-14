@@ -218,6 +218,7 @@ func _validate_shape(story: StoryData, area: Dictionary, shape: Dictionary, ptag
 	errors.append_array(sound_errors(shape, ptag))
 	errors.append_array(gesture_errors(story, shape, ptag))
 	errors.append_array(flashback_errors(shape, ptag))
+	errors.append_array(resist_errors(shape, ptag))
 	for choice in shape.get("choices", []):
 		errors.append_array(sound_errors(choice, "%s 的選項「%s」" % [ptag, choice.get("text", "")]))
 	if shape.has("trigger") and not TRIGGERS.has(shape["trigger"]):
@@ -251,6 +252,27 @@ func _validate_shape(story: StoryData, area: Dictionary, shape: Dictionary, ptag
 			for key in choice.get("require", {}):
 				if not story.stats.has(key):
 					errors.append("%s 的選項 require 用到 %s，但 story.json 的 stats 沒有定義" % [ptag, key])
+	return errors
+
+
+## A5：壓抑衝動（互動點的 resist）：只能用在 choice，presses 是正整數、time 是正數、fail 指向存在的選項
+static func resist_errors(holder: Dictionary, tag: String) -> Array[String]:
+	var errors: Array[String] = []
+	if not holder.has("resist"):
+		return errors
+	var resist = holder["resist"]
+	if typeof(resist) != TYPE_DICTIONARY:
+		errors.append("%s 的 resist 要是物件，例如 { \"presses\": 12, \"time\": 5, \"fail\": 1 }" % tag)
+		return errors
+	if holder.get("type") != "choice":
+		errors.append("%s 不是 choice，不能有 resist" % tag)
+	if not (resist.get("presses", 12) is float or resist.get("presses", 12) is int) or int(resist.get("presses", 12)) < 1:
+		errors.append("%s 的 resist.presses 要是正整數：%s" % [tag, resist.get("presses")])
+	if not (resist.get("time", 5.0) is float or resist.get("time", 5.0) is int) or float(resist.get("time", 5.0)) <= 0.0:
+		errors.append("%s 的 resist.time 要是正數：%s" % [tag, resist.get("time")])
+	var fail = resist.get("fail", -1)
+	if not (fail is float or fail is int) or int(fail) < 0 or int(fail) >= holder.get("choices", []).size():
+		errors.append("%s 的 resist.fail 要指向存在的選項（從 0 開始）：%s" % [tag, fail])
 	return errors
 
 

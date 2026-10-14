@@ -191,6 +191,28 @@ bbcode_enabled = true
 fit_content = true
 scroll_active = false
 
+[node name="Resist" type="VBoxContainer" parent="UILayer/StoryLayer/DialogPanel/VBox" unique_id=807262065]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="ResistLabel" type="Label" parent="UILayer/StoryLayer/DialogPanel/VBox/Resist" unique_id=1267030040]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.85, 0.85, 1)
+theme_override_font_sizes/font_size = 22
+horizontal_alignment = 1
+
+[node name="ResistBar" type="ProgressBar" parent="UILayer/StoryLayer/DialogPanel/VBox/Resist" unique_id=1516518951]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(360, 18)
+layout_mode = 2
+size_flags_horizontal = 4
+max_value = 1.0
+step = 0.0
+show_percentage = false
+
 [node name="Continue" type="Label" parent="UILayer/StoryLayer/DialogPanel/VBox" unique_id=1313509395]
 unique_name_in_owner = true
 visible = false

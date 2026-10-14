@@ -45,6 +45,7 @@ func run_parking() -> void:
 	ok(hum.playing and hum.bus == &"Ambient", "燈管的嗡聲是位置音效、自動播放")
 	var lamp: Node = main._area.get_node("LampLight")
 	var chance: float = lamp.get("dropout_chance")
+	lamp.set("_since_sound", 99.0)  # 遊戲剛開始時燈管可能已經自己熄滅過一次，喀喀聲還在冷卻；先歸零，測試才穩定
 	lamp.set("dropout_chance", 1.0)
 	await frames(3)
 	ok(hum.volume_db <= -79.0 and flicker.playing, "燈管熄滅：嗡聲靜音，播放啟動器的喀喀聲")
@@ -58,12 +59,11 @@ func run_parking() -> void:
 	ok(main.state == TYPING and not main.type_sfx.playing, "打字中沒有打字聲（A4-3：和音效重疊太躁，先關掉）")
 	await read()
 
-	# 婦人：自動聚焦第一個選項不出聲；方向鍵移動有游標聲；撲上去有低吼與確認音；逃走時尖叫
+	# 婦人：抵抗失敗 → 自動撲上去（低吼，沒有確認音）；逃走時尖叫（A5 起婦人的事件先抵抗衝動）
 	await walk_to(1460)
 	await wait_choices()
-	ok(not main.sound_log.has("ui_cursor"), "選項出現、自動選好第一個：沒有游標聲")
-	await select(1)
-	ok(main.sound_log.has("ui_cursor") and main.sound_log.has("ui_confirm") and main.sound_log.back() == "growl", "方向鍵移到「撲上去」有游標聲，按下有確認音和低吼")
+	main.call("_finish_resist", false)
+	ok(main.sound_log.back() == "growl" and not main.sound_log.has("ui_confirm"), "抵抗失敗、自動撲上去：低吼（不是自己選的，沒有確認音）")
 	await read()
 	ok(main.sound_log.back() == "scream", "婦人逃走：尖叫")
 
@@ -90,7 +90,9 @@ func run_street_and_bad_end() -> void:
 	await to_scene(6)
 	ok(main.get("_amb_file") == "", "過場（搜捕隊）：環境音淡出")
 	await wait_choices()
+	ok(not main.sound_log.has("ui_cursor"), "選項出現、自動選好第一個：沒有游標聲")
 	await select(2)
+	ok(main.sound_log.has("ui_cursor") and main.sound_log.has("ui_confirm"), "方向鍵移動有游標聲，按下有確認音")
 	await read()
 	await wait_for(func(): return main.sound_log.back() == "gunshot", 3.0)
 	ok(main.sound_log.back() == "gunshot" and main.fade.color.a > 0.9 and main.get("_bgm_file") == "bgm_bad.ogg", "Bad End「槍聲」：槍聲在黑畫面中響起（A4-3），Bad End 音樂 bgm_bad")

@@ -9,6 +9,7 @@ const CHOOSING := 3
 const RESPONSE := 4
 const EXPLORE := 5
 const AREA_TEXT := 6
+const RESIST := 9  # A5 壓抑衝動（連打）
 
 var main: Control
 var fails := 0
@@ -59,6 +60,8 @@ func interact() -> void:
 ## 讀完目前的文字：打字中先按一次顯示全部，再按一次關閉
 func read() -> void:
 	await wait_for(func(): return main.state in [TYPING, AREA_TEXT, RESPONSE], 5.0)
+	# A5 壓抑衝動判定後會鎖住按鍵一下（玩家連打時才不會跳過文字），等鎖解除再按
+	await wait_for(func(): return Time.get_ticks_msec() >= int(main.get("_input_locked_until")), 2.0)
 	if main.state == TYPING:
 		await key("interact")
 	await wait_for(func(): return main.state in [AREA_TEXT, RESPONSE], 3.0)
@@ -69,6 +72,18 @@ func read() -> void:
 ## 等選項出現（打字中先按一次），用方向鍵移到第 index 個選項、按 Enter，再讀完回應
 func choose(index: int) -> void:
 	await wait_choices()
+	if main.state == RESIST:
+		# A5 壓抑衝動：要選的是「撲上去」（fail）就判定抵抗失敗（自動撲上去）；其他選項先判定成功，
+		# 成功後 fail 那個選項會隱藏，後面的編號往前一格。真正的連打與時限在 test_a5 測。
+		var fail: int = main.resist_fail_index()
+		if index == fail:
+			main.call("_finish_resist", false)
+			await read()
+			return
+		main.call("_finish_resist", true)
+		await wait_for(func(): return main.state == CHOOSING and main.choices_ready(), 3.0)
+		if index > fail:
+			index -= 1
 	await select(index)
 	await read()
 
@@ -88,10 +103,10 @@ func select(index: int) -> void:
 
 
 func wait_choices() -> void:
-	await wait_for(func(): return main.state in [TYPING, CHOOSING], 5.0)
+	await wait_for(func(): return main.state in [TYPING, CHOOSING, RESIST], 5.0)
 	if main.state == TYPING:
 		await key("interact")
-	await wait_for(func(): return main.state == CHOOSING and main.choices_ready(), 3.0)
+	await wait_for(func(): return main.state == RESIST or (main.state == CHOOSING and main.choices_ready()), 3.0)
 
 
 ## 第 index 個選項是否鎖住（數值不夠：灰色、不能按）

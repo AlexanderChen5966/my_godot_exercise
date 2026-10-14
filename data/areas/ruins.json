@@ -26,6 +26,7 @@
       ]
     },
     "shelter": {
+      "resist": { "presses": 10, "time": 5.0, "fail": 2 },
       "gesture": { "text": "你隔著圍籬，按住胸口，攤開手掌，指向自己腳下。她停下分麵包的手，望向圍籬外的黑暗，皺起眉，像是想起了什麼。然後她搖搖頭，把麵包遞給下一個人。" },
       "type": "choice", "trigger": "approach", "title": "避難所的燈火",
       "impulse": { "range": 420 },

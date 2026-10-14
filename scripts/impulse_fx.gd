@@ -3,6 +3,8 @@
 ## 強度都在下面的 @export，可以在編輯器的屬性面板直接調整。
 extends ColorRect
 
+signal beat  # A5：每次心跳（壓抑衝動時，量表被拉掉一點）
+
 @export_group("範圍")
 ## 互動點的 impulse 沒寫 range 時，從多遠開始有感覺（px）
 @export var default_range := 420.0
@@ -94,6 +96,7 @@ func _update_heartbeat(delta: float) -> void:
 	_beat_wait -= delta
 	if _beat_wait <= 0.0:
 		_play_beat(0.0)
+		beat.emit()
 		if not sample_has_two_beats:
 			_second_beat_at = second_beat_delay
 		_beat_wait = lerpf(beat_interval_far, beat_interval_near, intensity)

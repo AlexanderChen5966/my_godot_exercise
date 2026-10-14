@@ -13,6 +13,8 @@ var stats: Dictionary = {}  # 數值的初始值（v1.5），例如 { "memory": 
 var start_area := ""       # 開始遊戲時進入的區域（v1.5）；空字串時從 start_id 的場景開始
 
 var gesture_alone := ""      # A5：附近沒有會反應的人時，第一次比手勢的獨白
+var resist_prompt := ""      # A5 壓抑衝動：量表上方的提示
+var resist_success := ""     # A5 壓抑衝動：成功時、選項出現前的一句
 var _scenes: Dictionary = {}  # int id -> Dictionary
 
 
@@ -31,6 +33,8 @@ func load_story(path: String = STORY) -> bool:
 	stats = data.get("stats", {})
 	start_area = data.get("start_area", "")
 	gesture_alone = data.get("gesture_alone", "")
+	resist_prompt = data.get("resist_prompt", "")
+	resist_success = data.get("resist_success", "")
 	_scenes.clear()
 	for s in data.get("scenes", []):
 		_scenes[int(s["id"])] = s

@@ -1,6 +1,7 @@
 ## A5 自動測試：手勢（G 鍵比出「我——在——這——裡」）、人物的反應文字、沒有對象時的獨白、只反應一次、事件發生後不再反應、
 ## 比手勢時不能移動也不接受其他按鍵、對話中按 G 沒有作用、按鍵提示、數值不變（方案 A）、劇本檢查。
 ## 記憶閃回：調查關鍵物品時先閃回原插畫再顯示文字、可以跳過、一輪一次、診療椅沒有錄音筆時不閃回、劇本檢查。
+## 壓抑衝動：連打成功 → 撲上去隱藏、失敗（時限）→ 自動撲上去、判定後鎖住按鍵、妻子失敗 → Bad End、重試重新抵抗、女兒不抵抗、劇本檢查。
 ## 共用操作在 play_base.gd。執行：zsh tests/run_tests.sh test_a5
 extends "res://tests/play_base.gd"
 
@@ -13,6 +14,8 @@ func run_tests() -> void:
 	await run_gesture_woman()
 	await back_to_title()
 	await run_flashback()
+	await back_to_title()
+	await run_resist()
 	await back_to_title()
 	run_validation()
 
@@ -118,6 +121,73 @@ func run_flashback() -> void:
 	ok(AreaData.view(chair, gs()).get("flashback", "") == "scene_05.webp", "診療椅（有錄音筆）：閃回 scene_05")
 
 
+func wait_resist() -> void:
+	await wait_for(func(): return main.state in [TYPING, RESIST], 5.0)
+	if main.state == TYPING:
+		await key("interact")
+	await wait_for(func(): return main.state == RESIST, 3.0)
+
+
+func run_resist() -> void:
+	print("\n== 壓抑衝動")
+	await start_game()
+	var humanity: int = gs().stats["humanity"]
+	await walk_to(1460)
+	await wait_resist()
+	ok(main.state == RESIST and main.resist_box.visible and main.resist_label.text == "連打【空白鍵】抵抗", "婦人：事件文字後出現「連打【空白鍵】抵抗」與量表，選項還沒出現")
+	ok(main.choices_box.get_child_count() == 0, "抵抗中沒有選項")
+	for i in 3:
+		await press_key(KEY_SPACE)
+	var v: float = main.resist_value
+	await seconds(0.6)
+	ok(v > 0.2 and main.resist_value < v, "連打會漲（%.2f），停下來會往下掉（%.2f）" % [v, main.resist_value])
+	for i in 30:
+		if main.state != RESIST:
+			break
+		await press_key(KEY_SPACE)
+	ok(main.state != RESIST and main.hint.visible and main.hint.text == "你咬緊牙，那股衝動慢慢退去。", "連打到滿：成功，顯示「你咬緊牙，那股衝動慢慢退去。」")
+	await press_key(KEY_ENTER)
+	ok(main.state != CHOOSING or main.choices_box.get_child_count() == 1, "判定後鎖住按鍵：繼續連打不會選到選項")
+	await wait_for(func(): return main.state == CHOOSING and main.choices_ready(), 3.0)
+	ok(main.choices_box.get_child_count() == 1 and (main.choices_box.get_child(0) as Button).text == "強行壓制自己", "成功：「撲上去」不見了，只剩「強行壓制自己」")
+	await select(0)
+	await read()
+	ok(gs().stats["humanity"] == humanity + 1, "選強行壓制自己：人性 +1")
+	await back_to_title()
+
+	# 失敗：什麼都不按，時限到了自動撲上去
+	await start_game()
+	await walk_to(1460)
+	await wait_resist()
+	await wait_for(func(): return main.state != RESIST, 7.0)
+	ok(main.sound_log.back() == "growl" and main.choices_box.get_child_count() == 0, "時限到了沒漲滿：自動撲上去（低吼）")
+	await read()
+	ok(gs().stats["humanity"] == humanity - 1, "自動撲上去：人性 −1（等於選了撲上去）")
+
+	# 妻子：失敗 → Bad End「噬語」；重試後重新抵抗
+	main.call("_switch_area", "ruins")
+	await enter("ruins")
+	await walk_to(1600)
+	await wait_resist()
+	ok(main.state == RESIST and main.resist_fail_index() == 2, "避難所的妻子：也要抵抗，失敗等於「撲向她」")
+	main.call("_finish_resist", false)
+	await read()
+	await to_scene(23)
+	ok(main.current_id == 23, "抵抗失敗：Bad End「噬語」")
+	await end_choice(0)
+	await enter("ruins")
+	await walk_to(1600)
+	await wait_resist()
+	ok(main.state == RESIST, "從這裡重試：回到廢墟，靠近妻子時重新抵抗")
+	ok(not main.areas.get_area("home")["points"]["daughter"].has("resist"), "女兒不抵抗（她會直接跑掉）")
+
+
+func seconds(t: float) -> void:
+	var until := Time.get_ticks_msec() + int(t * 1000)
+	while Time.get_ticks_msec() < until:
+		await process_frame
+
+
 func run_validation() -> void:
 	print("\n== 劇本檢查")
 	var story: StoryData = main.story
@@ -135,3 +205,8 @@ func run_validation() -> void:
 	ok(AreaData.flashback_errors({ "type": "inspect", "flashback": "scene_10.webp" }, "x").is_empty(), "正確的 flashback：通過")
 	ok(AreaData.flashback_errors({ "type": "inspect", "flashback": "scene_99.webp" }, "x").size() == 1, "flashback 插畫不存在：報錯")
 	ok(AreaData.flashback_errors({ "type": "exit", "flashback": "scene_10.webp" }, "x").size() == 1, "出口有 flashback：報錯")
+	var two := [{ "text": "a" }, { "text": "b" }]
+	ok(AreaData.resist_errors({ "type": "choice", "choices": two, "resist": { "presses": 10, "time": 5.0, "fail": 1 } }, "x").is_empty(), "正確的 resist：通過")
+	ok(AreaData.resist_errors({ "type": "choice", "choices": two, "resist": { "presses": 10, "time": 5.0, "fail": 2 } }, "x").size() == 1, "resist.fail 指向不存在的選項：報錯")
+	ok(AreaData.resist_errors({ "type": "choice", "choices": two, "resist": { "presses": 0, "time": -1, "fail": 0 } }, "x").size() == 2, "resist.presses、time 不是正數：報錯")
+	ok(AreaData.resist_errors({ "type": "inspect", "resist": { "fail": 0 } }, "x").size() == 2, "不是 choice 卻有 resist：報錯")

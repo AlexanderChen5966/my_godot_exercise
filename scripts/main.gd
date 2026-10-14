@@ -2,7 +2,7 @@
 ## 主文字與 response 以打字機效果顯示，換場時背景淡出淡入，BGM 以兩個播放器交替淡入淡出。
 extends Control
 
-enum State { TITLE, TRANSITION, TYPING, CHOOSING, RESPONSE, EXPLORE, AREA_TEXT, GESTURE, FLASHBACK }  # GESTURE：A5 比手勢中（不能移動、不接受其他按鍵）；FLASHBACK：A5 記憶閃回中（按互動鍵跳過）
+enum State { TITLE, TRANSITION, TYPING, CHOOSING, RESPONSE, EXPLORE, AREA_TEXT, GESTURE, FLASHBACK, RESIST }  # GESTURE：A5 比手勢中（不能移動、不接受其他按鍵）；FLASHBACK：A5 記憶閃回中（按互動鍵跳過）；RESIST：A5 壓抑衝動（連打）
 
 const EXTRA_HINT_COLOR := "#a8a8a8"
 const CHOSEN_MODULATE := Color(1, 1, 1, 0.45)
@@ -26,6 +26,12 @@ const FLASHBACK_FLASH := 0.12
 const FLASHBACK_REVEAL := 0.2
 const FLASHBACK_TIME := 2.2
 const FLASHBACK_FADE := 0.3
+## A5 壓抑衝動：量表每秒自己掉多少、每次心跳被拉掉多少、沒寫 time 時的時限；判定後鎖住按鍵多久
+## （連打的空白鍵不能直接按到剛出現的選項，也不能跳過撲上去的回應文字）
+const RESIST_DRAIN := 0.12
+const RESIST_TUG := 0.05
+const RESIST_TIME := 5.0
+const RESIST_LOCK_MS := 900
 ## A4：互動點沒有寫 sfx 時，依類型播放的聲音（出口在通過時才播自己的 sfx）
 const TYPE_SFX := { "inspect": "inspect", "item": "pickup" }
 const LOCKED_TEXT := "……（你想不起來）"   # 數值不夠時，選項顯示的文字
@@ -62,6 +68,9 @@ const LEAN_FROM := 0.5   # A3：衝動強度到這裡，主角站著時改成前
 @onready var prompt_label: Label = %PromptLabel
 @onready var flashback: TextureRect = %Flashback  # A5 記憶閃回的插畫（shaders/flashback.gdshader：褪色、雜訊、暗角）
 @onready var flash: ColorRect = %Flash             # 閃回開始時的白光
+@onready var resist_box: VBoxContainer = %Resist  # A5 壓抑衝動的提示與量表（在對話框裡）
+@onready var resist_label: Label = %ResistLabel
+@onready var resist_bar: ProgressBar = %ResistBar
 @onready var impulse_fx: ColorRect = %ImpulseOverlay  # 衝動機制的紅色暈影、心跳、手電筒閃爍（scripts/impulse_fx.gd）
 @onready var camera_fx: Node = %CameraFx  # A2-4 鏡頭的推近、震動、晃動（scripts/camera_fx.gd）
 
@@ -106,6 +115,10 @@ var _gesture_hint: Label      # A5：「G　比出手勢」（第一次可以走
 var _gesture_hint_shown := false
 var _flashback_tween: Tween
 var _flashback_ending := false
+var _resist: Dictionary = {}     # 目前事件的 resist 設定（presses、time、fail）
+var resist_value := 0.0          # 量表 0～1
+var _resist_left := 0.0          # 剩幾秒
+var _input_locked_until := 0     # 這個時間（毫秒）之前不接受按鍵
 
 signal flashback_finished  # A5：閃回播完（或被跳過）、回到區域
 var _pools := {}  # 播放器 → 輪流用的播放器陣列
@@ -137,11 +150,21 @@ func _ready() -> void:
 	if OS.is_debug_build():
 		_create_debug_label()
 	_create_gesture_hint()
+	impulse_fx.beat.connect(_on_heartbeat)
 	show_title()
 
 
 ## StyleBox 與主題覆寫在這裡設定（按鈕是動態產生的，樣式需由程式套用）。
 func _setup_style() -> void:
+	# A5 壓抑衝動的量表：深色底、淡米色的量
+	var bar_bg := StyleBoxFlat.new()
+	bar_bg.bg_color = Color(1, 1, 1, 0.15)
+	bar_bg.set_corner_radius_all(6)
+	var bar_fill := StyleBoxFlat.new()
+	bar_fill.bg_color = Color(0.78, 0.75, 0.69)
+	bar_fill.set_corner_radius_all(6)
+	resist_bar.add_theme_stylebox_override("background", bar_bg)
+	resist_bar.add_theme_stylebox_override("fill", bar_fill)
 	var box := StyleBoxFlat.new()
 	box.bg_color = Color(0, 0, 0, 0.65)
 	box.set_corner_radius_all(8)
@@ -411,6 +434,7 @@ func _show_area_text(holder: Dictionary, point_id := "") -> void:
 		GameState.apply_effects(holder.get("effects", {}), AreaData.done_key(_point_key(point_id), holder))
 	_area.set_can_move(false)
 	prompt_label.visible = false
+	_gesture_hint.visible = false  # 按鍵提示不要疊在對話框上
 	dialog_panel.visible = true
 	ending_tag.visible = false
 	hint.visible = false
@@ -418,7 +442,10 @@ func _show_area_text(holder: Dictionary, point_id := "") -> void:
 	_clear_choices()
 	scene_title.text = resolved.get("title", "")
 	if holder.get("type") == "choice":
-		_type_text(resolved.get("text", ""), _show_area_choices.bind(holder.get("choices", [])))
+		var after_text := _show_area_choices.bind(holder.get("choices", []))
+		if holder.has("resist") and not point_id.is_empty():
+			after_text = _begin_resist.bind(holder["resist"])  # A5：先抵抗衝動，才出現選項
+		_type_text(resolved.get("text", ""), after_text)
 	else:
 		_type_text(resolved.get("text", ""), _show_area_continue)
 
@@ -440,11 +467,13 @@ func _show_area_choices(choices: Array) -> void:
 	_build_choices(choices)
 
 
-func _on_area_choice_pressed(choice: Dictionary) -> void:
+func _on_area_choice_pressed(choice: Dictionary, by_player := true) -> void:
 	_area_choosing = false
 	_area_choice = choice
 	_impulse_released = true  # 選完了：張力淡出
-	play_ui("ui_confirm")
+	hint.visible = false      # 抵抗成功的那一句
+	if by_player:
+		play_ui("ui_confirm")
 	play_sound(choice.get("sfx", ""))  # 例如撲上去的低吼
 	if choice.has("item"):
 		play_sound("pickup")
@@ -852,6 +881,49 @@ func _show_continue() -> void:
 	continue_label.visible = true
 
 
+## A5 壓抑衝動：事件文字打完後出現「連打【空白鍵】抵抗」與量表。連打會漲、平常會掉、每次心跳被拉掉一點，時限內漲滿就成功。
+func _begin_resist(resist: Dictionary) -> void:
+	state = State.RESIST
+	_resist = resist
+	resist_value = 0.0
+	_resist_left = float(resist.get("time", RESIST_TIME))
+	resist_label.text = story.resist_prompt
+	resist_bar.value = 0.0
+	resist_box.visible = true
+
+
+## 成功：撲上去類的選項（fail）隱藏、顯示一句，再出現選項。失敗：自動撲上去（等於選了 fail 那個選項）。
+func _finish_resist(success: bool) -> void:
+	if state != State.RESIST:
+		return
+	state = State.TRANSITION
+	resist_box.visible = false
+	_input_locked_until = Time.get_ticks_msec() + RESIST_LOCK_MS
+	var choices: Array = _closing_view.get("choices", [])
+	var fail := int(_resist.get("fail", 0))
+	if success:
+		_impulse_released = true  # 衝動退去：紅色、心跳淡出
+		hint.text = story.resist_success
+		hint.visible = true
+		var rest := choices.duplicate()
+		rest.remove_at(fail)
+		await get_tree().create_timer(RESIST_LOCK_MS / 1000.0).timeout
+		_show_area_choices(rest)
+	else:
+		_on_area_choice_pressed(choices[fail], false)
+
+
+## 抵抗中每次心跳，量表被拉掉一點
+func _on_heartbeat() -> void:
+	if state == State.RESIST:
+		resist_value = maxf(resist_value - RESIST_TUG, 0.0)
+
+
+## 測試用：目前抵抗的失敗選項是第幾個
+func resist_fail_index() -> int:
+	return int(_resist.get("fail", -1)) if state == State.RESIST else -1
+
+
 ## 打開互動點：有記憶閃回（flashback）而且這一輪還沒閃回過時，先閃回再顯示文字。
 func _open_point(point: Dictionary, point_id: String) -> void:
 	if point.has("flashback") and not GameState.has_flag(_point_key(point_id) + ".flashback"):
@@ -981,7 +1053,13 @@ func _create_debug_label() -> void:
 	add_child(_debug_label)
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
+	if state == State.RESIST:
+		resist_value = maxf(resist_value - RESIST_DRAIN * delta, 0.0)
+		_resist_left -= delta
+		resist_bar.value = resist_value
+		if _resist_left <= 0.0:
+			_finish_resist(false)
 	impulse_fx.target = _impulse_target()
 	camera_fx.sway = impulse_fx.intensity
 	if _area:
@@ -1046,6 +1124,17 @@ func _input(event: InputEvent) -> void:
 		return
 	if rotate_hint.visible:
 		get_viewport().set_input_as_handled()
+		return
+	if Time.get_ticks_msec() < _input_locked_until:
+		get_viewport().set_input_as_handled()
+		return
+	if state == State.RESIST:
+		var key_event := event as InputEventKey
+		if event.is_action_pressed("interact") and not (key_event and key_event.echo):
+			get_viewport().set_input_as_handled()
+			resist_value = minf(resist_value + 1.0 / float(_resist.get("presses", 12)), 1.0)
+			if resist_value >= 1.0:
+				_finish_resist(true)
 		return
 	if state == State.FLASHBACK:
 		if event.is_action_pressed("interact") or event.is_action_pressed("ui_accept"):
