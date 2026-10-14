@@ -23,7 +23,9 @@ extends ColorRect
 ## 音量（dB）：剛有感覺時小聲，最強時大聲
 @export var beat_db_far := -26.0
 @export var beat_db_near := -2.0
-## 一次心跳兩聲（撲通）：第二聲延遲幾秒、小聲多少 dB
+## A4：心跳的錄音本身就是一組兩拍（撲通）時打開，程式不再補第二聲
+@export var sample_has_two_beats := true
+## 一次心跳兩聲（撲通）：第二聲延遲幾秒、小聲多少 dB（sample_has_two_beats 關閉時才用）
 @export var second_beat_delay := 0.16
 @export var second_beat_db := -5.0
 
@@ -92,7 +94,8 @@ func _update_heartbeat(delta: float) -> void:
 	_beat_wait -= delta
 	if _beat_wait <= 0.0:
 		_play_beat(0.0)
-		_second_beat_at = second_beat_delay
+		if not sample_has_two_beats:
+			_second_beat_at = second_beat_delay
 		_beat_wait = lerpf(beat_interval_far, beat_interval_near, intensity)
 		_pulse = 1.0
 

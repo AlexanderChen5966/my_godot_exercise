@@ -8,6 +8,10 @@ const FEET_SIZE := Vector2(24, 12)  # 互動判定的腳底範圍
 # 角色在 32px 畫格裡偏左 1px，左右兩套是互相翻轉的，所以兩個方向的 Sprite 位置不同，轉身時身體中心才不會跳動
 const SPRITE_X_RIGHT := 3.0
 const SPRITE_X_LEFT := -1.0
+## A4：行走 6 格裡腳著地的兩格（兩腳張得最開，第 0、3 格）；腳步聲在這兩格播放
+const STEP_FRAMES := [0, 3]
+const STEP_DB := -8.0
+const STEP_STOP_FADE := 0.08  # A4-3：停下來時，正在播的腳步聲在這段時間內淡出（作者：停下後腳步聲還在持續）
 
 var can_move := false
 var min_x := 0.0
@@ -18,6 +22,11 @@ var facing := 1  # 1 = 右，-1 = 左
 var acting := false  # A3：正在做動作（調查時伸手），這段時間不切換待機／行走
 var lean := false    # A3：衝動強度高，站著不動時改成前傾（由 Main 每個畫面設定）
 var lean_toward := NAN  # 前傾時轉向的 x（衝動最強的那個人）
+var step_sounds: Array[AudioStream] = []  # A4：目前區域地面的腳步聲（由 Main 依區域資料的 floor 設定）
+
+var _steps: AudioStreamPlayer
+var steps_played := 0  # 播過幾次腳步聲（測試用）
+var _steps_tween: Tween
 
 @onready var sprite: AnimatedSprite2D = $Sprite
 
@@ -37,6 +46,14 @@ func _ready() -> void:
 	feet.size = FEET_SIZE
 	$Shape.shape = feet
 	$Shape.position = Vector2(0, -FEET_SIZE.y / 2.0)
+	# A4：腳步聲
+	_steps = AudioStreamPlayer.new()
+	_steps.name = "Steps"
+	_steps.bus = &"SFX"
+	_steps.volume_db = STEP_DB
+	_steps.max_polyphony = 2
+	add_child(_steps)
+	sprite.frame_changed.connect(_on_frame_changed)
 
 
 func _physics_process(_delta: float) -> void:
@@ -78,5 +95,38 @@ func _update_animation(moving: bool) -> void:
 	var side := "right" if facing > 0 else "left"
 	var anim := ("walk_" if moving else ("lean_" if lean else "idle_")) + side
 	if sprite.animation != anim:
+		var was_walking := String(sprite.animation).begins_with("walk_")
 		sprite.play(anim)
+		if moving:
+			_play_step()  # 開始走的第一格（第 0 格）就是腳著地，frame_changed 不會觸發
+		elif was_walking:
+			_fade_out_step()
 	sprite.position.x = SPRITE_X_RIGHT if facing > 0 else SPRITE_X_LEFT
+
+
+## A4：行走到腳著地的那兩格時播放腳步聲（地面材質由區域決定，每次隨機挑一個、音高稍微變化）
+func _on_frame_changed() -> void:
+	if String(sprite.animation).begins_with("walk_") and sprite.frame in STEP_FRAMES:
+		_play_step()
+
+
+func _play_step() -> void:
+	if step_sounds.is_empty():
+		return
+	if _steps_tween:
+		_steps_tween.kill()
+	_steps.volume_db = STEP_DB
+	_steps.stream = step_sounds[randi() % step_sounds.size()]
+	_steps.pitch_scale = randf_range(0.92, 1.08)
+	_steps.play()
+	steps_played += 1
+
+
+func _fade_out_step() -> void:
+	if not _steps.playing:
+		return
+	if _steps_tween:
+		_steps_tween.kill()
+	_steps_tween = create_tween()
+	_steps_tween.tween_property(_steps, "volume_db", -40.0, STEP_STOP_FADE)
+	_steps_tween.tween_callback(_steps.stop)

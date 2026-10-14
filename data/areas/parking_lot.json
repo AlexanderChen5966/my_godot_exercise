@@ -2,6 +2,8 @@
   "id": "parking_lot",
   "scene": "res://scenes/areas/ParkingLot.tscn",
   "bgm": "bgm_01.ogg",
+  "ambience": "amb_parking.ogg",
+  "floor": "concrete",
   "spawns": { "default": 160, "street": 2150 },
   "intro": {
     "title": "停車場甦醒",
@@ -22,20 +24,20 @@
       "text": "你翻找落葉與灰塵，發現些殘骸與碎布。"
     },
     "woman": {
-      "type": "choice", "trigger": "approach", "hide_on_done": true, "title": "婦人",
+      "type": "choice", "trigger": "approach", "hide_on_done": true, "done_sfx": "scream", "title": "婦人",
       "impulse": { "range": 420 },
       "text": "遠處的人聲越來越近，是一個婦人。你聞到她的氣味，喉嚨深處湧起難以忍受的飢餓。",
       "choices": [
         { "text": "強行壓制自己",
           "response": "你追向聲音來源，在即將撲咬時強行壓制自己，撞上牆壁。那名婦人驚慌逃去。你意識到某些行為你還能控制，但對進食的衝動卻毫無抵抗力。",
           "effects": { "humanity": 1 } },
-        { "text": "撲上去", "camera": "shake",
+        { "text": "撲上去", "camera": "shake", "sfx": "growl",
           "response": "你失控衝上去，對方尖叫逃跑。你跌坐地上，確認自己無法控制進食的衝動。",
           "effects": { "humanity": -1 } }
       ]
     },
     "exit": {
-      "type": "exit", "label": "離開停車場", "title": "離開停車場",
+      "type": "exit", "sfx": "door_metal", "label": "離開停車場", "title": "離開停車場",
       "text": "你循著微弱的光，爬上通往地面的坡道。",
       "to": { "area": "street" }
     }

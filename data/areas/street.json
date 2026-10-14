@@ -2,6 +2,8 @@
   "id": "street",
   "scene": "res://scenes/areas/Street.tscn",
   "bgm": "bgm_03.ogg",
+  "ambience": "amb_street.ogg",
+  "floor": "glass",
   "intro": {
     "title": "斷裂街道",
     "text": "你走上街道，前方是一段塌陷的道路。焦黑的車體與殘火靜靜燃燒，空氣中混合著焦味與寂靜。"
@@ -9,7 +11,7 @@
   "spawns": { "default": 220, "parking_lot": 220, "clinic": 2100 },
   "points": {
     "back": {
-      "type": "exit", "label": "回到停車場",
+      "type": "exit", "sfx": "door_metal", "label": "回到停車場",
       "to": { "area": "parking_lot" }
     },
     "car": {
@@ -22,7 +24,7 @@
       "effects": { "memory": 1 }
     },
     "exit": {
-      "type": "exit", "label": "走向診所", "title": "走向診所",
+      "type": "exit", "sfx": "door_wood", "label": "走向診所", "title": "走向診所",
       "text": "你踩著碎裂柏油前行，心中一股熟悉感逐漸浮現。前方，是一間爬滿藤蔓的診所。",
       "to": { "area": "clinic" }
     }

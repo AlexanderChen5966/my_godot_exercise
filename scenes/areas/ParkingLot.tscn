@@ -17,7 +17,9 @@
 [ext_resource type="Texture2D" uid="uid://djyfvveixpxij" path="res://assets/sprites/props/blood_pool.png" id="9_xl8si"]
 [ext_resource type="Texture2D" uid="uid://bqior3i0taira" path="res://assets/sprites/props/lamp_mount.png" id="11_xl8si"]
 [ext_resource type="Texture2D" uid="uid://brk0cd80wmvh8" path="res://assets/sprites/props/lamp_anim.png" id="12_nx6l4"]
+[ext_resource type="AudioStream" uid="uid://sbgjb8scnjb1" path="res://assets/sfx/loop_lamp.ogg" id="13_b2y4s"]
 [ext_resource type="SpriteFrames" uid="uid://dflwy3b8urv5e" path="res://assets/sprites/characters/woman_frames.tres" id="14_nx6l4"]
+[ext_resource type="AudioStream" uid="uid://csjbi4v6rnih3" path="res://assets/sfx/lamp_flicker.ogg" id="14_vjy02"]
 [ext_resource type="Texture2D" uid="uid://cx1ev46h2b22n" path="res://assets/sprites/layers/parking_front_pillar.png" id="17_nx6l4"]
 [ext_resource type="Texture2D" uid="uid://dgcn27mn37xss" path="res://assets/sprites/layers/parking_near_papers.png" id="18_nx6l4"]
 [ext_resource type="Texture2D" uid="uid://dgwrgnpcbrwmr" path="res://assets/sprites/layers/parking_near_glass.png" id="19_67f1b"]
@@ -221,6 +223,21 @@ scale = Vector2(2, 2)
 texture = ExtResource("12_nx6l4")
 hframes = 2
 
+[node name="Hum" type="AudioStreamPlayer2D" parent="Points/Light" unique_id=1612831324]
+position = Vector2(0, -420)
+stream = ExtResource("13_b2y4s")
+volume_db = -2.0
+autoplay = true
+max_distance = 700.0
+bus = &"Ambient"
+
+[node name="Flicker" type="AudioStreamPlayer2D" parent="Points/Light" unique_id=229492990]
+position = Vector2(0, -420)
+stream = ExtResource("14_vjy02")
+volume_db = -10.0
+max_distance = 900.0
+bus = &"SFX"
+
 [node name="Debris" type="Area2D" parent="Points" unique_id=729555111]
 position = Vector2(1000, 640)
 script = ExtResource("4_tpq6i")
@@ -421,6 +438,8 @@ min_ratio = 1.0
 dropout_chance = 0.003
 dropout_ratio = 1.0
 off_sprite = NodePath("../Points/Light/Prop")
+hum = NodePath("../Points/Light/Hum")
+dropout_sound = NodePath("../Points/Light/Flicker")
 
 [node name="Dust" type="CPUParticles2D" parent="." unique_id=1818496813]
 z_index = 1

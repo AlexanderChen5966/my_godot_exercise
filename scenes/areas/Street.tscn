@@ -17,6 +17,7 @@
 [ext_resource type="Texture2D" uid="uid://dvcuhpomc55ei" path="res://assets/sprites/props/sign_clinic.png" id="7_rt3kv"]
 [ext_resource type="Texture2D" uid="uid://cks5xyigw3q8x" path="res://assets/sprites/layers/street_ground.png" id="8_p0hkv"]
 [ext_resource type="SpriteFrames" uid="uid://signsaj6lvqj" path="res://assets/sprites/props/burnt_car_frames.tres" id="11_imh8n"]
+[ext_resource type="AudioStream" uid="uid://de00sk256w1tk" path="res://assets/sfx/loop_fire.ogg" id="12_fg85u"]
 [ext_resource type="Texture2D" uid="uid://dl65vr0ennk8x" path="res://assets/sprites/layers/street_near_bricks.png" id="17_lso3b"]
 [ext_resource type="Texture2D" uid="uid://cqvycco5lh5gb" path="res://assets/sprites/layers/street_near_tire.png" id="18_hg0wx"]
 [ext_resource type="Texture2D" uid="uid://bfilvd8y4yo40" path="res://assets/sprites/layers/street_near_plank.png" id="19_w71ip"]
@@ -239,6 +240,13 @@ scale_amount_min = 2.0
 scale_amount_max = 4.0
 color_ramp = SubResource("Gradient_imh8n")
 
+[node name="Fire" type="AudioStreamPlayer2D" parent="Points/Car" unique_id=2123749781]
+position = Vector2(0, -60)
+stream = ExtResource("12_fg85u")
+autoplay = true
+max_distance = 1000.0
+bus = &"Ambient"
+
 [node name="Poster" type="Area2D" parent="Points" unique_id=729555111]
 position = Vector2(1450, 640)
 script = ExtResource("5_tm4wu")
@@ -402,7 +410,6 @@ pulse_speed = 4.0
 min_ratio = 0.6
 dropout_chance = 0.0
 follow = NodePath("../Points/Car/Prop")
-frame_strength = [0.85, 0.95, 0.9, 1.0]
 
 [node name="FogLayer" type="Parallax2D" parent="." unique_id=1688432825]
 scroll_scale = Vector2(0.85, 1)

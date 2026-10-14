@@ -4,7 +4,7 @@
 [ext_resource type="AudioStream" uid="uid://d33b4ck8jwvw3" path="res://assets/sfx/click.ogg" id="2_rvslj"]
 [ext_resource type="Shader" uid="uid://3u2dc4fwaw05" path="res://shaders/impulse_vignette.gdshader" id="2_vcsgt"]
 [ext_resource type="Script" uid="uid://dtpcpwu322pb" path="res://scripts/impulse_fx.gd" id="3_c01mt"]
-[ext_resource type="AudioStream" uid="uid://g34bjaxi4fg0" path="res://assets/sfx/heartbeat.wav" id="4_nxtc6"]
+[ext_resource type="AudioStream" uid="uid://b1tn61nkqglak" path="res://assets/sfx/heartbeat.ogg" id="4_c01mt"]
 [ext_resource type="Script" uid="uid://cy2x0hd27hova" path="res://scripts/camera_fx.gd" id="6_c01mt"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_jlsqs"]
@@ -52,8 +52,9 @@ mouse_filter = 2
 script = ExtResource("3_c01mt")
 
 [node name="Heartbeat" type="AudioStreamPlayer" parent="UILayer/ImpulseOverlay" unique_id=1049451877]
-stream = ExtResource("4_nxtc6")
-max_polyphony = 2
+stream = ExtResource("4_c01mt")
+max_polyphony = 3
+bus = &"SFX"
 
 [node name="Fade" type="ColorRect" parent="UILayer" unique_id=1488934852]
 unique_name_in_owner = true
@@ -212,20 +213,42 @@ vertical_alignment = 1
 
 [node name="BgmA" type="AudioStreamPlayer" parent="." unique_id=791141838]
 unique_name_in_owner = true
+bus = &"BGM"
 
 [node name="BgmB" type="AudioStreamPlayer" parent="." unique_id=1461300662]
 unique_name_in_owner = true
+bus = &"BGM"
 
 [node name="Sfx" type="AudioStreamPlayer" parent="." unique_id=1425206893]
 unique_name_in_owner = true
 stream = ExtResource("2_rvslj")
+bus = &"SFX"
 
 [node name="TypeSfx" type="AudioStreamPlayer" parent="." unique_id=1211838124]
 unique_name_in_owner = true
 stream = ExtResource("2_rvslj")
 volume_db = -8.0
 max_polyphony = 4
+bus = &"SFX"
 
 [node name="CameraFx" type="Node" parent="." unique_id=262416122]
 unique_name_in_owner = true
 script = ExtResource("6_c01mt")
+
+[node name="AmbA" type="AudioStreamPlayer" parent="." unique_id=1627149669]
+unique_name_in_owner = true
+bus = &"Ambient"
+
+[node name="AmbB" type="AudioStreamPlayer" parent="." unique_id=1759764501]
+unique_name_in_owner = true
+bus = &"Ambient"
+
+[node name="EventSfx" type="AudioStreamPlayer" parent="." unique_id=692238844]
+unique_name_in_owner = true
+max_polyphony = 4
+bus = &"SFX"
+
+[node name="UiSfx" type="AudioStreamPlayer" parent="." unique_id=1203199816]
+unique_name_in_owner = true
+max_polyphony = 2
+bus = &"SFX"

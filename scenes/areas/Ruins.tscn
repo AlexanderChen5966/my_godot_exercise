@@ -11,11 +11,13 @@
 [ext_resource type="SpriteFrames" uid="uid://ctljdy3gw4qw6" path="res://assets/sprites/layers/ruins_mid_firebarrel_frames.tres" id="6_8cc2f"]
 [ext_resource type="Texture2D" uid="uid://bbreeny8ht8rk" path="res://assets/sprites/props/shelter_fence.png" id="6_rbspv"]
 [ext_resource type="Script" uid="uid://cpx5m37cmu4jq" path="res://scripts/flicker_light.gd" id="6_xlq1f"]
+[ext_resource type="AudioStream" uid="uid://de00sk256w1tk" path="res://assets/sfx/loop_fire.ogg" id="7_4mhys"]
 [ext_resource type="Texture2D" uid="uid://m4d1l8kwf4t8" path="res://assets/sprites/layers/ruins_ground.png" id="7_if7y5"]
 [ext_resource type="Texture2D" uid="uid://bef5n6bpw3ky1" path="res://assets/sprites/props/sign_home.png" id="7_xlq1f"]
 [ext_resource type="SpriteFrames" uid="uid://c318ef1ckxlk8" path="res://assets/sprites/characters/horde_frames.tres" id="9_ltopt"]
 [ext_resource type="Script" uid="uid://bfmktami4g01u" path="res://scripts/idle_variation.gd" id="10_xls4e"]
 [ext_resource type="SpriteFrames" uid="uid://wabdyoybe4r3" path="res://assets/sprites/characters/wife_frames.tres" id="11_ltopt"]
+[ext_resource type="AudioStream" uid="uid://ds1noxw8mh8gh" path="res://assets/sfx/loop_shelter.ogg" id="14_jidu7"]
 [ext_resource type="Texture2D" uid="uid://jo1k2ag3r4i7" path="res://assets/sprites/props/ruins_barrier.png" id="15_4mhys"]
 [ext_resource type="Texture2D" uid="uid://c6lwlpbxflqp8" path="res://assets/sprites/layers/ruins_near_charred.png" id="16_jidu7"]
 [ext_resource type="Texture2D" uid="uid://bsps6rjtomyal" path="res://assets/sprites/layers/ruins_near_sign.png" id="17_1mne6"]
@@ -146,6 +148,13 @@ sprite_frames = ExtResource("6_8cc2f")
 animation = &"burn"
 autoplay = "burn"
 
+[node name="Fire" type="AudioStreamPlayer2D" parent="MidLayer/FireBarrel1" unique_id=1550102576]
+stream = ExtResource("7_4mhys")
+volume_db = -4.0
+autoplay = true
+max_distance = 800.0
+bus = &"Ambient"
+
 [node name="FireBarrel2" type="AnimatedSprite2D" parent="MidLayer" unique_id=370962542]
 position = Vector2(1250, 606)
 scale = Vector2(2, 2)
@@ -157,6 +166,13 @@ speed_scale = 0.9
 
 [node name="Occluder" type="LightOccluder2D" parent="MidLayer/FireBarrel2" unique_id=851873366]
 occluder = SubResource("OccluderPolygon2D_8cc2f")
+
+[node name="Fire" type="AudioStreamPlayer2D" parent="MidLayer/FireBarrel2" unique_id=1406724327]
+stream = ExtResource("7_4mhys")
+volume_db = -4.0
+autoplay = true
+max_distance = 800.0
+bus = &"Ambient"
 
 [node name="Ground" type="TextureRect" parent="." unique_id=1232027761]
 texture_filter = 1
@@ -210,6 +226,13 @@ texture_filter = 1
 position = Vector2(150, -85)
 scale = Vector2(2, 2)
 texture = ExtResource("6_rbspv")
+
+[node name="Voices" type="AudioStreamPlayer2D" parent="Points/Shelter" unique_id=1851067191]
+position = Vector2(0, -80)
+stream = ExtResource("14_jidu7")
+autoplay = true
+max_distance = 900.0
+bus = &"Ambient"
 
 [node name="Exit" type="Area2D" parent="Points" unique_id=1483213795]
 position = Vector2(2150, 640)

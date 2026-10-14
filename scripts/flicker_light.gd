@@ -12,11 +12,19 @@ extends PointLight2D
 @export var frame_strength := PackedFloat32Array()
 ## A3：燈突然熄滅時，把這個 Sprite2D（hframes 2：0 亮、1 熄）切到熄滅那格，例如停車場的燈管
 @export var off_sprite: NodePath
+## A4：燈的嗡聲（AudioStreamPlayer2D）熄滅時靜音；熄滅的瞬間播放 dropout_sound（例如燈管啟動器的喀喀聲，最少間隔 sound_cooldown 秒）
+@export var hum: NodePath
+@export var dropout_sound: NodePath
+@export var sound_cooldown := 4.0
 
 var _time := 0.0
 var _dropout_left := 0.0
 var _follow: AnimatedSprite2D
 var _off_sprite: Sprite2D
+var _hum: AudioStreamPlayer2D
+var _dropout_sound: AudioStreamPlayer2D
+var _hum_db := 0.0
+var _since_sound := 99.0
 
 
 func _ready() -> void:
@@ -24,10 +32,19 @@ func _ready() -> void:
 		_follow = get_node_or_null(follow) as AnimatedSprite2D
 	if not off_sprite.is_empty():
 		_off_sprite = get_node_or_null(off_sprite) as Sprite2D
+	if not hum.is_empty():
+		_hum = get_node_or_null(hum) as AudioStreamPlayer2D
+		if _hum:
+			_hum_db = _hum.volume_db
+	if not dropout_sound.is_empty():
+		_dropout_sound = get_node_or_null(dropout_sound) as AudioStreamPlayer2D
 
 
 func _process(delta: float) -> void:
 	_time += delta
+	_since_sound += delta
+	if _hum:
+		_hum.volume_db = -80.0 if _dropout_left > 0.0 else _hum_db
 	if _off_sprite:
 		_off_sprite.frame = 1 if _dropout_left > 0.0 else 0
 	if _dropout_left > 0.0:
@@ -36,6 +53,9 @@ func _process(delta: float) -> void:
 		return
 	if randf() < dropout_chance:
 		_dropout_left = randf_range(0.05, 0.15)
+		if _dropout_sound and _since_sound >= sound_cooldown:
+			_dropout_sound.play()
+			_since_sound = 0.0
 	var pulse := sin(_time * pulse_speed) * 0.5 + 0.5
 	energy = base_energy * lerpf(min_ratio, 1.0, pulse) * _frame_factor()
 

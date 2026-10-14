@@ -2,6 +2,8 @@
   "id": "wall",
   "scene": "res://scenes/areas/Wall.tscn",
   "bgm": "bgm_16.ogg",
+  "ambience": "amb_wall.ogg",
+  "floor": "concrete",
   "intro": {
     "title": "牆前",
     "text": "那是間殘破的屋子，牆面寫著四個字：『我還在。』那是他留下的最後一句話，字跡歪斜卻清晰。有人說這是自我找回的證明，有人說那只是未完成的幻象。你佇立在那句話前，意識緩緩裂解。"

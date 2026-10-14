@@ -23,8 +23,14 @@ for test in "$COPY"/tests/test_*.gd; do
 	name="${test:t:r}"
 	[ $# -gt 0 ] && [ "$name" != "$1" ] && continue
 	echo "\n== $name"
-	"$GODOT" --headless --path "$COPY" --script "res://tests/$name.gd" 2>&1 | grep -v "^Godot Engine\|^$\|leaked at exit\|still in use at exit\|at: cleanup\|at: clear"
-	[ ${pipestatus[1]} -eq 0 ] || fails=$((fails + 1))
+	out=$("$GODOT" --headless --path "$COPY" --script "res://tests/$name.gd" 2>&1)
+	code=$?
+	print -r -- "$out" | grep -v "^Godot Engine\|^$\|leaked at exit\|still in use at exit\|at: cleanup\|at: clear"
+	# 腳本載入失敗（例如 Parse Error）時 Godot 的結束碼仍是 0，所以也看輸出：有 SCRIPT ERROR 或沒有印出結果都算失敗
+	if [ $code -ne 0 ] || print -r -- "$out" | grep -q "SCRIPT ERROR" || ! print -r -- "$out" | grep -q "項檢查"; then
+		fails=$((fails + 1))
+		print -r -- "$out" | grep -q "項檢查" || echo "✗ $name 沒有執行完（腳本錯誤或卡住）"
+	fi
 done
 
 echo ""

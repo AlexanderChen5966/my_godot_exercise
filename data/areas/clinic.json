@@ -2,6 +2,8 @@
   "id": "clinic",
   "scene": "res://scenes/areas/Clinic.tscn",
   "bgm": "bgm_04.ogg",
+  "ambience": "amb_clinic.ogg",
+  "floor": "glass",
   "intro": {
     "title": "廢棄診所",
     "text": "你走進一間布滿爬藤的廢診所，藥水氣味讓你腦中閃過殘影。診所曾是什麼樣子？你模糊地記得這裡與某段記憶重疊。"
@@ -9,7 +11,7 @@
   "spawns": { "default": 220, "street": 220 },
   "points": {
     "back": {
-      "type": "exit", "label": "回到街道",
+      "type": "exit", "sfx": "door_wood", "label": "回到街道",
       "to": { "area": "street" }
     },
     "cabinet": {
@@ -39,7 +41,7 @@
       ]
     },
     "exit": {
-      "type": "exit", "label": "離開診所", "title": "離開診所",
+      "type": "exit", "sfx": "door_wood", "label": "離開診所", "title": "離開診所",
       "text": "你推開診所的後門，走進黃昏的街道。",
       "to": { "scene": 6 }
     }

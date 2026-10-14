@@ -8,7 +8,7 @@
   },
   "title_screen": {
     "bg": "scene_16.webp",
-    "bgm": "bgm_15.ogg"
+    "bgm": "bgm_title.ogg"
   },
   "scenes": [
     {
@@ -156,11 +156,12 @@
       "id": 21,
       "title": "槍聲",
       "camera": "shake",
+      "sfx": "gunshot",
       "text": "槍聲在街道間迴盪了很久。他們走近確認時，你的手還朝著診所的方向伸著。沒有人知道，你剛剛才想起自己是誰。",
       "hint": "",
       "extra_hint": "",
       "bg": "scene_17.webp",
-      "bgm": "bgm_17.ogg",
+      "bgm": "bgm_bad.ogg",
       "is_ending": true,
       "ending_type": "bad",
       "ending_label": "— 死亡結局 —",
@@ -184,7 +185,7 @@
       "hint": "",
       "extra_hint": "",
       "bg": "scene_17.webp",
-      "bgm": "bgm_17.ogg",
+      "bgm": "bgm_bad.ogg",
       "is_ending": true,
       "ending_type": "bad",
       "ending_label": "— 死亡結局 —",
@@ -204,11 +205,12 @@
     {
       "id": 23,
       "title": "噬語",
+      "sfx": "fence",
       "text": "圍籬倒下的時候，你已經聽不見她的聲音了，只剩下飢餓。從那天起，避難所的人說，有一隻感染者總在圍籬外徘徊，喉嚨裡發出像是名字的聲音。",
       "hint": "",
       "extra_hint": "",
       "bg": "scene_17.webp",
-      "bgm": "bgm_17.ogg",
+      "bgm": "bgm_bad.ogg",
       "is_ending": true,
       "ending_type": "bad",
       "ending_label": "— 死亡結局 —",

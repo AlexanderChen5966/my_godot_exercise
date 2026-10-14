@@ -10,6 +10,14 @@ const CHARS_PER_SECOND := 30.0
 const SILENT_CHARS := " \n，。、！？：；「」『』（）…—,.!?:;\"'()-"  # 打到這些字元時不出打字聲
 const FADE_HALF_TIME := 0.2  # 淡出 + 淡入共約 0.4 秒
 const BGM_FADE_TIME := 0.8
+const AMB_FADE_TIME := 1.2  # A4：環境音換區域時的交叉淡化
+const POOL_SIZE := 4  # A4：音效、介面音各準備幾個播放器輪流用
+## A4-3：有聲音的轉場（出口的開門聲、Bad End 的槍聲）在黑畫面多停幾秒，讓聲音在黑幕中播完再進下一個畫面（作者：聲音在轉場後才出來很怪）
+const SOUND_HOLD_TIME := 0.7
+## A4-3：打字聲（作者：和音效、環境音重疊很躁，先關掉；A6 的設定可以再做開關）
+const TYPE_SOUND := false
+## A4：互動點沒有寫 sfx 時，依類型播放的聲音（出口在通過時才播自己的 sfx）
+const TYPE_SFX := { "inspect": "inspect", "item": "pickup" }
 const LOCKED_TEXT := "……（你想不起來）"   # 數值不夠時，選項顯示的文字
 const ENDING_LABEL := "— 結局 —"
 const BAD_ENDING_COLOR := Color(0.85, 0.35, 0.3)
@@ -37,6 +45,9 @@ const LEAN_FROM := 0.5   # A3：衝動強度到這裡，主角站著時改成前
 @onready var bgm_players: Array[AudioStreamPlayer] = [%BgmA, %BgmB]
 @onready var sfx: AudioStreamPlayer = %Sfx
 @onready var type_sfx: AudioStreamPlayer = %TypeSfx
+@onready var amb_players: Array[AudioStreamPlayer] = [%AmbA, %AmbB]  # A4：區域環境音，兩個交替淡入淡出
+@onready var event_sfx: AudioStreamPlayer = %EventSfx  # A4：互動、事件音（和下面幾個複製出來的播放器輪流用，可以重疊）
+@onready var ui_sfx: AudioStreamPlayer = %UiSfx        # A4：選項游標、確認
 @onready var rotate_hint: ColorRect = %RotateHint
 @onready var prompt_label: Label = %PromptLabel
 @onready var impulse_fx: ColorRect = %ImpulseOverlay  # 衝動機制的紅色暈影、心跳、手電筒閃爍（scripts/impulse_fx.gd）
@@ -74,11 +85,30 @@ var _audio_unlocked := false  # 瀏覽器要求使用者互動後才能播放聲
 var _bgm_file := ""           # 目前播放（或淡入中）的曲目
 var _bgm_index := 0           # bgm_players 中目前使用的播放器
 var _bgm_tween: Tween
+var _amb_file := ""
+var _amb_index := 0
+var _amb_tween: Tween
+var _quiet_focus := false     # 自動聚焦第一個選項時不出游標聲
+var _hold_black := 0.0        # 下一次轉場在黑畫面多停幾秒（出口播了開門聲時）
+var _pools := {}  # 播放器 → 輪流用的播放器陣列
+var sound_log: Array[String] = []  # 最近播過的音效名稱（測試與 MCP 驗證用，最多 20 個）
 var _start_blink: Tween
 
 
 func _ready() -> void:
 	_type_base_db = type_sfx.volume_db
+	SoundLib.register_all()  # 網頁版：先把音效交給瀏覽器解碼，第一次播放時才不會延遲
+	# A4：每種聲音準備幾個播放器輪流用，讓聲音可以重疊（低吼＋確認音）。
+	# 不用 AudioStreamPolyphonic：網頁版預設的 Sample 播放模式不一定支援，一般的播放器最保險。
+	for player in [event_sfx, ui_sfx]:
+		var pool: Array[AudioStreamPlayer] = [player]
+		for i in POOL_SIZE - 1:
+			var copy := player.duplicate() as AudioStreamPlayer
+			copy.name = "%s%d" % [player.name, i + 2]
+			copy.unique_name_in_owner = false
+			add_child(copy)
+			pool.append(copy)
+		_pools[player] = pool
 	camera_fx.set_background(background)
 	_setup_style()
 	get_window().size_changed.connect(_on_window_resized)
@@ -149,6 +179,7 @@ func show_title() -> void:
 		tween.tween_callback(func() -> void: state = State.TITLE)
 	else:
 		state = State.TITLE
+	play_ambience("")
 	if _audio_unlocked:
 		play_bgm(story.title_screen["bgm"])
 	if _start_blink:
@@ -194,6 +225,7 @@ func _instantiate_area(area_id: String, from_area := "") -> Node2D:
 	_area_id = area_id
 	_nearby_point = ""
 	world.add_child(_area)
+	_area.player.step_sounds = SoundLib.variants("step_" + str(area.get("floor", "concrete")))  # A4：地面材質決定腳步聲
 	impulse_fx.set_flashlight(_area.get_node_or_null("Player/Flashlight"), _area.flashlight_energy)
 	camera_fx.set_camera(_area.camera)
 	_area.point_entered.connect(_on_point_entered)
@@ -237,11 +269,13 @@ func enter_area(area_id: String, scene_id: int, fade_out := true, from_area := "
 	state = State.TRANSITION
 	if area.has("bgm"):
 		play_bgm(area["bgm"])
+	play_ambience(area.get("ambience", ""))
 	var tween := create_tween()
 	if fade_out:
 		tween.tween_property(fade, "color:a", 1.0, FADE_HALF_TIME)
 	else:
 		fade.color.a = 1.0
+	_tween_hold(tween)
 	tween.tween_callback(func() -> void:
 		_instantiate_area(area_id, from_area)
 		title_layer.visible = false
@@ -267,6 +301,7 @@ func leave_area(next_id: int) -> void:
 	prompt_label.visible = false
 	var tween := create_tween()
 	tween.tween_property(fade, "color:a", 1.0, FADE_HALF_TIME)
+	_tween_hold(tween)
 	tween.tween_callback(func() -> void:
 		_free_area()
 		background.visible = true
@@ -349,6 +384,8 @@ func _show_area_text(holder: Dictionary, point_id := "") -> void:
 		camera_fx.push_in()  # 遇到人：鏡頭輕微推近，關閉文字時退回
 	if not point_id.is_empty():
 		_area.point_event(point_id, true)
+		if holder.get("type") != "exit":
+			play_sound(holder.get("sfx", TYPE_SFX.get(holder.get("type"), "")))  # 調查翻找、撿起
 	if not point_id.is_empty() and holder.get("type") != "choice":
 		GameState.apply_effects(holder.get("effects", {}), AreaData.done_key(_point_key(point_id), holder))
 	_area.set_can_move(false)
@@ -386,7 +423,10 @@ func _on_area_choice_pressed(choice: Dictionary) -> void:
 	_area_choosing = false
 	_area_choice = choice
 	_impulse_released = true  # 選完了：張力淡出
-	sfx.play()
+	play_ui("ui_confirm")
+	play_sound(choice.get("sfx", ""))  # 例如撲上去的低吼
+	if choice.has("item"):
+		play_sound("pickup")
 	_camera_cue(choice)
 	if choice.has("figure"):
 		_area.point_play(_closing_point, choice["figure"])  # 例如女兒舉手比出同樣的手勢
@@ -418,6 +458,7 @@ func _close_area_text() -> void:
 		GameState.set_flag(flag)
 	if _hides_when_done(point):
 		_area.consume_point(point_id, _area.player.global_position.x)  # 例如婦人尖叫、逃走後消失
+		play_sound(point.get("done_sfx", ""))  # 例如婦人的尖叫
 	var chosen := _area_choice
 	_area_choice = {}
 	if chosen.has("to"):
@@ -450,6 +491,9 @@ func _hides_when_done(point: Dictionary) -> bool:
 
 ## 出口：通往另一個區域（to.area），或接回視覺小說（to.scene／Lv1 的 exit_to）。
 func _go_through_exit(point: Dictionary) -> void:
+	if point.has("sfx"):
+		play_sound(point["sfx"])  # 例如推開鐵門：畫面變暗時響起，在黑畫面停一下再進新區域
+		_hold_black = SOUND_HOLD_TIME
 	_go_to(AreaData.exit_target(areas.get_area(_area_id), point))
 
 
@@ -490,6 +534,72 @@ func play_bgm(file: String) -> void:
 		_bgm_tween.chain().tween_callback(old.stop)
 
 
+## A4：區域環境音（循環），和 BGM 一樣兩個播放器交替淡入淡出；file 為空字串時淡出。
+func play_ambience(file: String) -> void:
+	if file == _amb_file:
+		return
+	_amb_file = file
+	var old := amb_players[_amb_index]
+	_amb_index = 1 - _amb_index
+	var new := amb_players[_amb_index]
+	if _amb_tween:
+		_amb_tween.kill()
+	_amb_tween = create_tween().set_parallel()
+	if not file.is_empty():
+		new.stream = load(SoundLib.SFX_DIR + file)
+		new.volume_linear = 0.0
+		new.play()
+		_amb_tween.tween_property(new, "volume_linear", 1.0, AMB_FADE_TIME)
+	if old.playing:
+		_amb_tween.tween_property(old, "volume_linear", 0.0, AMB_FADE_TIME)
+		_amb_tween.chain().tween_callback(old.stop)
+
+
+## 轉場時在黑畫面多停 _hold_black 秒（用一次就歸零）
+func _tween_hold(tween: Tween) -> void:
+	if _hold_black > 0.0:
+		tween.tween_interval(_hold_black)
+		_hold_black = 0.0
+
+
+## A4：播放音效（資料的 "sfx"，例如 "growl" 會從 growl_1、growl_2 隨機挑；寫成陣列時同時播放，例如 ["growl", "scream"]）。
+## 空字串或找不到時不播。
+func play_sound(sound, volume_db := 0.0) -> void:
+	if sound is Array:
+		for one in sound:
+			_play_on(event_sfx, str(one), volume_db)
+	else:
+		_play_on(event_sfx, str(sound), volume_db)
+
+
+func play_ui(sound_name: String) -> void:
+	_play_on(ui_sfx, sound_name, -6.0)
+
+
+func _play_on(player: AudioStreamPlayer, sound_name: String, volume_db: float) -> void:
+	var stream := SoundLib.pick(sound_name)
+	if stream == null:
+		return
+	sound_log.append(sound_name)
+	if sound_log.size() > 20:
+		sound_log.pop_front()
+	var pool: Array = _pools.get(player, [player])
+	var free_player: AudioStreamPlayer = pool[0]
+	for p in pool:
+		if not (p as AudioStreamPlayer).playing:
+			free_player = p
+			break
+	free_player.stream = stream
+	free_player.volume_db = volume_db
+	free_player.play()
+
+
+## 方向鍵移動選項時的游標聲（自動聚焦第一個選項時不出聲）
+func _on_choice_focus() -> void:
+	if not _quiet_focus:
+		play_ui("ui_cursor")
+
+
 func show_scene(id: int, fade_out := true) -> void:
 	var scene := story.get_scene(id)
 	if scene.is_empty():
@@ -517,6 +627,7 @@ func show_scene(id: int, fade_out := true) -> void:
 		_save_checkpoint({ "scene": id })
 	state = State.TRANSITION
 	play_bgm(scene["bgm"])
+	play_ambience("")  # 過場與結局沒有區域環境音
 	var tween := create_tween()
 	if fade_out:
 		tween.tween_property(fade, "color:a", 1.0, FADE_HALF_TIME)
@@ -530,7 +641,10 @@ func show_scene(id: int, fade_out := true) -> void:
 		var bad: bool = scene.get("ending_type", "normal") == "bad"
 		ending_tag.add_theme_color_override("font_color", BAD_ENDING_COLOR if bad else Color(1, 1, 1))
 		body.text = ""
+		play_sound(scene.get("sfx", ""))  # 例如槍聲、撞上鐵絲網：在黑畫面中響起
 	)
+	if scene.has("sfx"):
+		tween.tween_interval(SOUND_HOLD_TIME)
 	tween.tween_property(fade, "color:a", 0.0, FADE_HALF_TIME)
 	tween.tween_callback(func() -> void:
 		_camera_cue(scene)  # 例如 Bad End「槍聲」：淡入後畫面震動
@@ -579,6 +693,7 @@ func _build_choices(choices: Array) -> void:
 			button.add_theme_color_override("font_disabled_color", Color(0.55, 0.55, 0.55))
 			button.focus_mode = Control.FOCUS_NONE  # 方向鍵移動時跳過鎖住的選項
 		button.pressed.connect(_on_choice_pressed.bind(i, choice))
+		button.focus_entered.connect(_on_choice_focus)
 		choices_box.add_child(button)
 	# 鍵盤操作：聚焦第一個能選的選項（方向鍵移動、Enter／空白鍵選擇）。
 	# 打開選項的那次按鍵已經 set_input_as_handled()，不會同時按下這個選項；
@@ -586,7 +701,9 @@ func _build_choices(choices: Array) -> void:
 	_choices_shown_at = Time.get_ticks_msec()
 	for button in choices_box.get_children():
 		if not (button as Button).disabled:
+			_quiet_focus = true
 			(button as Button).grab_focus()
+			_quiet_focus = false
 			break
 
 
@@ -623,6 +740,8 @@ func _set_typed_count(count: int) -> void:
 
 ## 鍵盤感：每 2～4 個字隨機響一次，音高與音量帶些微變化，標點與空白不出聲。
 func _play_type_tick(ch: String) -> void:
+	if not TYPE_SOUND:
+		return
 	if SILENT_CHARS.contains(ch):
 		_next_tick_at = _typed_count + 1  # 標點後的下一個字馬上出聲，形成停頓後的重音
 		return
@@ -650,7 +769,8 @@ func _on_choice_pressed(index: int, choice: Dictionary) -> void:
 		_on_area_choice_pressed(choice)
 		return
 	_chosen_in_scene[index] = true
-	sfx.play()
+	play_ui("ui_confirm")
+	play_sound(choice.get("sfx", ""))
 	_camera_cue(choice)
 	_clear_choices()
 	hint.visible = false

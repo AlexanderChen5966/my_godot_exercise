@@ -54,6 +54,9 @@ func _init() -> void:
 			errors.append("%s 缺背景：%s" % [tag, s["bg"]])
 		if not ResourceLoader.exists(BGM_DIR + s["bgm"]):
 			errors.append("%s 缺音樂：%s" % [tag, s["bgm"]])
+		errors.append_array(AreaData.sound_errors(s, tag))
+		for c in s["choices"]:
+			errors.append_array(AreaData.sound_errors(c, "%s 的選項「%s」" % [tag, c.get("text", "")]))
 		if s.get("is_ending", false):
 			endings += 1
 			if s.get("ending_type", "normal") == "bad":

@@ -2,6 +2,8 @@
   "id": "lab",
   "scene": "res://scenes/areas/Lab.tscn",
   "bgm": "bgm_08.ogg",
+  "ambience": "amb_lab.ogg",
+  "floor": "concrete",
   "intro": {
     "title": "實驗逃脫",
     "text": "不知過了多少天。某個夜裡，警報響了。實驗設施失控，警報大作。你趁機掙脫，奪門而出。火焰、碎裂玻璃與混亂人聲交織成地獄般景象。"
@@ -16,7 +18,7 @@
         { "text": "收下筆記本",
           "response": "你接過筆記本，指尖碰到她的手。她沒有退縮。你們對看了一眼，她轉身跑進濃煙裡。",
           "effects": { "memory": 1 }, "item": "notebook", "item_name": "筆記本" },
-        { "text": "撲向她", "camera": "shake",
+        { "text": "撲向她", "camera": "shake", "sfx": "growl",
           "response": "飢餓比你更快。你撲上去，她跌倒，筆記本散落一地。你在最後一刻停住，她爬起來逃走了。",
           "effects": { "humanity": -2 } }
       ]
@@ -32,7 +34,7 @@
       "choices": [
         { "text": "躲進通風管",
           "response": "你擠進狹窄的通風管，屏住呼吸。腳步聲停了一下，又走遠了。" },
-        { "text": "撲向警衛", "camera": "shake",
+        { "text": "撲向警衛", "camera": "shake", "sfx": "growl",
           "response": "你從暗處撲出，撞倒警衛，他的槍滑過地面。你強迫自己鬆口，跌跌撞撞地跑開。",
           "effects": { "humanity": -1 } },
         { "text": "停下不動",
@@ -41,7 +43,7 @@
       ]
     },
     "exit": {
-      "type": "exit", "label": "逃出設施", "title": "逃出設施",
+      "type": "exit", "sfx": "door_metal", "label": "逃出設施", "title": "逃出設施",
       "text": "你朝出口狂奔，衝出破碎的鐵門，心中只剩一個目標——回家。",
       "to": { "area": "ruins" }
     }

@@ -134,6 +134,11 @@ func validate(story: StoryData, warnings: Array[String] = []) -> Array[String]:
 				errors.append("%s 的 replaces_scenes 指向不存在的場景 %d" % [tag, int(scene_id)])
 		if area.has("exit_to") and not story.has_scene(int(area["exit_to"])):
 			errors.append("%s 的 exit_to 不存在：%s" % [tag, str(area["exit_to"]).trim_suffix(".0")])
+		# A4：環境音檔案、地面材質（step_<floor>_1… 腳步聲）要存在
+		if area.has("ambience") and not ResourceLoader.exists(SoundLib.SFX_DIR + str(area["ambience"])):
+			errors.append("%s 的環境音不存在：%s" % [tag, area["ambience"]])
+		if area.has("floor") and SoundLib.paths("step_" + str(area["floor"])).is_empty():
+			errors.append("%s 的 floor 沒有對應的腳步聲（step_%s_1.ogg…）：%s" % [tag, area["floor"], area["floor"]])
 		if area.has("intro") and text_of(story, area["intro"]).is_empty():
 			errors.append("%s 的開場沒有文字或引用無效：%s" % [tag, area["intro"]])
 		for key in area.get("spawns", {}):
@@ -210,6 +215,9 @@ func _validate_shape(story: StoryData, area: Dictionary, shape: Dictionary, ptag
 	if not POINT_TYPES.has(type):
 		errors.append("%s 類型不正確：%s" % [ptag, type])
 		return errors
+	errors.append_array(sound_errors(shape, ptag))
+	for choice in shape.get("choices", []):
+		errors.append_array(sound_errors(choice, "%s 的選項「%s」" % [ptag, choice.get("text", "")]))
 	if shape.has("trigger") and not TRIGGERS.has(shape["trigger"]):
 		errors.append("%s 的 trigger 不正確：%s" % [ptag, shape["trigger"]])
 	if shape.has("impulse"):
@@ -241,6 +249,19 @@ func _validate_shape(story: StoryData, area: Dictionary, shape: Dictionary, ptag
 			for key in choice.get("require", {}):
 				if not story.stats.has(key):
 					errors.append("%s 的選項 require 用到 %s，但 story.json 的 stats 沒有定義" % [ptag, key])
+	return errors
+
+
+## A4：資料裡的音效名稱（sfx、done_sfx）要找得到檔案
+static func sound_errors(holder: Dictionary, tag: String) -> Array[String]:
+	var errors: Array[String] = []
+	for key in ["sfx", "done_sfx"]:
+		if not holder.has(key):
+			continue
+		var names: Array = holder[key] if holder[key] is Array else [holder[key]]  # 可以寫成陣列，同時播放
+		for sound_name in names:
+			if SoundLib.paths(str(sound_name)).is_empty():
+				errors.append("%s 的 %s 找不到聲音檔：%s" % [tag, key, sound_name])
 	return errors
 
 

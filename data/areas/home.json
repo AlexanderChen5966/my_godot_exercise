@@ -2,6 +2,8 @@
   "id": "home",
   "scene": "res://scenes/areas/Home.tscn",
   "bgm": "bgm_10.ogg",
+  "ambience": "amb_home.ogg",
+  "floor": "wood",
   "intro": {
     "title": "舊家",
     "text": "你走進熟悉的社區。那棟斑駁的大樓依舊矗立，門前雜草叢生。你推開門，屋內早已斷壁殘垣。"
@@ -48,7 +50,7 @@
       ]
     },
     "exit": {
-      "type": "exit", "label": "離開", "title": "離開",
+      "type": "exit", "sfx": "door_wood", "label": "離開", "title": "離開",
       "text": "你在家門口站了很久。世界無聲，但你知道——你還活著。你也知道，最後要去哪裡。",
       "to": { "scene": 15 }
     }
