@@ -11,6 +11,7 @@
   "spawns": { "default": 220 },
   "points": {
     "wall": {
+      "flashback": "scene_10.webp",
       "type": "inspect", "label": "牆上的字", "title": "牆上的蠟筆字",
       "text": "牆上，仍有那熟悉的字句：「爸爸，我知道是你。」下面還有一行更小的蠟筆字：「如果你回來，我會知道是你，因為你不會傷害我。」你淚流滿面，跪地失聲。",
       "effects": { "memory": 1 }

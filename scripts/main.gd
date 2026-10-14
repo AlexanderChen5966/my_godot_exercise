@@ -2,7 +2,7 @@
 ## 主文字與 response 以打字機效果顯示，換場時背景淡出淡入，BGM 以兩個播放器交替淡入淡出。
 extends Control
 
-enum State { TITLE, TRANSITION, TYPING, CHOOSING, RESPONSE, EXPLORE, AREA_TEXT, GESTURE }  # GESTURE：A5 比手勢中（不能移動、不接受其他按鍵）
+enum State { TITLE, TRANSITION, TYPING, CHOOSING, RESPONSE, EXPLORE, AREA_TEXT, GESTURE, FLASHBACK }  # GESTURE：A5 比手勢中（不能移動、不接受其他按鍵）；FLASHBACK：A5 記憶閃回中（按互動鍵跳過）
 
 const EXTRA_HINT_COLOR := "#a8a8a8"
 const CHOSEN_MODULATE := Color(1, 1, 1, 0.45)
@@ -21,6 +21,11 @@ const GESTURE_RANGE := 360.0
 const GESTURE_SFX := "inspect_4.ogg"
 const GESTURE_HINT := "G　比出手勢"
 const GESTURE_HINT_TIME := 4.0
+## A5 記憶閃回：白光亮起、白光退去（露出插畫）、停留、淡出淡入回到區域的秒數（docs/A5_記憶閃回設計.md）
+const FLASHBACK_FLASH := 0.12
+const FLASHBACK_REVEAL := 0.2
+const FLASHBACK_TIME := 2.2
+const FLASHBACK_FADE := 0.3
 ## A4：互動點沒有寫 sfx 時，依類型播放的聲音（出口在通過時才播自己的 sfx）
 const TYPE_SFX := { "inspect": "inspect", "item": "pickup" }
 const LOCKED_TEXT := "……（你想不起來）"   # 數值不夠時，選項顯示的文字
@@ -55,6 +60,8 @@ const LEAN_FROM := 0.5   # A3：衝動強度到這裡，主角站著時改成前
 @onready var ui_sfx: AudioStreamPlayer = %UiSfx        # A4：選項游標、確認
 @onready var rotate_hint: ColorRect = %RotateHint
 @onready var prompt_label: Label = %PromptLabel
+@onready var flashback: TextureRect = %Flashback  # A5 記憶閃回的插畫（shaders/flashback.gdshader：褪色、雜訊、暗角）
+@onready var flash: ColorRect = %Flash             # 閃回開始時的白光
 @onready var impulse_fx: ColorRect = %ImpulseOverlay  # 衝動機制的紅色暈影、心跳、手電筒閃爍（scripts/impulse_fx.gd）
 @onready var camera_fx: Node = %CameraFx  # A2-4 鏡頭的推近、震動、晃動（scripts/camera_fx.gd）
 
@@ -97,6 +104,10 @@ var _quiet_focus := false     # 自動聚焦第一個選項時不出游標聲
 var _hold_black := 0.0        # 下一次轉場在黑畫面多停幾秒（出口播了開門聲時）
 var _gesture_hint: Label      # A5：「G　比出手勢」（第一次可以走動時顯示一次）
 var _gesture_hint_shown := false
+var _flashback_tween: Tween
+var _flashback_ending := false
+
+signal flashback_finished  # A5：閃回播完（或被跳過）、回到區域
 var _pools := {}  # 播放器 → 輪流用的播放器陣列
 var sound_log: Array[String] = []  # 最近播過的音效名稱（測試與 MCP 驗證用，最多 20 個）
 var _start_blink: Tween
@@ -841,6 +852,47 @@ func _show_continue() -> void:
 	continue_label.visible = true
 
 
+## 打開互動點：有記憶閃回（flashback）而且這一輪還沒閃回過時，先閃回再顯示文字。
+func _open_point(point: Dictionary, point_id: String) -> void:
+	if point.has("flashback") and not GameState.has_flag(_point_key(point_id) + ".flashback"):
+		await _play_flashback(str(point["flashback"]), point_id)
+	_show_area_text(point, point_id)
+
+
+## A5 記憶閃回：白光一閃 → 原插畫（褪色、雜訊、暗角）停 FLASHBACK_TIME 秒 → 淡出淡入回到區域。按互動鍵可以跳過。
+func _play_flashback(image: String, point_id: String) -> void:
+	state = State.FLASHBACK
+	_flashback_ending = false
+	_area.set_can_move(false)
+	prompt_label.visible = false
+	GameState.set_flag(_point_key(point_id) + ".flashback")
+	_gesture_hint.visible = false  # 按鍵提示不要蓋在閃回畫面上
+	play_sound("flashback")
+	flashback.texture = load(StoryData.bg_path(image))
+	_flashback_tween = create_tween()
+	_flashback_tween.tween_property(flash, "color:a", 1.0, FLASHBACK_FLASH)
+	_flashback_tween.tween_callback(func() -> void: flashback.visible = true)
+	_flashback_tween.tween_property(flash, "color:a", 0.0, FLASHBACK_REVEAL)
+	_flashback_tween.tween_interval(FLASHBACK_TIME)
+	_flashback_tween.tween_callback(_end_flashback)
+	await flashback_finished
+
+
+## 閃回結束（播完或跳過）：淡出到黑、收起插畫、淡入回到區域
+func _end_flashback() -> void:
+	if _flashback_ending:
+		return
+	_flashback_ending = true
+	if _flashback_tween:
+		_flashback_tween.kill()
+	var tween := create_tween()
+	tween.tween_property(flash, "color:a", 0.0, 0.05)
+	tween.tween_property(fade, "color:a", 1.0, FLASHBACK_FADE)
+	tween.tween_callback(func() -> void: flashback.visible = false)
+	tween.tween_property(fade, "color:a", 0.0, FLASHBACK_FADE)
+	tween.tween_callback(func() -> void: flashback_finished.emit())
+
+
 ## A5：比出手勢「我——在——這——裡」。附近有會反應的人（互動點的 gesture）就在比完後顯示反應文字（每人一輪一次）；
 ## 沒有對象時，一輪的第一次顯示獨白（story.json 的 gesture_alone），之後只有動畫。
 func _do_gesture() -> void:
@@ -899,10 +951,8 @@ func _create_gesture_hint() -> void:
 	_gesture_hint.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_gesture_hint.visible = false
 	prompt_label.get_parent().add_child(_gesture_hint)
-	_gesture_hint.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
-	_gesture_hint.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	_gesture_hint.grow_vertical = Control.GROW_DIRECTION_BEGIN
-	_gesture_hint.offset_bottom = -24.0
+	# 錨點和位移都要設（只設錨點時位移是 0，會跑到左上角）：畫面下方中間、離底部 24 px
+	_gesture_hint.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM, Control.PRESET_MODE_MINSIZE, 24)
 
 
 ## 第一次可以走動時，畫面下方淡淡顯示一次按鍵提示，幾秒後淡出
@@ -997,6 +1047,11 @@ func _input(event: InputEvent) -> void:
 	if rotate_hint.visible:
 		get_viewport().set_input_as_handled()
 		return
+	if state == State.FLASHBACK:
+		if event.is_action_pressed("interact") or event.is_action_pressed("ui_accept"):
+			get_viewport().set_input_as_handled()
+			_end_flashback()  # 跳過閃回
+		return
 	if state == State.EXPLORE and event.is_action_pressed("gesture"):
 		get_viewport().set_input_as_handled()
 		_do_gesture()
@@ -1014,7 +1069,7 @@ func _input(event: InputEvent) -> void:
 			else:
 				if point.get("type") != "exit":
 					_area.player_reach(_nearby_point)  # A3：轉向物件、伸手調查
-				_show_area_text(point, _nearby_point)
+				_open_point(point, _nearby_point)
 		return
 	if state != State.TITLE and state != State.TYPING and state != State.RESPONSE \
 			and state != State.AREA_TEXT:

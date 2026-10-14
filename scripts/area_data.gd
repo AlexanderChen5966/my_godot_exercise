@@ -217,6 +217,7 @@ func _validate_shape(story: StoryData, area: Dictionary, shape: Dictionary, ptag
 		return errors
 	errors.append_array(sound_errors(shape, ptag))
 	errors.append_array(gesture_errors(story, shape, ptag))
+	errors.append_array(flashback_errors(shape, ptag))
 	for choice in shape.get("choices", []):
 		errors.append_array(sound_errors(choice, "%s 的選項「%s」" % [ptag, choice.get("text", "")]))
 	if shape.has("trigger") and not TRIGGERS.has(shape["trigger"]):
@@ -250,6 +251,18 @@ func _validate_shape(story: StoryData, area: Dictionary, shape: Dictionary, ptag
 			for key in choice.get("require", {}):
 				if not story.stats.has(key):
 					errors.append("%s 的選項 require 用到 %s，但 story.json 的 stats 沒有定義" % [ptag, key])
+	return errors
+
+
+## A5：記憶閃回（互動點或 variant 的 flashback）：插畫要在 assets/bg/，出口不能閃回
+static func flashback_errors(holder: Dictionary, tag: String) -> Array[String]:
+	var errors: Array[String] = []
+	if not holder.has("flashback"):
+		return errors
+	if holder.get("type") == "exit":
+		errors.append("%s 是出口，不能有 flashback" % tag)
+	if not ResourceLoader.exists(StoryData.bg_path(str(holder["flashback"]))):
+		errors.append("%s 的 flashback 插畫不存在：%s" % [tag, holder["flashback"]])
 	return errors
 
 

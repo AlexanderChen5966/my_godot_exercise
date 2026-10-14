@@ -1,14 +1,18 @@
 ## A5 自動測試：手勢（G 鍵比出「我——在——這——裡」）、人物的反應文字、沒有對象時的獨白、只反應一次、事件發生後不再反應、
 ## 比手勢時不能移動也不接受其他按鍵、對話中按 G 沒有作用、按鍵提示、數值不變（方案 A）、劇本檢查。
+## 記憶閃回：調查關鍵物品時先閃回原插畫再顯示文字、可以跳過、一輪一次、診療椅沒有錄音筆時不閃回、劇本檢查。
 ## 共用操作在 play_base.gd。執行：zsh tests/run_tests.sh test_a5
 extends "res://tests/play_base.gd"
 
 const GESTURE := 7  # main.gd 的 State.GESTURE
+const FLASHBACK := 8
 
 
 func run_tests() -> void:
 	await run_gesture_alone()
 	await run_gesture_woman()
+	await back_to_title()
+	await run_flashback()
 	await back_to_title()
 	run_validation()
 
@@ -77,6 +81,43 @@ func run_gesture_woman() -> void:
 	ok(main.gesture_target() == "", "婦人逃走後：不再是手勢的對象")
 
 
+func run_flashback() -> void:
+	print("\n== 記憶閃回")
+	await start_game()
+	await walk_to(300)
+	var started := Time.get_ticks_msec()
+	await interact()
+	ok(main.state == FLASHBACK, "調查「醒來的地方」：進入記憶閃回")
+	ok(main.sound_log.back() == "flashback", "閃回音")
+	await wait_for(func(): return main.flashback.visible, 1.0)
+	ok(main.flashback.visible and main.flashback.texture.resource_path.ends_with("scene_19.webp"), "白光之後出現插畫 scene_19（加上閃回 shader）")
+	await wait_for(func(): return main.state in [TYPING, AREA_TEXT], 5.0)
+	var took := (Time.get_ticks_msec() - started) / 1000.0
+	ok(main.state in [TYPING, AREA_TEXT] and main.body.text.contains("照片") and not main.flashback.visible, "閃回結束（%.1f 秒）：回到區域，顯示原本的調查文字" % took)
+	ok(took >= 2.5 and took <= 4.0, "閃回約 3 秒")
+	await read()
+	# 再調查一次（清掉「已調查」，保留「已閃回」）：不再閃回
+	gs().flags.erase("parking_lot.wake")
+	await interact()
+	ok(main.state in [TYPING, AREA_TEXT], "同一輪再調查：不再閃回，直接顯示文字")
+	await read()
+	# 跳過：清掉兩個旗標再調查，閃回中按互動鍵
+	gs().flags.erase("parking_lot.wake")
+	gs().flags.erase("parking_lot.wake.flashback")
+	await interact()
+	await frames(10)
+	started = Time.get_ticks_msec()
+	await press_key(KEY_SPACE)
+	await wait_for(func(): return main.state in [TYPING, AREA_TEXT], 3.0)
+	ok(main.state in [TYPING, AREA_TEXT] and (Time.get_ticks_msec() - started) < 1200, "閃回中按互動鍵：跳過，馬上回到區域")
+	await read()
+	# 診療椅：只有拿到錄音筆的 variant 才閃回
+	var chair: Dictionary = main.areas.get_area("clinic")["points"]["chair"]
+	ok(not AreaData.view(chair, gs()).has("flashback"), "診療椅（沒有錄音筆）：不閃回")
+	gs().add_item("recorder")
+	ok(AreaData.view(chair, gs()).get("flashback", "") == "scene_05.webp", "診療椅（有錄音筆）：閃回 scene_05")
+
+
 func run_validation() -> void:
 	print("\n== 劇本檢查")
 	var story: StoryData = main.story
@@ -91,3 +132,6 @@ func run_validation() -> void:
 			if point.has("gesture"):
 				with_gesture += 1
 	ok(with_gesture == 7 and not story.gesture_alone.is_empty(), "資料：7 個互動點有手勢反應，另有沒有對象時的獨白")
+	ok(AreaData.flashback_errors({ "type": "inspect", "flashback": "scene_10.webp" }, "x").is_empty(), "正確的 flashback：通過")
+	ok(AreaData.flashback_errors({ "type": "inspect", "flashback": "scene_99.webp" }, "x").size() == 1, "flashback 插畫不存在：報錯")
+	ok(AreaData.flashback_errors({ "type": "exit", "flashback": "scene_10.webp" }, "x").size() == 1, "出口有 flashback：報錯")

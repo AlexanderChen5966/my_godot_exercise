@@ -11,6 +11,7 @@
   },
   "points": {
     "wake": {
+      "flashback": "scene_19.webp",
       "type": "inspect", "label": "醒來的地方", "title": "醒來的地方",
       "text": "你回到醒來的地方，在口袋裡摸到一張發黃的照片，是你與一個小女孩的合影。你想不起她的名字，卻捨不得放手。",
       "effects": { "memory": 1 }

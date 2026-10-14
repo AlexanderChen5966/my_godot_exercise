@@ -31,6 +31,7 @@
         {
           "require": { "items": ["recorder"] },
           "type": "choice", "label": "坐下", "title": "錄音筆", "once": true,
+          "flashback": "scene_05.webp",
           "text": "你在診療椅上坐下，掏出錄音筆，按下開關。一道稚嫩聲音傳來：「爸爸，你說話很奇怪耶……那天媽媽說你不一樣了。」你腦中刺痛，四肢痙攣，情緒洶湧。",
           "choices": [
             { "text": "反覆播放", "response": "你反覆聽著那聲音，回憶與痛苦交織。", "effects": { "memory": 1 } },
