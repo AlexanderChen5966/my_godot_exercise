@@ -216,6 +216,7 @@ func _validate_shape(story: StoryData, area: Dictionary, shape: Dictionary, ptag
 		errors.append("%s 類型不正確：%s" % [ptag, type])
 		return errors
 	errors.append_array(sound_errors(shape, ptag))
+	errors.append_array(gesture_errors(story, shape, ptag))
 	for choice in shape.get("choices", []):
 		errors.append_array(sound_errors(choice, "%s 的選項「%s」" % [ptag, choice.get("text", "")]))
 	if shape.has("trigger") and not TRIGGERS.has(shape["trigger"]):
@@ -249,6 +250,25 @@ func _validate_shape(story: StoryData, area: Dictionary, shape: Dictionary, ptag
 			for key in choice.get("require", {}):
 				if not story.stats.has(key):
 					errors.append("%s 的選項 require 用到 %s，但 story.json 的 stats 沒有定義" % [ptag, key])
+	return errors
+
+
+## A5：手勢的反應（互動點的 gesture）：要有 text、range 是正數、effects 的數值名稱要存在
+static func gesture_errors(story: StoryData, holder: Dictionary, tag: String) -> Array[String]:
+	var errors: Array[String] = []
+	if not holder.has("gesture"):
+		return errors
+	var gesture = holder["gesture"]
+	if typeof(gesture) != TYPE_DICTIONARY:
+		errors.append("%s 的 gesture 要是物件，例如 { \"text\": \"…\" }" % tag)
+		return errors
+	if str(gesture.get("text", "")).strip_edges().is_empty():
+		errors.append("%s 的 gesture 沒有 text（比手勢時的反應文字）" % tag)
+	if gesture.has("range") and not ((gesture["range"] is float or gesture["range"] is int) and float(gesture["range"]) > 0.0):
+		errors.append("%s 的 gesture.range 要是正數：%s" % [tag, gesture["range"]])
+	for key in gesture.get("effects", {}):
+		if not story.stats.has(key):
+			errors.append("%s 的 gesture.effects 用到 %s，但 story.json 的 stats 沒有定義" % [tag, key])
 	return errors
 
 

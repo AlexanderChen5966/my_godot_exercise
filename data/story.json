@@ -2,6 +2,7 @@
   "version": "1.5",
   "game_title": "失語者",
   "start_area": "parking_lot",
+  "gesture_alone": "你張開嘴，喉嚨只擠出含糊的聲音。手卻自己動了起來——按在胸口，攤開，指向地面。你不知道這些動作從哪裡來，只覺得曾經有人等著看。",
   "stats": {
     "memory": 0,
     "humanity": 3

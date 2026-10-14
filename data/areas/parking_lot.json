@@ -24,6 +24,7 @@
       "text": "你翻找落葉與灰塵，發現些殘骸與碎布。"
     },
     "woman": {
+      "gesture": { "text": "你按住胸口，攤開手掌，再指向地面。婦人僵在原地，盯著你的手。她的嘴唇動了動，像是想問什麼——然後恐懼又回到她臉上。" },
       "type": "choice", "trigger": "approach", "hide_on_done": true, "done_sfx": "scream", "title": "婦人",
       "impulse": { "range": 420 },
       "text": "遠處的人聲越來越近，是一個婦人。你聞到她的氣味，喉嚨深處湧起難以忍受的飢餓。",

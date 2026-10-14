@@ -24,6 +24,8 @@ func _init() -> void:
 		ids[int(s["id"])] = s
 	var stats: Dictionary = data.get("stats", {})
 	var start_area: String = data.get("start_area", "")
+	if data.has("gesture_alone") and not (data["gesture_alone"] is String):
+		errors.append("gesture_alone（沒有對象時比手勢的獨白）要是文字")
 	if start_area.is_empty() and not ids.has(int(data.get("start_id", 1))):
 		errors.append("start_id %s 不存在" % data.get("start_id", 1))
 	var ts: Dictionary = data.get("title_screen", {})

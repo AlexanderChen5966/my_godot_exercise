@@ -86,6 +86,19 @@ func end_action() -> void:
 	acting = false
 
 
+## A5：比出手勢「我——在——這——裡」（約 2 秒）。toward_x 有值時先轉向那個人。播完才結束，用 await 等。
+func play_gesture(toward_x := NAN) -> void:
+	if not is_nan(toward_x) and absf(toward_x - position.x) > 4.0:
+		facing = 1 if toward_x > position.x else -1
+	acting = true
+	_fade_out_step()
+	sprite.play("gesture_right" if facing > 0 else "gesture_left")
+	sprite.position.x = SPRITE_X_RIGHT if facing > 0 else SPRITE_X_LEFT
+	await sprite.animation_finished
+	acting = false
+	_update_animation(false)
+
+
 ## 左右各一套動畫（不用 flip_h），依「是否移動 × 面向」選擇；站著時衝動強度高就前傾
 func _update_animation(moving: bool) -> void:
 	if acting:

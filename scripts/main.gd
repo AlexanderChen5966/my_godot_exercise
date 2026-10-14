@@ -2,7 +2,7 @@
 ## 主文字與 response 以打字機效果顯示，換場時背景淡出淡入，BGM 以兩個播放器交替淡入淡出。
 extends Control
 
-enum State { TITLE, TRANSITION, TYPING, CHOOSING, RESPONSE, EXPLORE, AREA_TEXT }
+enum State { TITLE, TRANSITION, TYPING, CHOOSING, RESPONSE, EXPLORE, AREA_TEXT, GESTURE }  # GESTURE：A5 比手勢中（不能移動、不接受其他按鍵）
 
 const EXTRA_HINT_COLOR := "#a8a8a8"
 const CHOSEN_MODULATE := Color(1, 1, 1, 0.45)
@@ -16,6 +16,11 @@ const POOL_SIZE := 4  # A4：音效、介面音各準備幾個播放器輪流用
 const SOUND_HOLD_TIME := 0.7
 ## A4-3：打字聲（作者：和音效、環境音重疊很躁，先關掉；A6 的設定可以再做開關）
 const TYPE_SOUND := false
+## A5 手勢：互動點的 gesture 沒寫 range 時，多遠內有反應（px）；比手勢時的布料聲（Kenney cloth3）；第一次可以走動時的按鍵提示
+const GESTURE_RANGE := 360.0
+const GESTURE_SFX := "inspect_4.ogg"
+const GESTURE_HINT := "G　比出手勢"
+const GESTURE_HINT_TIME := 4.0
 ## A4：互動點沒有寫 sfx 時，依類型播放的聲音（出口在通過時才播自己的 sfx）
 const TYPE_SFX := { "inspect": "inspect", "item": "pickup" }
 const LOCKED_TEXT := "……（你想不起來）"   # 數值不夠時，選項顯示的文字
@@ -90,6 +95,8 @@ var _amb_index := 0
 var _amb_tween: Tween
 var _quiet_focus := false     # 自動聚焦第一個選項時不出游標聲
 var _hold_black := 0.0        # 下一次轉場在黑畫面多停幾秒（出口播了開門聲時）
+var _gesture_hint: Label      # A5：「G　比出手勢」（第一次可以走動時顯示一次）
+var _gesture_hint_shown := false
 var _pools := {}  # 播放器 → 輪流用的播放器陣列
 var sound_log: Array[String] = []  # 最近播過的音效名稱（測試與 MCP 驗證用，最多 20 個）
 var _start_blink: Tween
@@ -118,6 +125,7 @@ func _ready() -> void:
 	areas.load_areas()
 	if OS.is_debug_build():
 		_create_debug_label()
+	_create_gesture_hint()
 	show_title()
 
 
@@ -334,6 +342,8 @@ func _begin_explore() -> void:
 	_area.set_can_move(true)
 	_area.player.end_action()  # 調查完：手放下
 	_update_prompt()
+	if not _gesture_hint_shown:
+		_show_gesture_hint()
 
 
 func _update_prompt() -> void:
@@ -831,6 +841,82 @@ func _show_continue() -> void:
 	continue_label.visible = true
 
 
+## A5：比出手勢「我——在——這——裡」。附近有會反應的人（互動點的 gesture）就在比完後顯示反應文字（每人一輪一次）；
+## 沒有對象時，一輪的第一次顯示獨白（story.json 的 gesture_alone），之後只有動畫。
+func _do_gesture() -> void:
+	state = State.GESTURE
+	_area.set_can_move(false)
+	prompt_label.visible = false
+	var target := gesture_target()
+	play_sound(GESTURE_SFX)
+	await _area.player.play_gesture(_area.point_x(target) if not target.is_empty() else NAN)
+	if _area == null or state != State.GESTURE:
+		return
+	var holder := {}
+	if not target.is_empty():
+		var point := _area_point(target)
+		var gesture: Dictionary = point["gesture"]
+		var key := _point_key(target) + ".gesture"
+		GameState.set_flag(key)  # 之後的事件可以用 variants 依這個旗標換文字
+		GameState.apply_effects(gesture.get("effects", {}), key)
+		holder = { "title": point.get("title", ""), "text": gesture["text"] }
+	elif not GameState.has_flag("gesture.alone") and not story.gesture_alone.is_empty():
+		GameState.set_flag("gesture.alone")
+		holder = { "title": "", "text": story.gesture_alone }
+	if holder.is_empty():
+		_begin_explore()
+	else:
+		_show_area_text(holder)  # 沒有 point_id：關閉後回到探索
+
+
+## 手勢的對象：有 gesture、事件還沒發生、還沒對他比過、在範圍內的互動點中最近的一個；沒有時回傳空字串。
+func gesture_target() -> String:
+	var best := ""
+	var best_d := INF
+	var points: Dictionary = areas.get_area(_area_id).get("points", {})
+	for point_id in points:
+		if not points[point_id].has("gesture"):
+			continue
+		var point := _area_point(point_id)
+		if not _point_active(point_id, point) or GameState.has_flag(_point_key(point_id) + ".gesture"):
+			continue
+		var x: float = _area.point_x(point_id)
+		var d := absf(x - _area.player.position.x)
+		if d <= float(point["gesture"].get("range", GESTURE_RANGE)) and d < best_d:
+			best = point_id
+			best_d = d
+	return best
+
+
+func _create_gesture_hint() -> void:
+	_gesture_hint = Label.new()
+	_gesture_hint.name = "GestureHint"
+	_gesture_hint.text = GESTURE_HINT
+	_gesture_hint.add_theme_font_size_override("font_size", 18)
+	_gesture_hint.add_theme_color_override("font_color", Color(0.85, 0.85, 0.85))
+	_gesture_hint.add_theme_color_override("font_outline_color", Color.BLACK)
+	_gesture_hint.add_theme_constant_override("outline_size", 4)
+	_gesture_hint.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_gesture_hint.visible = false
+	prompt_label.get_parent().add_child(_gesture_hint)
+	_gesture_hint.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
+	_gesture_hint.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_gesture_hint.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	_gesture_hint.offset_bottom = -24.0
+
+
+## 第一次可以走動時，畫面下方淡淡顯示一次按鍵提示，幾秒後淡出
+func _show_gesture_hint() -> void:
+	_gesture_hint_shown = true
+	_gesture_hint.visible = true
+	_gesture_hint.modulate.a = 0.0
+	var tween := create_tween()
+	tween.tween_property(_gesture_hint, "modulate:a", 0.8, 0.6)
+	tween.tween_interval(GESTURE_HINT_TIME)
+	tween.tween_property(_gesture_hint, "modulate:a", 0.0, 0.8)
+	tween.tween_callback(func() -> void: _gesture_hint.visible = false)
+
+
 ## 除錯用：F3 顯示目前的數值（只在 debug 版建立，Web 正式版不會出現）。
 func _create_debug_label() -> void:
 	_debug_label = Label.new()
@@ -910,6 +996,10 @@ func _input(event: InputEvent) -> void:
 		return
 	if rotate_hint.visible:
 		get_viewport().set_input_as_handled()
+		return
+	if state == State.EXPLORE and event.is_action_pressed("gesture"):
+		get_viewport().set_input_as_handled()
+		_do_gesture()
 		return
 	if state == State.EXPLORE:
 		# 同一個輸入事件只處理一次：開啟文字後立即標記為已處理，不會同時被當成「關閉」。
