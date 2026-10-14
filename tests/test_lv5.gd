@@ -73,7 +73,11 @@ func run_normal() -> void:
 	await physics(2)
 	ok(sci.animation == "run" and sci.visible, "撲向科學家後她直接逃跑（沒有尖叫），還沒消失")
 	ok(not gs().has_item("notebook"), "撲向科學家：沒有筆記本")
-	await walk_to(1650); await choose(1)                        # 撲向警衛 人性 −1
+	await walk_to(1650)
+	var guard: AnimatedSprite2D = main.get("_area").get_node("Points/Guard/Figure")
+	var torch: PointLight2D = main.get("_area").get_node("Points/Guard/Torch")
+	ok(guard.animation == "event" and is_equal_approx(torch.rotation, PI), "警衛：事件開始時舉槍瞄準，手電筒的光水平照過來（A3）")
+	await choose(1)                                             # 撲向警衛 人性 −1
 	await go_exit(2150, "ruins")
 	await walk_to(800); await choose(2)                         # 躲起來
 	await walk_to(1600); await choose(0)                        # 看著她 記憶 +1

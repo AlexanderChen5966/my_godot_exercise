@@ -14,7 +14,9 @@
 [ext_resource type="SpriteFrames" uid="uid://b872yo2d63qvl" path="res://assets/sprites/player_frames.tres" id="9_k7ac4"]
 [ext_resource type="SpriteFrames" uid="uid://dhhotxbwmr3l2" path="res://assets/sprites/characters/scientist_frames.tres" id="9_ulrxu"]
 [ext_resource type="Script" uid="uid://cpx5m37cmu4jq" path="res://scripts/flicker_light.gd" id="10_4ogqb"]
-[ext_resource type="Texture2D" path="res://assets/sprites/characters/guard_canvas.tres" id="11_ulrxu"]
+[ext_resource type="SpriteFrames" uid="uid://jrobajgd4j5o" path="res://assets/sprites/characters/guard_frames.tres" id="11_00esb"]
+[ext_resource type="Texture2D" uid="uid://duel6ix5aqtus" path="res://assets/fx/flashlight_cone.png" id="12_w0vuw"]
+[ext_resource type="Script" uid="uid://d3i4dck8gbfgl" path="res://scripts/gun_torch.gd" id="13_00esb"]
 [ext_resource type="Texture2D" uid="uid://b1m8jx8sq2mvf" path="res://assets/sprites/props/lab_cart.png" id="15_wnh6g"]
 [ext_resource type="Texture2D" uid="uid://xlv8apiyf5yj" path="res://assets/sprites/layers/lab_near_vials.png" id="16_hsw77"]
 [ext_resource type="Texture2D" uid="uid://y0xjkcweiw4u" path="res://assets/sprites/layers/lab_near_cable.png" id="17_0cawk"]
@@ -254,11 +256,26 @@ point_id = "guard"
 position = Vector2(0, -2)
 shape = SubResource("RectangleShape2D_sxo7y")
 
-[node name="Figure" type="Sprite2D" parent="Points/Guard" unique_id=1697475855]
+[node name="Figure" type="AnimatedSprite2D" parent="Points/Guard" unique_id=1084424122]
 texture_filter = 1
 position = Vector2(55, -48)
 scale = Vector2(2, 2)
-texture = ExtResource("11_ulrxu")
+sprite_frames = ExtResource("11_00esb")
+animation = &"idle"
+autoplay = "idle"
+
+[node name="Torch" type="PointLight2D" parent="Points/Guard" unique_id=2028368410]
+color = Color(1, 0.92, 0.75, 1)
+energy = 2.6
+shadow_enabled = true
+shadow_filter = 1
+texture = ExtResource("12_w0vuw")
+texture_scale = 1.6
+height = 60.0
+script = ExtResource("13_00esb")
+follow = NodePath("../Figure")
+idle_frames = PackedVector3Array(2.6, 29, 22, 3.6, 30.5, 28, 4.7, 31.8, 34, 3.6, 30.5, 28)
+event_frame = Vector3(1, 22.5, 0)
 
 [node name="Exit" type="Area2D" parent="Points" unique_id=1483213795]
 position = Vector2(2150, 640)
