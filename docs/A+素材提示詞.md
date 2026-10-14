@@ -1,6 +1,8 @@
 # 失語者 A＋素材提示詞
 
 給外部 AI 工具用的提示詞（生圖、Suno、音效工具）。方案見 `docs/A+方案.md`。
+
+> **目前狀態（2026-10-14）**：A4 的聲音**全部用免費素材完成**（Freesound、Kenney、Pixabay），沒有用到 Suno 或 ElevenLabs；選了哪些檔案、來源與授權見 `docs/素材來源.md`。A1 的 7 張新遠景（第 1 節）和 Bad End 圖 B7 **還沒交付**：遊戲裡的遠景目前沿用原本的插畫（`scene_01` 等），Bad End 用 `scene_17`；要不要補由作者決定（A6 前都可以）。
 v1.5 的素材清單 `docs/asset_requests.md` 仍然有效：**還沒交付的 B1～B7、M1～M2、S1～S6 直接併入本文件**，不用重複準備。
 
 | 節 | 內容 | 用在 | 誰產生 |
@@ -155,6 +157,7 @@ Structure tags: [Intro] [Theme] [Outro]
 | **Zapsplat** | 免費版需標示作者 | 量很大 |
 
 **比較難找到合適的**（建議直接用 AI 補）：E2 感染者低吼、E5 婦人尖叫、E6 記憶閃回音。
+> 實際上 E2、E5 在 Freesound 找到了（低吼用男性呻吟的片段，尖叫加上停車場回音）。E6 留到 A5 做記憶閃回時再準備。
 
 ### 工具
 
@@ -230,6 +233,7 @@ Structure tags: [Intro] [Theme] [Outro]
 ## 5. 勾選清單
 
 **A1 需要（作者，生圖 AI）**
+（還沒交付；A1 先沿用原本的插畫完成，要不要補由作者決定）
 - [ ] P1 `area_parking.webp`（樣板，最先做）
 - [ ] P2 `area_street.webp`
 - [ ] P3 `area_clinic.webp`
@@ -237,13 +241,18 @@ Structure tags: [Intro] [Theme] [Outro]
 - [ ] P5 `area_ruins.webp`
 - [ ] P6 `area_home.webp`
 - [ ] P7 `area_wall.webp`
-- [ ] B7 `bad_end.webp`（v1.5 清單，A1 期間任何時候都可以）
+- [ ] B7 `bad_end.webp`（v1.5 清單；目前 Bad End 用 `scene_17`）
 
 **A4 需要**
-- [ ] 作者（免費素材）：F1～F3、I1～I4、E1、E3、E4、A1～A7、L1～L4 的候選
-- [ ] 作者（免費素材，找不到再用 Suno）：M1 `bgm_bad`、M2 `bgm_shelter`（選做）、M3 `bgm_title`（選做）
-- [ ] 補缺（ElevenLabs 或網頁工具，作者同意後）：E2 低吼、E5 尖叫、E6 閃回音，以及其他找不到合適素材的項目
-- [ ] Claude：整理候選、寫進 `docs/素材來源.md`
+（2026-10-14 完成）
+- [x] 作者（免費素材）：F1～F3、I1～I4、E1、E3、E4、A1～A6、L1～L4 的候選（Claude 列出 Freesound 網址、下載 Kenney 素材包）
+- [x] 作者（免費素材）：M1 `bgm_bad`（Metris）、M2 `bgm_shelter`（Pixabay 音樂盒）、M3 `bgm_title`（Pixabay sad world）
+- [x] E2 低吼、E5 尖叫：免費素材就找到了，沒有用 AI
+- [x] Claude：A7 牆前耳鳴、介面音（游標、確認、取消）用 ffmpeg 合成
+- [x] Claude：整理候選、寫進 `docs/素材來源.md`
+
+**A5 可能需要**
+- [ ] E6 `flashback.ogg`（記憶閃回音，做記憶閃回時才需要）
 
 沒有準備好的項目都有暫用素材，不會卡住開發。
 
