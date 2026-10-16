@@ -14,8 +14,9 @@ const AMB_FADE_TIME := 1.2  # A4：環境音換區域時的交叉淡化
 const POOL_SIZE := 4  # A4：音效、介面音各準備幾個播放器輪流用
 ## A4-3：有聲音的轉場（出口的開門聲、Bad End 的槍聲）在黑畫面多停幾秒，讓聲音在黑幕中播完再進下一個畫面（作者：聲音在轉場後才出來很怪）
 const SOUND_HOLD_TIME := 0.7
-## A4-3：打字聲（作者：和音效、環境音重疊很躁，先關掉；A6 的設定可以再做開關）
-const TYPE_SOUND := false
+## A6：標題選單與設定面板的顏色（選中＝金色）
+const MENU_COLOR := Color(0.78, 0.78, 0.78)
+const MENU_FOCUS_COLOR := Color(0.91, 0.81, 0.54)
 ## A5 手勢：互動點的 gesture 沒寫 range 時，多遠內有反應（px）；比手勢時的布料聲（Kenney cloth3）；第一次可以走動時的按鍵提示
 const GESTURE_RANGE := 360.0
 const GESTURE_SFX := "inspect_4.ogg"
@@ -56,7 +57,17 @@ const LEAN_FROM := 0.5   # A3：衝動強度到這裡，主角站著時改成前
 @onready var fade: ColorRect = %Fade
 @onready var title_layer: Control = %TitleLayer
 @onready var title_label: Label = %TitleLabel
-@onready var start_label: Label = %StartLabel
+@onready var start_label: Label = %StartLabel  # A6 起不用（改成選單），保留節點
+@onready var title_menu: VBoxContainer = %TitleMenu  # A6：開始遊戲／設定／製作群
+@onready var start_button: Button = %StartButton
+@onready var settings_button: Button = %SettingsButton
+@onready var credits_button: Button = %CreditsButton
+@onready var settings_panel: PanelContainer = %SettingsPanel  # A6：音量與打字聲（scripts/game_settings.gd）
+@onready var music_slider: HSlider = %MusicSlider
+@onready var sfx_slider: HSlider = %SfxSlider
+@onready var ambient_slider: HSlider = %AmbientSlider
+@onready var typing_toggle: Button = %TypingToggle
+@onready var back_button: Button = %BackButton
 @onready var story_layer: Control = %StoryLayer
 @onready var dialog_panel: PanelContainer = %DialogPanel
 @onready var ending_tag: Label = %EndingTag
@@ -131,11 +142,12 @@ var patrols: Dictionary = {}     # A5 躲藏：互動點編號 → 警衛巡視�
 signal flashback_finished  # A5：閃回播完（或被跳過）、回到區域
 var _pools := {}  # 播放器 → 輪流用的播放器陣列
 var sound_log: Array[String] = []  # 最近播過的音效名稱（測試與 MCP 驗證用，最多 20 個）
-var _start_blink: Tween
+var _sliders := {}  # A6：設定鍵 → 音量條
 
 
 func _ready() -> void:
 	_type_base_db = type_sfx.volume_db
+	GameSettings.load_settings()  # A6：音量、打字聲
 	SoundLib.register_all()  # 網頁版：先把音效交給瀏覽器解碼，第一次播放時才不會延遲
 	# A4：每種聲音準備幾個播放器輪流用，讓聲音可以重疊（低吼＋確認音）。
 	# 不用 AudioStreamPolyphonic：網頁版預設的 Sample 播放模式不一定支援，一般的播放器最保險。
@@ -150,6 +162,7 @@ func _ready() -> void:
 		_pools[player] = pool
 	camera_fx.set_background(background)
 	_setup_style()
+	_setup_title_menu()
 	get_window().size_changed.connect(_on_window_resized)
 	_on_window_resized()
 	if not story.load_story():
@@ -232,21 +245,19 @@ func show_title() -> void:
 	play_ambience("")
 	if _audio_unlocked:
 		play_bgm(story.title_screen["bgm"])
-	if _start_blink:
-		_start_blink.kill()
-	start_label.modulate.a = 1.0
-	_start_blink = create_tween().set_loops()
-	_start_blink.tween_property(start_label, "modulate:a", 0.3, 0.9)
-	_start_blink.tween_property(start_label, "modulate:a", 1.0, 0.9)
+	start_label.visible = false
+	settings_panel.visible = false
+	title_menu.visible = true
+	title_label.visible = true
+	_quiet_focus = true
+	start_button.grab_focus()
+	_quiet_focus = false
 
 
 func _start_game() -> void:
 	GameState.reset(story.stats)  # 新的一輪：清空旗標、物品，數值回到初始值
 	_audio_unlocked = true
-	sfx.play()
-	if _start_blink:
-		_start_blink.kill()
-		_start_blink = null
+	get_viewport().gui_release_focus()  # 選單的焦點拿掉，避免之後的按鍵又按到選單
 	state = State.TRANSITION
 	var tween := create_tween()
 	tween.tween_property(fade, "color:a", 1.0, FADE_HALF_TIME)
@@ -806,7 +817,7 @@ func _set_typed_count(count: int) -> void:
 
 ## 鍵盤感：每 2～4 個字隨機響一次，音高與音量帶些微變化，標點與空白不出聲。
 func _play_type_tick(ch: String) -> void:
-	if not TYPE_SOUND:
+	if not GameSettings.get_value("typing"):  # A6：設定裡的打字聲開關（預設關）
 		return
 	if SILENT_CHARS.contains(ch):
 		_next_tick_at = _typed_count + 1  # 標點後的下一個字馬上出聲，形成停頓後的重音
@@ -1145,6 +1156,150 @@ func _show_bottom_hint(text: String) -> void:
 	tween.tween_callback(func() -> void: _gesture_hint.visible = false)
 
 
+## A6：標題選單與設定面板
+func _setup_title_menu() -> void:
+	for button in [start_button, settings_button, credits_button, back_button]:
+		_style_menu_button(button)
+	_style_menu_button(typing_toggle, false)  # 開關的 ▶ 加在那一列的名稱上
+	typing_toggle.add_theme_font_size_override("font_size", 22)
+	for label in music_slider.get_parent().get_children():
+		if label is Label:
+			label.add_theme_font_size_override("font_size", 22)  # 每一列的名稱、百分比和開關一樣大
+	for button in [start_button, settings_button, credits_button]:
+		button.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.8))  # 標題背景是亮的牆，加陰影比較好讀
+		button.add_theme_constant_override("shadow_offset_x", 2)
+		button.add_theme_constant_override("shadow_offset_y", 2)
+	start_button.pressed.connect(_on_title_button.bind("start"))
+	settings_button.pressed.connect(_on_title_button.bind("settings"))
+	back_button.pressed.connect(_close_settings)
+	typing_toggle.pressed.connect(_on_typing_toggled)
+	_sliders = { "music": music_slider, "sfx": sfx_slider, "ambient": ambient_slider }
+	for key in _sliders:
+		var slider: HSlider = _sliders[key]
+		slider.value_changed.connect(_on_volume_changed.bind(key))
+		_highlight_row_on_focus(slider)
+	_highlight_row_on_focus(typing_toggle)
+	var panel_style := StyleBoxFlat.new()
+	panel_style.bg_color = Color(0.07, 0.07, 0.09, 0.94)
+	panel_style.border_color = Color(0.35, 0.31, 0.25)
+	panel_style.set_border_width_all(2)
+	panel_style.set_corner_radius_all(10)
+	panel_style.set_content_margin_all(28)
+	settings_panel.add_theme_stylebox_override("panel", panel_style)
+	var track := StyleBoxFlat.new()
+	track.bg_color = Color(1, 1, 1, 0.15)
+	track.set_corner_radius_all(6)
+	track.content_margin_top = 6
+	track.content_margin_bottom = 6
+	var fill := track.duplicate() as StyleBoxFlat
+	fill.bg_color = Color(0.78, 0.75, 0.69)
+	for slider in _sliders.values():
+		slider.add_theme_stylebox_override("slider", track)
+		slider.add_theme_stylebox_override("grabber_area", fill)
+		slider.add_theme_stylebox_override("grabber_area_highlight", fill)
+
+
+## 選單按鈕：沒有底框，文字灰色，選中（聚焦或滑鼠移過去）變金色、前面加 ▶
+func _style_menu_button(button: Button, with_arrow := true) -> void:
+	var empty := StyleBoxEmpty.new()
+	for style_name in ["normal", "hover", "pressed", "focus", "disabled"]:
+		button.add_theme_stylebox_override(style_name, empty)
+	button.add_theme_font_size_override("font_size", 24)
+	button.add_theme_color_override("font_color", MENU_COLOR)
+	for color_name in ["font_hover_color", "font_focus_color", "font_pressed_color", "font_hover_pressed_color"]:
+		button.add_theme_color_override(color_name, MENU_FOCUS_COLOR)
+	if with_arrow:
+		button.set_meta("base_text", button.text)
+		button.focus_entered.connect(func() -> void:
+			button.text = "▶ " + str(button.get_meta("base_text"))
+			_on_choice_focus())
+		button.focus_exited.connect(func() -> void: button.text = str(button.get_meta("base_text")))
+	button.mouse_entered.connect(func() -> void:
+		if button.is_visible_in_tree():
+			button.grab_focus())
+
+
+## 設定面板裡，聚焦的那一列名稱變金色、前面加 ▶
+func _highlight_row_on_focus(control: Control) -> void:
+	var label := control.get_parent().get_child(control.get_index() - 1) as Label
+	var base := label.text
+	control.focus_entered.connect(func() -> void:
+		label.text = "▶ " + base
+		label.add_theme_color_override("font_color", MENU_FOCUS_COLOR)
+		_on_choice_focus())
+	control.focus_exited.connect(func() -> void:
+		label.text = base
+		label.remove_theme_color_override("font_color"))
+
+
+## 標題畫面的按鍵：第一次按鍵或點擊時解鎖聲音、開始播標題曲（瀏覽器規定互動後才能播放）；設定面板開著時 Esc 關閉
+func _title_input(event: InputEvent) -> void:
+	var pressed := (event is InputEventKey or event is InputEventMouseButton) and event.is_pressed()
+	if pressed and not _audio_unlocked:
+		_audio_unlocked = true
+		play_bgm(story.title_screen["bgm"])
+	if settings_panel.visible and event.is_action_pressed("ui_cancel"):
+		get_viewport().set_input_as_handled()
+		_close_settings()
+
+
+func _on_title_button(which: String) -> void:
+	if state != State.TITLE:
+		return
+	play_ui("ui_confirm")
+	match which:
+		"start":
+			_start_game()
+		"settings":
+			_open_settings()
+
+
+func _open_settings() -> void:
+	title_menu.visible = false
+	title_label.visible = false  # 標題的字會從面板後面透出來
+	settings_panel.visible = true
+	for key in _sliders:
+		(_sliders[key] as HSlider).set_value_no_signal(roundf(float(GameSettings.get_value(key)) * 100.0))
+		_update_volume_label(key)
+	_update_typing_text()
+	_quiet_focus = true
+	music_slider.grab_focus()
+	_quiet_focus = false
+
+
+func _close_settings() -> void:
+	settings_panel.visible = false
+	title_menu.visible = true
+	title_label.visible = true
+	play_ui("ui_cancel")
+	_quiet_focus = true
+	settings_button.grab_focus()
+	_quiet_focus = false
+
+
+func _on_volume_changed(value: float, key: String) -> void:
+	GameSettings.set_value(key, value / 100.0)
+	_update_volume_label(key)
+	if key == "sfx":
+		play_ui("ui_confirm")  # 調音效時播一聲，聽得出大小
+
+
+func _update_volume_label(key: String) -> void:
+	var slider: HSlider = _sliders[key]
+	var value_label := slider.get_parent().get_child(slider.get_index() + 1) as Label
+	value_label.text = "%d%%" % int(slider.value)
+
+
+func _on_typing_toggled() -> void:
+	GameSettings.set_value("typing", not GameSettings.get_value("typing"))
+	_update_typing_text()
+	play_ui("ui_confirm")
+
+
+func _update_typing_text() -> void:
+	typing_toggle.text = "開" if GameSettings.get_value("typing") else "關"
+
+
 ## 除錯用：F3 顯示目前的數值（只在 debug 版建立，Web 正式版不會出現）。
 func _create_debug_label() -> void:
 	_debug_label = Label.new()
@@ -1281,8 +1436,10 @@ func _input(event: InputEvent) -> void:
 					_area.player_reach(_nearby_point)  # A3：轉向物件、伸手調查
 				_open_point(point, _nearby_point)
 		return
-	if state != State.TITLE and state != State.TYPING and state != State.RESPONSE \
-			and state != State.AREA_TEXT:
+	if state == State.TITLE:
+		_title_input(event)  # A6：標題由選單處理（第一次按鍵時解鎖聲音）
+		return
+	if state != State.TYPING and state != State.RESPONSE and state != State.AREA_TEXT:
 		return
 	var mb := event as InputEventMouseButton
 	var clicked := mb != null and mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT
@@ -1291,8 +1448,6 @@ func _input(event: InputEvent) -> void:
 	get_viewport().set_input_as_handled()
 	if state == State.AREA_TEXT:
 		_close_area_text()
-	elif state == State.TITLE:
-		_start_game()
 	elif state == State.TYPING:
 		_finish_typing()  # 打字中點擊：直接顯示全部
 	else:

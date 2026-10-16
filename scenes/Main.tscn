@@ -127,6 +127,7 @@ vertical_alignment = 1
 
 [node name="StartLabel" type="Label" parent="UILayer/TitleLayer" unique_id=1629298349]
 unique_name_in_owner = true
+visible = false
 layout_mode = 1
 anchors_preset = -1
 anchor_top = 0.8
@@ -139,6 +140,134 @@ theme_override_font_sizes/font_size = 28
 text = "點擊開始"
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="TitleMenu" type="VBoxContainer" parent="UILayer/TitleLayer" unique_id=948027536]
+unique_name_in_owner = true
+layout_mode = 0
+anchor_left = 0.5
+anchor_top = 0.79
+anchor_right = 0.5
+anchor_bottom = 0.79
+offset_left = -120.0
+offset_right = 120.0
+offset_bottom = 140.0
+theme_override_constants/separation = 2
+
+[node name="StartButton" type="Button" parent="UILayer/TitleLayer/TitleMenu" unique_id=715540809]
+unique_name_in_owner = true
+layout_mode = 2
+text = "開始遊戲"
+
+[node name="SettingsButton" type="Button" parent="UILayer/TitleLayer/TitleMenu" unique_id=807066660]
+unique_name_in_owner = true
+layout_mode = 2
+text = "設定"
+
+[node name="CreditsButton" type="Button" parent="UILayer/TitleLayer/TitleMenu" unique_id=1005019952]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+text = "製作群"
+
+[node name="SettingsPanel" type="PanelContainer" parent="UILayer/TitleLayer" unique_id=1760346664]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -270.0
+offset_top = -220.0
+offset_right = 270.0
+offset_bottom = 220.0
+
+[node name="VBox" type="VBoxContainer" parent="UILayer/TitleLayer/SettingsPanel" unique_id=938453488]
+layout_mode = 2
+theme_override_constants/separation = 22
+
+[node name="SettingsTitle" type="Label" parent="UILayer/TitleLayer/SettingsPanel/VBox" unique_id=762672011]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.91, 0.81, 0.54, 1)
+theme_override_font_sizes/font_size = 30
+text = "設定"
+horizontal_alignment = 1
+
+[node name="Grid" type="GridContainer" parent="UILayer/TitleLayer/SettingsPanel/VBox" unique_id=106700254]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/h_separation = 24
+theme_override_constants/v_separation = 26
+columns = 3
+
+[node name="MusicLabel" type="Label" parent="UILayer/TitleLayer/SettingsPanel/VBox/Grid" unique_id=1770693570]
+custom_minimum_size = Vector2(130, 0)
+layout_mode = 2
+text = "音樂"
+
+[node name="MusicSlider" type="HSlider" parent="UILayer/TitleLayer/SettingsPanel/VBox/Grid" unique_id=883979125]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(240, 24)
+layout_mode = 2
+size_flags_vertical = 4
+step = 10.0
+
+[node name="MusicValue" type="Label" parent="UILayer/TitleLayer/SettingsPanel/VBox/Grid" unique_id=322847274]
+custom_minimum_size = Vector2(70, 0)
+layout_mode = 2
+
+[node name="SfxLabel" type="Label" parent="UILayer/TitleLayer/SettingsPanel/VBox/Grid" unique_id=1982668742]
+layout_mode = 2
+text = "音效"
+
+[node name="SfxSlider" type="HSlider" parent="UILayer/TitleLayer/SettingsPanel/VBox/Grid" unique_id=550448980]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(240, 24)
+layout_mode = 2
+size_flags_vertical = 4
+step = 10.0
+
+[node name="SfxValue" type="Label" parent="UILayer/TitleLayer/SettingsPanel/VBox/Grid" unique_id=239395494]
+layout_mode = 2
+
+[node name="AmbientLabel" type="Label" parent="UILayer/TitleLayer/SettingsPanel/VBox/Grid" unique_id=134106349]
+layout_mode = 2
+text = "環境音"
+
+[node name="AmbientSlider" type="HSlider" parent="UILayer/TitleLayer/SettingsPanel/VBox/Grid" unique_id=1458425145]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(240, 24)
+layout_mode = 2
+size_flags_vertical = 4
+step = 10.0
+
+[node name="AmbientValue" type="Label" parent="UILayer/TitleLayer/SettingsPanel/VBox/Grid" unique_id=1853279553]
+layout_mode = 2
+
+[node name="TypingLabel" type="Label" parent="UILayer/TitleLayer/SettingsPanel/VBox/Grid" unique_id=271069615]
+layout_mode = 2
+text = "打字聲"
+
+[node name="TypingToggle" type="Button" parent="UILayer/TitleLayer/SettingsPanel/VBox/Grid" unique_id=468968989]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 0
+
+[node name="TypingSpacer" type="Label" parent="UILayer/TitleLayer/SettingsPanel/VBox/Grid" unique_id=1091146877]
+layout_mode = 2
+
+[node name="BackButton" type="Button" parent="UILayer/TitleLayer/SettingsPanel/VBox" unique_id=698412656]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 4
+text = "返回"
+
+[node name="KeysHint" type="Label" parent="UILayer/TitleLayer/SettingsPanel/VBox" unique_id=1611527275]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.55, 0.55, 1)
+theme_override_font_sizes/font_size = 15
+text = "↑↓ 選擇　←→ 調整　Enter／空白鍵 確定　Esc 返回"
+horizontal_alignment = 1
 
 [node name="StoryLayer" type="Control" parent="UILayer" unique_id=1853390955]
 unique_name_in_owner = true

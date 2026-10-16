@@ -18,6 +18,9 @@ var checks := 0
 
 ## 載入主場景、執行 run_tests()、印出結果並結束（子類別覆寫 run_tests）
 func _initialize() -> void:
+	# A6：測試用自己的設定檔，從預設值開始（測試副本和編輯器共用同一個使用者資料夾，不能讀到、改到作者實際的設定）
+	GameSettings.path = "user://settings_test.cfg"
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(GameSettings.path))
 	main = (load("res://scenes/Main.tscn") as PackedScene).instantiate()
 	root.add_child(main)
 	await frames(5)

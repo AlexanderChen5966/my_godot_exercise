@@ -1,0 +1,51 @@
+## A6 自動測試：標題選單（開始遊戲／設定）、設定面板（音量、打字聲、記住設定）、第一次按鍵解鎖聲音。
+## 共用操作在 play_base.gd（測試用自己的設定檔 user://settings_test.cfg）。執行：zsh tests/run_tests.sh test_a6
+extends "res://tests/play_base.gd"
+
+
+func run_tests() -> void:
+	print("\n== 標題選單")
+	ok(main.state == TITLE and main.title_menu.visible and not main.start_label.visible, "標題畫面：顯示選單，不再是「點擊開始」")
+	ok(main.start_button.has_focus() and main.start_button.text == "▶ 開始遊戲", "一開始選中「開始遊戲」（金色、前面有 ▶）")
+	ok(not main.credits_button.visible, "製作群還沒開放（A6-2 才做）")
+	await press_key(KEY_DOWN)
+	ok(main.settings_button.has_focus() and main.settings_button.text == "▶ 設定" and main.start_button.text == "開始遊戲", "↓：移到「設定」")
+	ok(main.sound_log.back() == "ui_cursor", "移動有游標聲")
+	ok(main.get("_audio_unlocked") and main.get("_bgm_file") == "bgm_title.ogg", "第一次按鍵：解鎖聲音、開始播標題曲")
+
+	print("\n== 設定面板")
+	await press_key(KEY_ENTER)
+	ok(main.settings_panel.visible and not main.title_menu.visible and not main.title_label.visible, "Enter：打開設定（選單和標題藏起來）")
+	ok(main.music_slider.has_focus() and main.music_slider.value == 100.0 and main.sfx_slider.value == 100.0 and main.ambient_slider.value == 100.0, "預設音量都是 100%，選中音樂")
+	ok(main.typing_toggle.text == "關", "打字聲預設關")
+	await press_key(KEY_LEFT)
+	ok(main.music_slider.value == 90.0 and is_equal_approx(AudioServer.get_bus_volume_db(AudioServer.get_bus_index("BGM")), linear_to_db(0.9)), "←：音樂 90%，BGM 分組的音量跟著變")
+	await press_key(KEY_DOWN)
+	await press_key(KEY_LEFT)
+	await press_key(KEY_LEFT)
+	ok(main.sfx_slider.value == 80.0 and main.sound_log.back() == "ui_confirm", "音效調到 80%，調的時候播一聲確認音")
+	await press_key(KEY_DOWN)
+	for i in 10:
+		await press_key(KEY_LEFT)
+	ok(main.ambient_slider.value == 0.0 and AudioServer.is_bus_mute(AudioServer.get_bus_index("Ambient")), "環境音調到 0%：環境音分組靜音")
+	await press_key(KEY_DOWN)
+	await press_key(KEY_ENTER)
+	ok(main.typing_toggle.text == "開" and GameSettings.get_value("typing"), "打字聲：按 Enter 切成開")
+	var cfg := ConfigFile.new()
+	cfg.load(GameSettings.path)
+	ok(is_equal_approx(float(cfg.get_value("settings", "music")), 0.9) and is_equal_approx(float(cfg.get_value("settings", "sfx")), 0.8) and cfg.get_value("settings", "typing") == true, "設定已存檔（下次開遊戲還在）")
+	await press_key(KEY_ESCAPE)
+	ok(not main.settings_panel.visible and main.title_menu.visible and main.settings_button.has_focus(), "Esc：關閉設定，回到選單的「設定」")
+
+	print("\n== 記住設定、開始遊戲")
+	GameSettings.values["music"] = 1.0
+	GameSettings.load_settings()
+	ok(is_equal_approx(float(GameSettings.get_value("music")), 0.9), "重新讀取設定檔：音樂還是 90%")
+	await press_key(KEY_UP)
+	await press_key(KEY_ENTER)
+	await wait_for(func(): return main.state in [TYPING, AREA_TEXT], 5.0)
+	ok(area() == "parking_lot", "選「開始遊戲」：進入停車場")
+	await wait_for(func(): return main.type_sfx.playing, 2.0)
+	ok(main.type_sfx.playing, "打字聲開著：打字時有聲音")
+	await back_to_title()
+	ok(main.state == TITLE and main.start_button.has_focus(), "回到標題：選單選中「開始遊戲」")
