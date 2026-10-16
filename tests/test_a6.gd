@@ -1,4 +1,4 @@
-## A6 自動測試：標題選單（開始遊戲／設定）、設定面板（音量、打字聲、記住設定）、第一次按鍵解鎖聲音。
+## A6 自動測試：標題選單（開始遊戲／設定／製作群）、製作群（CC BY 作者、Godot 授權、捲動）、設定面板（音量、打字聲、記住設定）、第一次按鍵解鎖聲音。
 ## 共用操作在 play_base.gd（測試用自己的設定檔 user://settings_test.cfg）。執行：zsh tests/run_tests.sh test_a6
 extends "res://tests/play_base.gd"
 
@@ -7,7 +7,7 @@ func run_tests() -> void:
 	print("\n== 標題選單")
 	ok(main.state == TITLE and main.title_menu.visible and not main.start_label.visible, "標題畫面：顯示選單，不再是「點擊開始」")
 	ok(main.start_button.has_focus() and main.start_button.text == "▶ 開始遊戲", "一開始選中「開始遊戲」（金色、前面有 ▶）")
-	ok(not main.credits_button.visible, "製作群還沒開放（A6-2 才做）")
+	ok(main.credits_button.visible, "選單有「製作群」")
 	await press_key(KEY_DOWN)
 	ok(main.settings_button.has_focus() and main.settings_button.text == "▶ 設定" and main.start_button.text == "開始遊戲", "↓：移到「設定」")
 	ok(main.sound_log.back() == "ui_cursor", "移動有游標聲")
@@ -36,6 +36,21 @@ func run_tests() -> void:
 	ok(is_equal_approx(float(cfg.get_value("settings", "music")), 0.9) and is_equal_approx(float(cfg.get_value("settings", "sfx")), 0.8) and cfg.get_value("settings", "typing") == true, "設定已存檔（下次開遊戲還在）")
 	await press_key(KEY_ESCAPE)
 	ok(not main.settings_panel.visible and main.title_menu.visible and main.settings_button.has_focus(), "Esc：關閉設定，回到選單的「設定」")
+
+	print("\n== 製作群")
+	await press_key(KEY_DOWN)
+	await press_key(KEY_ENTER)
+	ok(main.credits_panel.visible and not main.title_menu.visible and main.credits_back.has_focus(), "製作群：打開面板，選中「返回」")
+	var text: String = main.credits_text.get_parsed_text()
+	ok(text.contains("cosmicembers") and text.contains("pfranzen") and text.contains("Metris"), "列出 CC BY 素材的三位作者")
+	ok(text.contains("Permission is hereby granted") and text.contains("Godot Engine"), "附上 Godot Engine 的 MIT 授權全文（引擎提供）")
+	ok(text.contains("Kenney") and text.contains("Noto Sans TC"), "感謝名單與字型")
+	await press_key(KEY_DOWN)
+	await press_key(KEY_DOWN)
+	ok(main.credits_scroll.scroll_vertical > 0 and main.credits_back.has_focus(), "↓：捲動內容（焦點留在「返回」）")
+	await press_key(KEY_ESCAPE)
+	ok(not main.credits_panel.visible and main.title_menu.visible and main.credits_button.has_focus(), "Esc：關閉製作群，回到選單的「製作群」")
+	await press_key(KEY_UP)
 
 	print("\n== 記住設定、開始遊戲")
 	GameSettings.values["music"] = 1.0

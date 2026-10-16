@@ -1,0 +1,20 @@
+{
+  "title": "製作群",
+  "sections": [
+    { "title": "插畫", "lines": ["原作 Kivy 版插畫（ChatGPT 生成）"] },
+    { "title": "音樂", "lines": [
+      "Suno 生成",
+      "\"Dark Ambient Reverse Chords\" by Metris（Freesound）— CC BY 4.0",
+      "universfield、epic_music（Pixabay）"
+    ] },
+    { "title": "音效", "lines": [
+      "\"distent gunshot\" by cosmicembers（Freesound）— CC BY 3.0",
+      "\"Windy, creaky old house ambience\" by pfranzen（Freesound）— CC BY 4.0",
+      "Kenney（kenney.nl）",
+      "Freesound 社群：Ixwolf、kkenny101、cyntrix、Lydmakeren、Mr_KeybOred、agaudiodesigns、Nox_Sound、brunoboselli、EverydaySounds、patchytherat、Mystikuum、LampEight、mathewhenry、jemburyturner、loudernoises、sadc0415、starnezio"
+    ] },
+    { "title": "字型", "lines": ["Noto Sans TC（Google）— SIL Open Font License 1.1"] },
+    { "title": "使用工具", "lines": ["Godot Engine、Pixelorama"] }
+  ],
+  "engine_license": true
+}

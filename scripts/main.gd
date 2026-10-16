@@ -17,6 +17,8 @@ const SOUND_HOLD_TIME := 0.7
 ## A6：標題選單與設定面板的顏色（選中＝金色）
 const MENU_COLOR := Color(0.78, 0.78, 0.78)
 const MENU_FOCUS_COLOR := Color(0.91, 0.81, 0.54)
+const CREDITS_FILE := "res://data/credits.json"
+const CREDITS_SCROLL_STEP := 60  # ↑↓ 一次捲動幾 px
 ## A5 手勢：互動點的 gesture 沒寫 range 時，多遠內有反應（px）；比手勢時的布料聲（Kenney cloth3）；第一次可以走動時的按鍵提示
 const GESTURE_RANGE := 360.0
 const GESTURE_SFX := "inspect_4.ogg"
@@ -68,6 +70,10 @@ const LEAN_FROM := 0.5   # A3：衝動強度到這裡，主角站著時改成前
 @onready var ambient_slider: HSlider = %AmbientSlider
 @onready var typing_toggle: Button = %TypingToggle
 @onready var back_button: Button = %BackButton
+@onready var credits_panel: PanelContainer = %CreditsPanel  # A6：製作群（內容在 data/credits.json，Godot 授權由引擎提供）
+@onready var credits_scroll: ScrollContainer = %CreditsScroll
+@onready var credits_text: RichTextLabel = %CreditsText
+@onready var credits_back: Button = %CreditsBack
 @onready var story_layer: Control = %StoryLayer
 @onready var dialog_panel: PanelContainer = %DialogPanel
 @onready var ending_tag: Label = %EndingTag
@@ -247,6 +253,7 @@ func show_title() -> void:
 		play_bgm(story.title_screen["bgm"])
 	start_label.visible = false
 	settings_panel.visible = false
+	credits_panel.visible = false
 	title_menu.visible = true
 	title_label.visible = true
 	_quiet_focus = true
@@ -1158,7 +1165,7 @@ func _show_bottom_hint(text: String) -> void:
 
 ## A6：標題選單與設定面板
 func _setup_title_menu() -> void:
-	for button in [start_button, settings_button, credits_button, back_button]:
+	for button in [start_button, settings_button, credits_button, back_button, credits_back]:
 		_style_menu_button(button)
 	_style_menu_button(typing_toggle, false)  # 開關的 ▶ 加在那一列的名稱上
 	typing_toggle.add_theme_font_size_override("font_size", 22)
@@ -1172,6 +1179,8 @@ func _setup_title_menu() -> void:
 	start_button.pressed.connect(_on_title_button.bind("start"))
 	settings_button.pressed.connect(_on_title_button.bind("settings"))
 	back_button.pressed.connect(_close_settings)
+	credits_button.pressed.connect(_on_title_button.bind("credits"))
+	credits_back.pressed.connect(_close_credits)
 	typing_toggle.pressed.connect(_on_typing_toggled)
 	_sliders = { "music": music_slider, "sfx": sfx_slider, "ambient": ambient_slider }
 	for key in _sliders:
@@ -1186,6 +1195,7 @@ func _setup_title_menu() -> void:
 	panel_style.set_corner_radius_all(10)
 	panel_style.set_content_margin_all(28)
 	settings_panel.add_theme_stylebox_override("panel", panel_style)
+	credits_panel.add_theme_stylebox_override("panel", panel_style)
 	var track := StyleBoxFlat.new()
 	track.bg_color = Color(1, 1, 1, 0.15)
 	track.set_corner_radius_all(6)
@@ -1241,6 +1251,13 @@ func _title_input(event: InputEvent) -> void:
 	if settings_panel.visible and event.is_action_pressed("ui_cancel"):
 		get_viewport().set_input_as_handled()
 		_close_settings()
+	elif credits_panel.visible:
+		if event.is_action_pressed("ui_cancel"):
+			get_viewport().set_input_as_handled()
+			_close_credits()
+		elif event.is_action_pressed("ui_up", true) or event.is_action_pressed("ui_down", true):
+			get_viewport().set_input_as_handled()  # ↑↓ 捲動內容（不移動焦點）
+			credits_scroll.scroll_vertical += CREDITS_SCROLL_STEP * (-1 if event.is_action("ui_up") else 1)
 
 
 func _on_title_button(which: String) -> void:
@@ -1252,6 +1269,8 @@ func _on_title_button(which: String) -> void:
 			_start_game()
 		"settings":
 			_open_settings()
+		"credits":
+			_open_credits()
 
 
 func _open_settings() -> void:
@@ -1275,6 +1294,56 @@ func _close_settings() -> void:
 	_quiet_focus = true
 	settings_button.grab_focus()
 	_quiet_focus = false
+
+
+func _open_credits() -> void:
+	title_menu.visible = false
+	title_label.visible = false
+	credits_panel.visible = true
+	if credits_text.text.is_empty():
+		credits_text.text = _credits_bbcode()
+	credits_scroll.scroll_vertical = 0
+	_quiet_focus = true
+	credits_back.grab_focus()
+	_quiet_focus = false
+
+
+func _close_credits() -> void:
+	credits_panel.visible = false
+	title_menu.visible = true
+	title_label.visible = true
+	play_ui("ui_cancel")
+	_quiet_focus = true
+	credits_button.grab_focus()
+	_quiet_focus = false
+
+
+## 製作群的內容：data/credits.json 的各段（標題金色），最後是 Godot Engine 的 MIT 授權全文與第三方元件清單（引擎提供，和實際使用的版本一致）
+func _credits_bbcode() -> String:
+	var data = JSON.parse_string(FileAccess.get_file_as_string(CREDITS_FILE))
+	if typeof(data) != TYPE_DICTIONARY:
+		return ""
+	var out := ""
+	for section in data.get("sections", []):
+		out += "[color=#e8cf8a]%s[/color]\n" % _bb_escape(section.get("title", ""))
+		for line in section.get("lines", []):
+			out += _bb_escape(str(line)) + "\n"
+		out += "\n"
+	if data.get("engine_license", false):
+		out += "[color=#8a8a8a]────────────\n本遊戲使用 Godot Engine，授權如下：[/color]\n"
+		out += "[font_size=14]" + _bb_escape(Engine.get_license_text()) + "[/font_size]\n\n"
+		out += "[color=#8a8a8a]Godot Engine 使用的第三方元件：[/color]\n[font_size=14]"
+		for info in Engine.get_copyright_info():
+			var licenses := {}
+			for part in info.get("parts", []):
+				licenses[part.get("license", "")] = true
+			out += "%s（%s）\n" % [_bb_escape(info.get("name", "")), "、".join(licenses.keys())]
+		out += "[/font_size]"
+	return out
+
+
+func _bb_escape(text: String) -> String:
+	return text.replace("[", "[lb]")
 
 
 func _on_volume_changed(value: float, key: String) -> void:

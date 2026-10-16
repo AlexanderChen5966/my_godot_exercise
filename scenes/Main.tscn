@@ -165,7 +165,6 @@ text = "設定"
 
 [node name="CreditsButton" type="Button" parent="UILayer/TitleLayer/TitleMenu" unique_id=1005019952]
 unique_name_in_owner = true
-visible = false
 layout_mode = 2
 text = "製作群"
 
@@ -267,6 +266,58 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0.55, 0.55, 0.55, 1)
 theme_override_font_sizes/font_size = 15
 text = "↑↓ 選擇　←→ 調整　Enter／空白鍵 確定　Esc 返回"
+horizontal_alignment = 1
+
+[node name="CreditsPanel" type="PanelContainer" parent="UILayer/TitleLayer" unique_id=686449941]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -360.0
+offset_top = -330.0
+offset_right = 360.0
+offset_bottom = 330.0
+
+[node name="VBox" type="VBoxContainer" parent="UILayer/TitleLayer/CreditsPanel" unique_id=107712008]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="CreditsTitle" type="Label" parent="UILayer/TitleLayer/CreditsPanel/VBox" unique_id=1210198236]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.91, 0.81, 0.54, 1)
+theme_override_font_sizes/font_size = 30
+text = "製作群"
+horizontal_alignment = 1
+
+[node name="CreditsScroll" type="ScrollContainer" parent="UILayer/TitleLayer/CreditsPanel/VBox" unique_id=1339121042]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="CreditsText" type="RichTextLabel" parent="UILayer/TitleLayer/CreditsPanel/VBox/CreditsScroll" unique_id=1029485930]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/normal_font_size = 18
+bbcode_enabled = true
+fit_content = true
+
+[node name="CreditsBack" type="Button" parent="UILayer/TitleLayer/CreditsPanel/VBox" unique_id=177240650]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 4
+text = "返回"
+
+[node name="CreditsKeys" type="Label" parent="UILayer/TitleLayer/CreditsPanel/VBox" unique_id=657516568]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.55, 0.55, 1)
+theme_override_font_sizes/font_size = 15
+text = "↑↓ 捲動　Enter／Esc 返回"
 horizontal_alignment = 1
 
 [node name="StoryLayer" type="Control" parent="UILayer" unique_id=1853390955]
