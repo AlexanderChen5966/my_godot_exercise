@@ -4,6 +4,7 @@
   "bgm": "bgm_08.ogg",
   "ambience": "amb_lab.ogg",
   "floor": "concrete",
+  "hint": { "after_x": 1100, "text": "避開手電筒的光：靠近掩護按 E 躲起來" },
   "intro": {
     "title": "實驗逃脫",
     "text": "不知過了多少天。某個夜裡，警報響了。實驗設施失控，警報大作。你趁機掙脫，奪門而出。火焰、碎裂玻璃與混亂人聲交織成地獄般景象。"
@@ -31,6 +32,11 @@
       "text": "散落的紀錄寫著：「記憶重建實驗——受試者：楊尚瑜，編號 07。」下面有一行小字：「對女兒的聲音反應最強烈。」"
     },
     "guard": {
+      "patrol": { "face_left": 4.0, "face_right": 3.0, "spot_time": 0.4 },
+      "variants": [
+        { "require": { "flags": ["lab.guard.spotted"] },
+          "text": "手電筒的光停在你身上。「誰在那裡！」槍口跟著對準過來。" }
+      ],
       "resist": { "hold": 2.0, "presses": 8, "time": 5.0, "fail": 1 },
       "gesture": { "text": "你舉起手。手電筒的光猛地照過來，槍口跟著對準你。「別動！」他沒有看懂，也不打算看懂。" },
       "type": "choice", "trigger": "approach", "hide_on_done": true, "title": "警衛",
@@ -47,6 +53,11 @@
           "to": { "scene": 22 } }
       ]
     },
+    "cart_hide": { "type": "hide", "label": "躲起來", "title": "推車" },
+    "crates": { "type": "hide", "label": "躲起來", "title": "箱子" },
+    "vent": { "type": "hide", "label": "鑽進通風管", "title": "通風管", "sfx": "door_metal",
+      "text": "你擠進狹窄的通風管，屏住呼吸。腳步聲停了一下，又走遠了。",
+      "to_x": 1950, "after_text": "你從通風管另一頭爬出來。走廊盡頭的出口就在眼前。", "done": "guard" },
     "exit": {
       "type": "exit", "sfx": "door_metal", "label": "逃出設施", "title": "逃出設施",
       "text": "你朝出口狂奔，衝出破碎的鐵門，心中只剩一個目標——回家。",

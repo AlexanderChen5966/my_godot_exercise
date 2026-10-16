@@ -26,6 +26,7 @@ var step_sounds: Array[AudioStream] = []  # A4：目前區域地面的腳步聲�
 
 var _steps: AudioStreamPlayer
 var steps_played := 0  # 播過幾次腳步聲（測試用）
+var in_cover := false  # A5 躲藏：躲在掩護後面（變暗、半透明，警衛的光照到也不會發現）；一移動就出來
 var _steps_tween: Tween
 
 @onready var sprite: AnimatedSprite2D = $Sprite
@@ -58,6 +59,8 @@ func _ready() -> void:
 
 func _physics_process(_delta: float) -> void:
 	var direction := Input.get_vector("move_left", "move_right", "move_up", "move_down") if can_move else Vector2.ZERO
+	if in_cover and direction != Vector2.ZERO:
+		set_in_cover(false)  # 移動就從掩護後面出來
 	var old_position := position
 	velocity = Vector2(direction.x * SPEED, direction.y * SPEED * DEPTH_SPEED_RATIO)
 	move_and_slide()
@@ -84,6 +87,12 @@ func reach_toward(x: float) -> void:
 
 func end_action() -> void:
 	acting = false
+
+
+## A5 躲藏：躲到掩護後面／出來（樣子先用變暗、半透明；蹲下的動畫是之後的升級方案）
+func set_in_cover(value: bool) -> void:
+	in_cover = value
+	modulate = Color(0.35, 0.35, 0.42, 0.6) if value else Color.WHITE
 
 
 ## A5：比出手勢「我——在——這——裡」（約 2 秒）。toward_x 有值時先轉向那個人。播完才結束，用 await 等。

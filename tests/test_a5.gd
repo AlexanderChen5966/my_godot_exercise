@@ -1,6 +1,7 @@
 ## A5 自動測試：手勢（G 鍵比出「我——在——這——裡」）、人物的反應文字、沒有對象時的獨白、只反應一次、事件發生後不再反應、
 ## 比手勢時不能移動也不接受其他按鍵、對話中按 G 沒有作用、按鍵提示、數值不變（方案 A）、劇本檢查。
 ## 記憶閃回：調查關鍵物品時先閃回原插畫再顯示文字、可以跳過、一輪一次、診療椅沒有錄音筆時不閃回、劇本檢查。
+## 躲藏：警衛轉身、被光照到 → 被發現的警衛事件、掩護裡不會被發現、移動就出來、通風管 → 從另一頭出來、警衛事件結束。
 ## 壓抑衝動：按住（測試版）或連打（正式版）成功 → 撲上去隱藏、失敗（時限）→ 自動撲上去、判定後鎖住按鍵、妻子失敗 → Bad End、重試重新抵抗、女兒不抵抗、劇本檢查。
 ## 共用操作在 play_base.gd。執行：zsh tests/run_tests.sh test_a5
 extends "res://tests/play_base.gd"
@@ -16,6 +17,8 @@ func run_tests() -> void:
 	await run_flashback()
 	await back_to_title()
 	await run_resist()
+	await back_to_title()
+	await run_hide()
 	await back_to_title()
 	run_validation()
 
@@ -214,6 +217,72 @@ func seconds(t: float) -> void:
 		await process_frame
 
 
+func to_lab() -> void:
+	await start_game()
+	main.call("_switch_area", "lab")
+	await enter("lab")
+
+
+## 主角瞬移到 (x, y)，等物理更新讓互動點偵測到
+func place(x: float, y: float) -> void:
+	player().position = Vector2(x, y)
+	await physics(4)
+
+
+func run_hide() -> void:
+	print("\n== 躲藏")
+	await to_lab()
+	var patrol = main.patrols.get("guard")
+	ok(patrol != null and not patrol.is_facing_right(), "設施走廊：警衛有巡視，一開始面向左")
+	await walk_to(1150)
+	await frames(5)
+	ok(main.get("_gesture_hint").visible and main.get("_gesture_hint").text == "避開手電筒的光：靠近掩護按 E 躲起來", "走過 x 1100：畫面下方提示一次")
+	await seconds(4.3)
+	ok(patrol.is_facing_right(), "約 4 秒後轉身面向右")
+	await seconds(3.2)
+	ok(not patrol.is_facing_right(), "約 3 秒後轉回面向左")
+
+	# 站在光裡 → 被發現
+	patrol.face_toward(0.0)
+	await place(1500, 692)
+	await wait_for(func(): return main.state != EXPLORE, 2.0)
+	ok(gs().has_flag("lab.guard.spotted") and main.sound_log.has("pickup_2.ogg"), "站在光照到的地方 0.4 秒：被發現（旗標、上膛聲）")
+	ok(main.body.text.contains("誰在那裡"), "被發現：警衛事件換成「手電筒的光停在你身上……」")
+	await choose(0)  # 抵抗成功後選「躲進通風管」
+	ok(not figure_visible("Guard"), "警衛事件結束：警衛離開")
+	await back_to_title()
+
+	# 躲在箱子後面：光照到也不會被發現；一移動就出來
+	await to_lab()
+	patrol = main.patrols.get("guard")
+	await place(1450, 660)
+	ok(prompt().contains("躲起來"), "箱子：提示「E　躲起來」")
+	await interact()
+	ok(player().in_cover and main.sound_log.back() == "inspect_4.ogg" and prompt().contains("出來"), "按 E：躲到箱子後面（布料聲），提示變成「E　出來」")
+	patrol.face_toward(0.0)
+	await seconds(1.0)
+	ok(main.state == EXPLORE and not gs().has_flag("lab.guard.spotted"), "躲著時警衛面向這裡、光照到：不會被發現")
+	Input.action_press("move_left")
+	await physics(6)
+	Input.action_release("move_left")
+	await physics(2)
+	ok(not player().in_cover, "一移動就從掩護後面出來")
+
+	# 通風管：從另一頭出來，警衛事件一起結束
+	patrol.face_toward(2200.0)  # 警衛面向右（背對主角）
+	await place(1545, 670)
+	ok(prompt().contains("鑽進通風管"), "通風管入口：提示「E　鑽進通風管」")
+	await interact()
+	await read()
+	await wait_for(func(): return main.state in [TYPING, AREA_TEXT], 4.0)
+	ok(absf(player().position.x - 1950.0) < 1.0 and main.body.text.contains("另一頭爬出來"), "從通風管另一頭（x 1950）爬出來，顯示爬出來的文字")
+	ok(gs().has_flag("lab.guard") and not figure_visible("Guard"), "警衛事件算結束：警衛走遠、消失")
+	await read()
+	ok(main.state == EXPLORE and not patrol.active, "可以繼續走，警衛不再巡視")
+	await go_exit(2150, "ruins")
+	ok(area() == "ruins", "走到出口：進入廢墟")
+
+
 func run_validation() -> void:
 	print("\n== 劇本檢查")
 	var story: StoryData = main.story
@@ -236,3 +305,7 @@ func run_validation() -> void:
 	ok(AreaData.resist_errors({ "type": "choice", "choices": two, "resist": { "presses": 10, "time": 5.0, "fail": 2 } }, "x").size() == 1, "resist.fail 指向不存在的選項：報錯")
 	ok(AreaData.resist_errors({ "type": "choice", "choices": two, "resist": { "presses": 0, "time": -1, "fail": 0 } }, "x").size() == 2, "resist.presses、time 不是正數：報錯")
 	ok(AreaData.resist_errors({ "type": "inspect", "resist": { "fail": 0 } }, "x").size() == 2, "不是 choice 卻有 resist：報錯")
+	var lab: Dictionary = main.areas.get_area("lab")
+	ok(AreaData.hide_errors(lab, lab["points"]["vent"], "x").is_empty() and AreaData.patrol_errors(lab["points"]["guard"], "x").is_empty(), "走廊的通風管、警衛巡視：通過")
+	ok(AreaData.hide_errors(lab, { "type": "hide", "to_x": 1950, "done": "nobody" }, "x").size() == 3, "通風管沒有文字、done 指向不存在的互動點：報錯")
+	ok(AreaData.patrol_errors({ "patrol": { "face_left": 0, "spot_time": -1 } }, "x").size() == 2, "patrol 的秒數不是正數：報錯")

@@ -4,7 +4,7 @@ class_name AreaData
 extends RefCounted
 
 const AREA_DIR := "res://data/areas/"
-const POINT_TYPES := ["inspect", "item", "choice", "exit", "approach"]
+const POINT_TYPES := ["inspect", "item", "choice", "exit", "approach", "hide"]  # hide：A5 躲藏的掩護（有 to_x 的是通風管）
 const TRIGGERS := ["interact", "approach"]
 const ONCE_BY_DEFAULT := ["item", "choice"]
 
@@ -139,6 +139,9 @@ func validate(story: StoryData, warnings: Array[String] = []) -> Array[String]:
 			errors.append("%s 的環境音不存在：%s" % [tag, area["ambience"]])
 		if area.has("floor") and SoundLib.paths("step_" + str(area["floor"])).is_empty():
 			errors.append("%s 的 floor 沒有對應的腳步聲（step_%s_1.ogg…）：%s" % [tag, area["floor"], area["floor"]])
+		var hint = area.get("hint", {})
+		if area.has("hint") and (typeof(hint) != TYPE_DICTIONARY or str(hint.get("text", "")).is_empty() or not (hint.get("after_x") is float or hint.get("after_x") is int)):
+			errors.append("%s 的 hint 要有 text 與 after_x（數字）：%s" % [tag, hint])
 		if area.has("intro") and text_of(story, area["intro"]).is_empty():
 			errors.append("%s 的開場沒有文字或引用無效：%s" % [tag, area["intro"]])
 		for key in area.get("spawns", {}):
@@ -156,6 +159,10 @@ func validate(story: StoryData, warnings: Array[String] = []) -> Array[String]:
 			var point: Dictionary = points[point_id]
 			var ptag := "%s 的互動點 %s" % [tag, point_id]
 			set_flags["%s.%s" % [area_id, point_id]] = true  # 自動旗標
+			# A5：程式自動設定的旗標（被警衛發現、比過手勢、閃回過），variants 可以用
+			for auto in [["patrol", "spotted"], ["gesture", "gesture"], ["flashback", "flashback"]]:
+				if point.has(auto[0]):
+					set_flags["%s.%s.%s" % [area_id, point_id, auto[1]]] = true
 			_collect_require(point.get("require", {}), ptag, needed)
 			# 互動點本身與每一個 variant 都要各自完整
 			var shapes: Array = [point]
@@ -219,6 +226,7 @@ func _validate_shape(story: StoryData, area: Dictionary, shape: Dictionary, ptag
 	errors.append_array(gesture_errors(story, shape, ptag))
 	errors.append_array(flashback_errors(shape, ptag))
 	errors.append_array(resist_errors(shape, ptag))
+	errors.append_array(patrol_errors(shape, ptag))
 	for choice in shape.get("choices", []):
 		errors.append_array(sound_errors(choice, "%s 的選項「%s」" % [ptag, choice.get("text", "")]))
 	if shape.has("trigger") and not TRIGGERS.has(shape["trigger"]):
@@ -236,6 +244,8 @@ func _validate_shape(story: StoryData, area: Dictionary, shape: Dictionary, ptag
 		if shape.has("from") and not has_text:
 			errors.append("%s 引用無效：%s" % [ptag, shape["from"]])
 		errors.append_array(_validate_target(story, exit_target(area, shape), ptag))
+	elif type == "hide":
+		errors.append_array(hide_errors(area, shape, ptag))  # 掩護不用文字；通風管（to_x）才要
 	elif not has_text:
 		errors.append("%s 沒有文字或引用無效" % ptag)
 	if type == "item" and str(shape.get("item", "")).is_empty():
@@ -252,6 +262,37 @@ func _validate_shape(story: StoryData, area: Dictionary, shape: Dictionary, ptag
 			for key in choice.get("require", {}):
 				if not story.stats.has(key):
 					errors.append("%s 的選項 require 用到 %s，但 story.json 的 stats 沒有定義" % [ptag, key])
+	return errors
+
+
+## A5 躲藏：掩護（type hide）。有 to_x 的是通風管：要有 text、after_text，to_x 是正數，done 指向同一區域存在的互動點
+static func hide_errors(area: Dictionary, holder: Dictionary, tag: String) -> Array[String]:
+	var errors: Array[String] = []
+	if not holder.has("to_x"):
+		return errors
+	if not ((holder["to_x"] is float or holder["to_x"] is int) and float(holder["to_x"]) > 0.0):
+		errors.append("%s 的 to_x 要是正數：%s" % [tag, holder["to_x"]])
+	for key in ["text", "after_text"]:
+		if str(holder.get(key, "")).strip_edges().is_empty():
+			errors.append("%s 是通風管（有 to_x），但沒有 %s" % [tag, key])
+	if holder.has("done") and not area.get("points", {}).has(str(holder["done"])):
+		errors.append("%s 的 done 指向不存在的互動點：%s" % [tag, holder["done"]])
+	return errors
+
+
+## A5 躲藏：警衛的巡視（patrol）：face_left、face_right、spot_time 都要是正數
+static func patrol_errors(holder: Dictionary, tag: String) -> Array[String]:
+	var errors: Array[String] = []
+	if not holder.has("patrol"):
+		return errors
+	var patrol = holder["patrol"]
+	if typeof(patrol) != TYPE_DICTIONARY:
+		errors.append("%s 的 patrol 要是物件" % tag)
+		return errors
+	for key in ["face_left", "face_right", "spot_time"]:
+		var v = patrol.get(key, 1.0)
+		if not ((v is float or v is int) and float(v) > 0.0):
+			errors.append("%s 的 patrol.%s 要是正數：%s" % [tag, key, v])
 	return errors
 
 

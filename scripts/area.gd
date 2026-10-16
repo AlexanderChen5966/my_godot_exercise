@@ -92,6 +92,14 @@ func player_reach(point_id: String) -> void:
 	player.reach_toward(point_x(point_id))
 
 
+## 互動點的節點（找不到時回傳 null）
+func point_node(point_id: String) -> Node2D:
+	for point in $Points.get_children():
+		if point.get("point_id") == point_id:
+			return point
+	return null
+
+
 ## 互動點在區域裡的 x 座標（衝動機制算距離用）；找不到時回傳 NAN。
 func point_x(point_id: String) -> float:
 	for point in $Points.get_children():

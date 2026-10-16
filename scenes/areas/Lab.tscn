@@ -19,8 +19,10 @@
 [ext_resource type="Texture2D" uid="uid://duel6ix5aqtus" path="res://assets/fx/flashlight_cone.png" id="12_w0vuw"]
 [ext_resource type="Script" uid="uid://d3i4dck8gbfgl" path="res://scripts/gun_torch.gd" id="13_00esb"]
 [ext_resource type="Texture2D" uid="uid://b1m8jx8sq2mvf" path="res://assets/sprites/props/lab_cart.png" id="15_wnh6g"]
+[ext_resource type="Texture2D" uid="uid://c87rd7elduthq" path="res://assets/sprites/props/lab_crates.png" id="16_0cawk"]
 [ext_resource type="Texture2D" uid="uid://xlv8apiyf5yj" path="res://assets/sprites/layers/lab_near_vials.png" id="16_hsw77"]
 [ext_resource type="Texture2D" uid="uid://y0xjkcweiw4u" path="res://assets/sprites/layers/lab_near_cable.png" id="17_0cawk"]
+[ext_resource type="Texture2D" uid="uid://fy77snv4km62" path="res://assets/sprites/props/lab_vent.png" id="17_qs8ws"]
 [ext_resource type="Texture2D" uid="uid://dgwrgnpcbrwmr" path="res://assets/sprites/layers/parking_near_glass.png" id="18_qs8ws"]
 [ext_resource type="Texture2D" uid="uid://d24vhekys17va" path="res://assets/sprites/layers/clinic_near_clipboard.png" id="19_fywi0"]
 [ext_resource type="Texture2D" uid="uid://dgcn27mn37xss" path="res://assets/sprites/layers/parking_near_papers.png" id="20_11yr6"]
@@ -51,6 +53,18 @@ size = Vector2(160, 100)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_o5tg5"]
 size = Vector2(100, 50)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_fywi0"]
+size = Vector2(170, 96)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_11yr6"]
+size = Vector2(110, 96)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_q3xl1"]
+size = Vector2(60, 10)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_eg6yc"]
+size = Vector2(80, 50)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_kipkx"]
 size = Vector2(32, 96)
@@ -314,6 +328,51 @@ position = Vector2(0, -76)
 scale = Vector2(2, 2)
 texture = ExtResource("7_6u4t4")
 
+[node name="CartHide" type="Area2D" parent="Points" unique_id=1892798735]
+position = Vector2(950, 700)
+script = ExtResource("3_sxo7y")
+point_id = "cart_hide"
+
+[node name="Shape" type="CollisionShape2D" parent="Points/CartHide" unique_id=1378837346]
+position = Vector2(0, -8)
+shape = SubResource("RectangleShape2D_fywi0")
+
+[node name="Crates" type="Area2D" parent="Points" unique_id=1742708523]
+position = Vector2(1450, 700)
+script = ExtResource("3_sxo7y")
+point_id = "crates"
+
+[node name="Shape" type="CollisionShape2D" parent="Points/Crates" unique_id=1839418665]
+position = Vector2(0, -8)
+shape = SubResource("RectangleShape2D_11yr6")
+
+[node name="Prop" type="Sprite2D" parent="Points/Crates" unique_id=1403801069]
+texture_filter = 1
+position = Vector2(0, -32)
+scale = Vector2(2, 2)
+texture = ExtResource("16_0cawk")
+
+[node name="Block" type="StaticBody2D" parent="Points/Crates" unique_id=66021060]
+
+[node name="Shape" type="CollisionShape2D" parent="Points/Crates/Block" unique_id=411989989]
+position = Vector2(0, -5)
+shape = SubResource("RectangleShape2D_q3xl1")
+
+[node name="Vent" type="Area2D" parent="Points" unique_id=25137770]
+position = Vector2(1545, 640)
+script = ExtResource("3_sxo7y")
+point_id = "vent"
+
+[node name="Shape" type="CollisionShape2D" parent="Points/Vent" unique_id=839221376]
+position = Vector2(0, 25)
+shape = SubResource("RectangleShape2D_eg6yc")
+
+[node name="Prop" type="Sprite2D" parent="Points/Vent" unique_id=1800129765]
+texture_filter = 1
+position = Vector2(0, -20)
+scale = Vector2(2, 2)
+texture = ExtResource("17_qs8ws")
+
 [node name="Player" type="CharacterBody2D" parent="." unique_id=1633340741]
 position = Vector2(160, 640)
 motion_mode = 1
@@ -407,6 +466,13 @@ position = Vector2(2050, 760)
 scale = Vector2(2, 2)
 texture = ExtResource("16_hsw77")
 offset = Vector2(0, -4)
+flip_h = true
+
+[node name="VentExit" type="Sprite2D" parent="Near" unique_id=1375346153]
+texture_filter = 1
+position = Vector2(1950, 620)
+scale = Vector2(2, 2)
+texture = ExtResource("17_qs8ws")
 flip_h = true
 
 [node name="FrontLayer" type="Parallax2D" parent="." unique_id=1888911907]

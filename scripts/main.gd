@@ -35,6 +35,10 @@ const RESIST_LOCK_MS := 900
 ## 抵抗的操作（作者 2026-10-16）：true＝按住空白鍵（測試版，量表依資料的 hold 秒數上漲）；false＝連打（正式版，依 presses 次數）。正式版改回 false。
 const RESIST_HOLD := true
 const RESIST_HOLD_TIME := 2.0  # 資料沒寫 hold 時要按住幾秒
+## A5 躲藏：警衛的巡視（轉身、光錐判定）；被發現時的聲音（Kenney 金屬喀嚓，像槍上膛）；躲起來時的布料聲
+const GuardPatrol := preload("res://scripts/guard_patrol.gd")
+const SPOTTED_SFX := "pickup_2.ogg"
+const HIDE_SFX := "inspect_4.ogg"
 ## A4：互動點沒有寫 sfx 時，依類型播放的聲音（出口在通過時才播自己的 sfx）
 const TYPE_SFX := { "inspect": "inspect", "item": "pickup" }
 const LOCKED_TEXT := "……（你想不起來）"   # 數值不夠時，選項顯示的文字
@@ -122,6 +126,7 @@ var _resist: Dictionary = {}     # 目前事件的 resist 設定（hold／presse
 var resist_value := 0.0          # 量表 0～1
 var _resist_left := 0.0          # 剩幾秒
 var _input_locked_until := 0     # 這個時間（毫秒）之前不接受按鍵
+var patrols: Dictionary = {}     # A5 躲藏：互動點編號 → 警衛巡視節點（guard_patrol.gd）
 
 signal flashback_finished  # A5：閃回播完（或被跳過）、回到區域
 var _pools := {}  # 播放器 → 輪流用的播放器陣列
@@ -288,10 +293,12 @@ func _instantiate_area(area_id: String, from_area := "") -> Node2D:
 	for point_id in points:
 		if _is_done(point_id) and _hides_when_done(points[point_id]):
 			_area.consume_point(point_id)
+	_setup_patrols()
 	return _area
 
 
 func _free_area() -> void:
+	patrols.clear()
 	if _area:
 		_area.queue_free()
 		_area = null
@@ -388,7 +395,10 @@ func _update_prompt() -> void:
 	if state != State.EXPLORE or not _point_active(_nearby_point, point):
 		prompt_label.visible = false
 		return
-	prompt_label.text = "E　%s" % point.get("label", "調查")
+	var label: String = point.get("label", "調查")
+	if point.get("type") == "hide" and _area.player.in_cover:
+		label = "出來"
+	prompt_label.text = "E　%s" % label
 	prompt_label.visible = true
 	_place_prompt()
 
@@ -516,6 +526,9 @@ func _close_area_text() -> void:
 	_area_choice = {}
 	if chosen.has("to"):
 		_go_to(chosen["to"])  # 例如警衛逼近時選「停下不動」→ Bad End
+		return
+	if point.get("type") == "hide" and point.has("to_x"):
+		_go_through_vent(point)  # A5 躲藏：鑽進通風管，從另一頭爬出來
 		return
 	if point.get("type") == "exit":
 		_go_through_exit(point)
@@ -929,6 +942,88 @@ func resist_fail_index() -> int:
 	return int(_resist.get("fail", -1)) if state == State.RESIST else -1
 
 
+## A5 躲藏：區域裡有 patrol 的互動點（警衛），在它底下建立巡視節點
+func _setup_patrols() -> void:
+	patrols.clear()
+	var points: Dictionary = areas.get_area(_area_id).get("points", {})
+	for point_id in points:
+		if not points[point_id].has("patrol"):
+			continue
+		var node: Node2D = _area.point_node(point_id)
+		if node == null or not node.has_node("Figure") or not node.has_node("Torch"):
+			continue
+		var patrol := GuardPatrol.new()
+		patrol.name = "Patrol"
+		node.add_child(patrol)
+		patrol.setup(points[point_id]["patrol"], node.get_node("Figure"), node.get_node("Torch"), _area.player)
+		patrol.spotted.connect(_on_spotted.bind(point_id))
+		patrols[point_id] = patrol
+
+
+## 被警衛發現：轉向主角、上膛聲、畫面震動，進入原本的事件（旗標「區域.互動點.spotted」讓事件換成被發現的文字）
+func _on_spotted(point_id: String) -> void:
+	if state != State.EXPLORE:
+		return
+	GameState.set_flag(_point_key(point_id) + ".spotted")
+	_area.player.set_in_cover(false)
+	patrols[point_id].face_toward(_area.player.global_position.x)
+	play_sound(SPOTTED_SFX)
+	camera_fx.shake()
+	_show_area_text(_area_point(point_id), point_id)
+
+
+## 躲到掩護後面／出來
+func _toggle_hidden() -> void:
+	var player = _area.player
+	player.set_in_cover(not player.in_cover)
+	if player.in_cover:
+		play_sound(HIDE_SFX)
+	_update_prompt()
+
+
+## 鑽進通風管：黑畫面 → 從另一頭（to_x）爬出來，done 指定的事件（警衛）一起結束 → 顯示 after_text
+func _go_through_vent(point: Dictionary) -> void:
+	state = State.TRANSITION
+	_area.set_can_move(false)
+	prompt_label.visible = false
+	_area.player.set_in_cover(false)
+	var tween := create_tween()
+	tween.tween_property(fade, "color:a", 1.0, FADE_HALF_TIME)
+	tween.tween_interval(SOUND_HOLD_TIME)
+	tween.tween_callback(func() -> void:
+		_area.place_player(float(point["to_x"]))
+		_area.player.face(1)
+		if point.has("done"):
+			_finish_point(str(point["done"]))
+	)
+	tween.tween_property(fade, "color:a", 0.0, FADE_HALF_TIME)
+	tween.tween_callback(func() -> void:
+		_show_area_text({ "title": point.get("title", ""), "text": point.get("after_text", "") })
+	)
+
+
+## 讓互動點的事件直接算結束（不顯示文字）：完成旗標、人物離開
+func _finish_point(point_id: String) -> void:
+	var point := _area_point(point_id)
+	_mark_done(point_id)
+	GameState.set_flag(AreaData.done_key(_point_key(point_id), point))
+	_area.consume_point(point_id)
+
+
+## A5：區域的 hint（{ after_x, text }）：主角第一次走過 after_x 時，畫面下方淡淡顯示一次
+func _check_area_hint() -> void:
+	if state != State.EXPLORE or _area == null:
+		return
+	var hint_data: Dictionary = areas.get_area(_area_id).get("hint", {})
+	if hint_data.is_empty() or _area.player.position.x < float(hint_data.get("after_x", 0.0)):
+		return
+	var key := "hint.%s" % _area_id
+	if GameState.has_flag(key):
+		return
+	GameState.set_flag(key)
+	_show_bottom_hint(str(hint_data.get("text", "")))
+
+
 ## 打開互動點：有記憶閃回（flashback）而且這一輪還沒閃回過時，先閃回再顯示文字。
 func _open_point(point: Dictionary, point_id: String) -> void:
 	if point.has("flashback") and not GameState.has_flag(_point_key(point_id) + ".flashback"):
@@ -1035,6 +1130,12 @@ func _create_gesture_hint() -> void:
 ## 第一次可以走動時，畫面下方淡淡顯示一次按鍵提示，幾秒後淡出
 func _show_gesture_hint() -> void:
 	_gesture_hint_shown = true
+	_show_bottom_hint(GESTURE_HINT)
+
+
+## 畫面下方淡淡顯示一句提示，幾秒後淡出（手勢、躲藏共用）
+func _show_bottom_hint(text: String) -> void:
+	_gesture_hint.text = text
 	_gesture_hint.visible = true
 	_gesture_hint.modulate.a = 0.0
 	var tween := create_tween()
@@ -1059,6 +1160,11 @@ func _create_debug_label() -> void:
 
 
 func _process(delta: float) -> void:
+	for point_id in patrols:
+		var patrol = patrols[point_id]  # 不指定型別：區域釋放後這裡是已釋放的物件，先檢查再用
+		if is_instance_valid(patrol):
+			patrol.active = state == State.EXPLORE and _point_active(point_id, _area_point(point_id))
+	_check_area_hint()
 	if state == State.RESIST:
 		if RESIST_HOLD and Input.is_action_pressed("interact"):
 			resist_value = minf(resist_value + delta / float(_resist.get("hold", RESIST_HOLD_TIME)), 1.0)
@@ -1165,7 +1271,9 @@ func _input(event: InputEvent) -> void:
 			var point := _area_point(_nearby_point)
 			if not _point_active(_nearby_point, point):
 				return
-			if point.get("type") == "exit" and AreaData.text_of(story, point).is_empty():
+			if point.get("type") == "hide" and not point.has("to_x"):
+				_toggle_hidden()  # A5 躲藏：躲到掩護後面／出來
+			elif point.get("type") == "exit" and AreaData.text_of(story, point).is_empty():
 				_mark_done(_nearby_point)
 				_go_through_exit(point)  # 沒有文字的出口（例如「回到停車場」）直接換區域
 			else:
