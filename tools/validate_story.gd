@@ -94,6 +94,35 @@ func _init() -> void:
 		print("數值：%s" % ", ".join(stats.keys().map(func(k): return "%s=%s" % [k, str(stats[k]).trim_suffix(".0")])))
 
 	errors.append_array(areas.validate(story, warnings))
+	# A6 瘦身：字型只留用到的字（art/tools/font_subset.py）；資料裡的每個字都要在字型裡，否則網頁版會顯示成方塊
+	var font_path: String = ProjectSettings.get_setting("gui/theme/custom_font", "")
+	var font := load(font_path) as FontFile if not font_path.is_empty() else null
+	if font:
+		var texts: Array[String] = []
+		_collect_text(data, texts)
+		for area_id in areas.area_ids():
+			_collect_text(areas.get_area(area_id), texts)
+		_collect_text(JSON.parse_string(FileAccess.get_file_as_string("res://data/credits.json")), texts)
+		var missing := {}
+		for snippet in texts:
+			for ch in snippet:
+				if ch.unicode_at(0) > 0x7E and not font.has_char(ch.unicode_at(0)):
+					missing[ch] = true
+		if not missing.is_empty():
+			errors.append("字型缺少這些字（重新執行 ~/Tools/fonttools-venv/bin/python art/tools/font_subset.py）：%s" % "".join(missing.keys()))
+	# A6 瘦身：網頁版排除了沒用到的 BGM（export_presets.cfg 的 exclude_filter）；有用到的音樂不能被排除，否則網頁版會沒有那首
+	var used_bgm := { story.title_screen.get("bgm", ""): "標題畫面" }
+	for id in ids:
+		used_bgm[ids[id]["bgm"]] = "場景 %d" % id
+	for area_id in areas.area_ids():
+		var area_bgm: String = areas.get_area(area_id).get("bgm", "")
+		if not area_bgm.is_empty():
+			used_bgm[area_bgm] = "區域 %s" % area_id
+	var excluded := _export_excludes()
+	for bgm in used_bgm:
+		for pattern in excluded:
+			if ("assets/bgm/" + str(bgm)).match(pattern):
+				errors.append("%s 用到的音樂 %s 被網頁版的 exclude_filter 排除了（%s）" % [used_bgm[bgm], bgm, pattern])
 	for area_id in areas.area_ids():
 		var bgm: String = areas.get_area(area_id).get("bgm", "")
 		if not bgm.is_empty() and not ResourceLoader.exists(BGM_DIR + bgm):
@@ -178,6 +207,31 @@ func _check_routes(story: StoryData, areas: AreaData, start_area: String, ids: D
 		for key in item[1]:
 			if int(top.get(key, 0)) < int(item[1][key]):
 				errors.append("%s 需要 %s ≥ %d，但最多只能到 %d" % [item[0], key, int(item[1][key]), int(top.get(key, 0))])
+
+
+## 把 JSON 資料裡所有的文字收集起來（字型檢查用）
+static func _collect_text(value, out: Array[String]) -> void:
+	if value is String:
+		out.append(value)
+	elif value is Array:
+		for item in value:
+			_collect_text(item, out)
+	elif value is Dictionary:
+		for key in value:
+			_collect_text(value[key], out)
+
+
+## Web 匯出設定的 exclude_filter（逗號分隔的萬用字元路徑）
+static func _export_excludes() -> Array[String]:
+	var out: Array[String] = []
+	var cfg := ConfigFile.new()
+	if cfg.load("res://export_presets.cfg") != OK:
+		return out
+	for section in cfg.get_sections():
+		if cfg.get_value(section, "name", "") == "Web":
+			for pattern in str(cfg.get_value(section, "exclude_filter", "")).split(",", false):
+				out.append(pattern.strip_edges())
+	return out
 
 
 static func _note_effects(best: Dictionary, source: String, effects: Dictionary) -> void:
