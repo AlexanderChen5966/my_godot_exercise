@@ -1,7 +1,7 @@
 ## A5 自動測試：手勢（G 鍵比出「我——在——這——裡」）、人物的反應文字、沒有對象時的獨白、只反應一次、事件發生後不再反應、
 ## 比手勢時不能移動也不接受其他按鍵、對話中按 G 沒有作用、按鍵提示、數值不變（方案 A）、劇本檢查。
 ## 記憶閃回：調查關鍵物品時先閃回原插畫再顯示文字、可以跳過、一輪一次、診療椅沒有錄音筆時不閃回、劇本檢查。
-## 壓抑衝動：連打成功 → 撲上去隱藏、失敗（時限）→ 自動撲上去、判定後鎖住按鍵、妻子失敗 → Bad End、重試重新抵抗、女兒不抵抗、劇本檢查。
+## 壓抑衝動：按住（測試版）或連打（正式版）成功 → 撲上去隱藏、失敗（時限）→ 自動撲上去、判定後鎖住按鍵、妻子失敗 → Bad End、重試重新抵抗、女兒不抵抗、劇本檢查。
 ## 共用操作在 play_base.gd。執行：zsh tests/run_tests.sh test_a5
 extends "res://tests/play_base.gd"
 
@@ -134,20 +134,37 @@ func run_resist() -> void:
 	var humanity: int = gs().stats["humanity"]
 	await walk_to(1460)
 	await wait_resist()
-	ok(main.state == RESIST and main.resist_box.visible and main.resist_label.text == "連打【空白鍵】抵抗", "婦人：事件文字後出現「連打【空白鍵】抵抗」與量表，選項還沒出現")
 	ok(main.choices_box.get_child_count() == 0, "抵抗中沒有選項")
-	for i in 3:
-		await press_key(KEY_SPACE)
-	var v: float = main.resist_value
-	await seconds(0.6)
-	ok(v > 0.2 and main.resist_value < v, "連打會漲（%.2f），停下來會往下掉（%.2f）" % [v, main.resist_value])
-	for i in 30:
-		if main.state != RESIST:
-			break
-		await press_key(KEY_SPACE)
-	ok(main.state != RESIST and main.hint.visible and main.hint.text == "你咬緊牙，那股衝動慢慢退去。", "連打到滿：成功，顯示「你咬緊牙，那股衝動慢慢退去。」")
-	await press_key(KEY_ENTER)
-	ok(main.state != CHOOSING or main.choices_box.get_child_count() == 1, "判定後鎖住按鍵：繼續連打不會選到選項")
+	if main.RESIST_HOLD:
+		# 測試版：按住空白鍵（main.gd 的 RESIST_HOLD = true）
+		ok(main.state == RESIST and main.resist_box.visible and main.resist_label.text == "按住【空白鍵】抵抗", "婦人：事件文字後出現「按住【空白鍵】抵抗」與量表，選項還沒出現")
+		space(true)
+		await seconds(0.5)
+		space(false)
+		var v: float = main.resist_value
+		await seconds(0.6)
+		ok(v > 0.2 and main.resist_value < v, "按住會漲（%.2f），放開會往下掉（%.2f）" % [v, main.resist_value])
+		space(true)
+		await wait_for(func(): return main.state != RESIST, 3.0)
+		ok(main.state != RESIST and main.hint.visible and main.hint.text == "你咬緊牙，那股衝動慢慢退去。", "按住到滿（婦人 1.5 秒）：成功，顯示「你咬緊牙，那股衝動慢慢退去。」")
+		await seconds(1.5)
+		ok(main.state != CHOOSING, "還按著空白鍵：選項不會出現（放開才出現，避免一出現就被選到）")
+		space(false)
+	else:
+		# 正式版：連打
+		ok(main.state == RESIST and main.resist_box.visible and main.resist_label.text == "連打【空白鍵】抵抗", "婦人：事件文字後出現「連打【空白鍵】抵抗」與量表，選項還沒出現")
+		for i in 3:
+			await press_key(KEY_SPACE)
+		var v: float = main.resist_value
+		await seconds(0.6)
+		ok(v > 0.2 and main.resist_value < v, "連打會漲（%.2f），停下來會往下掉（%.2f）" % [v, main.resist_value])
+		for i in 30:
+			if main.state != RESIST:
+				break
+			await press_key(KEY_SPACE)
+		ok(main.state != RESIST and main.hint.visible and main.hint.text == "你咬緊牙，那股衝動慢慢退去。", "連打到滿：成功，顯示「你咬緊牙，那股衝動慢慢退去。」")
+		await press_key(KEY_ENTER)
+		ok(main.state != CHOOSING or main.choices_box.get_child_count() == 1, "判定後鎖住按鍵：繼續連打不會選到選項")
 	await wait_for(func(): return main.state == CHOOSING and main.choices_ready(), 3.0)
 	ok(main.choices_box.get_child_count() == 1 and (main.choices_box.get_child(0) as Button).text == "強行壓制自己", "成功：「撲上去」不見了，只剩「強行壓制自己」")
 	await select(0)
@@ -180,6 +197,15 @@ func run_resist() -> void:
 	await wait_resist()
 	ok(main.state == RESIST, "從這裡重試：回到廢墟，靠近妻子時重新抵抗")
 	ok(not main.areas.get_area("home")["points"]["daughter"].has("resist"), "女兒不抵抗（她會直接跑掉）")
+
+
+## 按下／放開真正的空白鍵（按住版用：不送放開，就是一直按著）
+func space(pressed: bool) -> void:
+	var event := InputEventKey.new()
+	event.keycode = KEY_SPACE
+	event.physical_keycode = KEY_SPACE
+	event.pressed = pressed
+	Input.parse_input_event(event)
 
 
 func seconds(t: float) -> void:

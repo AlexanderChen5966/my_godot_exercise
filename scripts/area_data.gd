@@ -268,6 +268,8 @@ static func resist_errors(holder: Dictionary, tag: String) -> Array[String]:
 		errors.append("%s 不是 choice，不能有 resist" % tag)
 	if not (resist.get("presses", 12) is float or resist.get("presses", 12) is int) or int(resist.get("presses", 12)) < 1:
 		errors.append("%s 的 resist.presses 要是正整數：%s" % [tag, resist.get("presses")])
+	if resist.has("hold") and not ((resist["hold"] is float or resist["hold"] is int) and float(resist["hold"]) > 0.0 and float(resist["hold"]) < float(resist.get("time", 5.0))):
+		errors.append("%s 的 resist.hold 要是正數，而且比 time 短：%s" % [tag, resist["hold"]])
 	if not (resist.get("time", 5.0) is float or resist.get("time", 5.0) is int) or float(resist.get("time", 5.0)) <= 0.0:
 		errors.append("%s 的 resist.time 要是正數：%s" % [tag, resist.get("time")])
 	var fail = resist.get("fail", -1)

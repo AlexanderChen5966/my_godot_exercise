@@ -13,7 +13,8 @@ var stats: Dictionary = {}  # 數值的初始值（v1.5），例如 { "memory": 
 var start_area := ""       # 開始遊戲時進入的區域（v1.5）；空字串時從 start_id 的場景開始
 
 var gesture_alone := ""      # A5：附近沒有會反應的人時，第一次比手勢的獨白
-var resist_prompt := ""      # A5 壓抑衝動：量表上方的提示
+var resist_prompt := ""      # A5 壓抑衝動：量表上方的提示（連打）
+var resist_prompt_hold := "" # 按住版的提示（測試版，main.gd 的 RESIST_HOLD）
 var resist_success := ""     # A5 壓抑衝動：成功時、選項出現前的一句
 var _scenes: Dictionary = {}  # int id -> Dictionary
 
@@ -34,6 +35,7 @@ func load_story(path: String = STORY) -> bool:
 	start_area = data.get("start_area", "")
 	gesture_alone = data.get("gesture_alone", "")
 	resist_prompt = data.get("resist_prompt", "")
+	resist_prompt_hold = data.get("resist_prompt_hold", "")
 	resist_success = data.get("resist_success", "")
 	_scenes.clear()
 	for s in data.get("scenes", []):

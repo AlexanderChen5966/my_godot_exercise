@@ -2,7 +2,7 @@
 ## 主文字與 response 以打字機效果顯示，換場時背景淡出淡入，BGM 以兩個播放器交替淡入淡出。
 extends Control
 
-enum State { TITLE, TRANSITION, TYPING, CHOOSING, RESPONSE, EXPLORE, AREA_TEXT, GESTURE, FLASHBACK, RESIST }  # GESTURE：A5 比手勢中（不能移動、不接受其他按鍵）；FLASHBACK：A5 記憶閃回中（按互動鍵跳過）；RESIST：A5 壓抑衝動（連打）
+enum State { TITLE, TRANSITION, TYPING, CHOOSING, RESPONSE, EXPLORE, AREA_TEXT, GESTURE, FLASHBACK, RESIST }  # GESTURE：A5 比手勢中（不能移動、不接受其他按鍵）；FLASHBACK：A5 記憶閃回中（按互動鍵跳過）；RESIST：A5 壓抑衝動（按住或連打，見 RESIST_HOLD）
 
 const EXTRA_HINT_COLOR := "#a8a8a8"
 const CHOSEN_MODULATE := Color(1, 1, 1, 0.45)
@@ -32,6 +32,9 @@ const RESIST_DRAIN := 0.12
 const RESIST_TUG := 0.05
 const RESIST_TIME := 5.0
 const RESIST_LOCK_MS := 900
+## 抵抗的操作（作者 2026-10-16）：true＝按住空白鍵（測試版，量表依資料的 hold 秒數上漲）；false＝連打（正式版，依 presses 次數）。正式版改回 false。
+const RESIST_HOLD := true
+const RESIST_HOLD_TIME := 2.0  # 資料沒寫 hold 時要按住幾秒
 ## A4：互動點沒有寫 sfx 時，依類型播放的聲音（出口在通過時才播自己的 sfx）
 const TYPE_SFX := { "inspect": "inspect", "item": "pickup" }
 const LOCKED_TEXT := "……（你想不起來）"   # 數值不夠時，選項顯示的文字
@@ -115,7 +118,7 @@ var _gesture_hint: Label      # A5：「G　比出手勢」（第一次可以走
 var _gesture_hint_shown := false
 var _flashback_tween: Tween
 var _flashback_ending := false
-var _resist: Dictionary = {}     # 目前事件的 resist 設定（presses、time、fail）
+var _resist: Dictionary = {}     # 目前事件的 resist 設定（hold／presses、time、fail）
 var resist_value := 0.0          # 量表 0～1
 var _resist_left := 0.0          # 剩幾秒
 var _input_locked_until := 0     # 這個時間（毫秒）之前不接受按鍵
@@ -887,7 +890,7 @@ func _begin_resist(resist: Dictionary) -> void:
 	_resist = resist
 	resist_value = 0.0
 	_resist_left = float(resist.get("time", RESIST_TIME))
-	resist_label.text = story.resist_prompt
+	resist_label.text = story.resist_prompt_hold if RESIST_HOLD else story.resist_prompt
 	resist_bar.value = 0.0
 	resist_box.visible = true
 
@@ -908,6 +911,8 @@ func _finish_resist(success: bool) -> void:
 		var rest := choices.duplicate()
 		rest.remove_at(fail)
 		await get_tree().create_timer(RESIST_LOCK_MS / 1000.0).timeout
+		while Input.is_action_pressed("interact"):  # 按住的玩家要先放開，選項才出現（避免一出現就被選到）
+			await get_tree().process_frame
 		_show_area_choices(rest)
 	else:
 		_on_area_choice_pressed(choices[fail], false)
@@ -1055,7 +1060,13 @@ func _create_debug_label() -> void:
 
 func _process(delta: float) -> void:
 	if state == State.RESIST:
-		resist_value = maxf(resist_value - RESIST_DRAIN * delta, 0.0)
+		if RESIST_HOLD and Input.is_action_pressed("interact"):
+			resist_value = minf(resist_value + delta / float(_resist.get("hold", RESIST_HOLD_TIME)), 1.0)
+		else:
+			resist_value = maxf(resist_value - RESIST_DRAIN * delta, 0.0)
+		if resist_value >= 1.0:
+			_finish_resist(true)
+			return
 		_resist_left -= delta
 		resist_bar.value = resist_value
 		if _resist_left <= 0.0:
@@ -1132,6 +1143,8 @@ func _input(event: InputEvent) -> void:
 		var key_event := event as InputEventKey
 		if event.is_action_pressed("interact") and not (key_event and key_event.echo):
 			get_viewport().set_input_as_handled()
+			if RESIST_HOLD:
+				return  # 按住的量表在 _process 處理
 			resist_value = minf(resist_value + 1.0 / float(_resist.get("presses", 12)), 1.0)
 			if resist_value >= 1.0:
 				_finish_resist(true)
